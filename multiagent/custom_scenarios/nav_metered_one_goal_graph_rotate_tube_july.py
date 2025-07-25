@@ -451,8 +451,8 @@ class Scenario(BaseScenario):
 			self.world_size * 0.15  # Minimum width
 		)
 
-		random_angle = np.random.uniform(-np.pi/2, np.pi/2)
-		# random_angle = -np.pi/4
+		# random_angle = np.random.uniform(-np.pi/2, np.pi/2)
+		random_angle = -np.pi/2
 		# print(f"Random Angle: {random_angle*180/np.pi} degrees")
 		# Calculate tube length
 		tube_length = self.world_size * 0.8  # Use 80% of world size for tube length
@@ -811,7 +811,8 @@ class Scenario(BaseScenario):
 					continue
 				if self.is_collision(a, agent):
 					rew -= self.collision_rew*4
-					# print(f"Agent {agent.id} collided with agent {a.id} penalty",self.collision_rew*4 )
+					# print(f"!!!Agent {agent.id} collided with agent {a.id} penalty",self.collision_rew*4 )
+					# print(" self.separation_distance", self.separation_distance)
 					# input("Collision")
 			
 			if self.is_obstacle_collision(pos=agent.state.p_pos,
@@ -894,7 +895,7 @@ class Scenario(BaseScenario):
 			# Reward for getting closer to tube entrance
 			dist_to_entrance = np.linalg.norm(world.tube_params['entrance'] - agent.state.p_pos)
 			rew -= dist_to_entrance
-			# print("dist_to_entrance",dist_to_entrance, "rew", rew)
+			# print("Agent", agent.id, " Phase 0 dist_to_entrance", dist_to_entrance, "rew", rew)
 
 			# # Formation reward considering front and back agents
 			# spacing_error = 0

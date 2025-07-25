@@ -50,8 +50,8 @@ datetime_str=$(date '+%y%m%d_%H%M%S')
 if [ "$dynamics_type" == "unicycle_vehicle" ]; then
     str_dynamics_type="uv"
     world_size=4
-    episode_length=120
-    num_env_steps=10000000
+    episode_length=200
+    num_env_steps=15000000
 elif [ "$dynamics_type" == "double_integrator" ]; then
     str_dynamics_type="di"
     world_size=4
@@ -88,7 +88,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --num_landmarks=${n_agents} \
 --collision_rew 30 \
 --formation_rew 5 \
---n_training_threads 1 --n_rollout_threads 64 \
+--n_training_threads 1 --n_rollout_threads 128 \
 --num_mini_batch 1 \
 --episode_length ${episode_length} \
 --total_actions 9 \

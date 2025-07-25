@@ -144,13 +144,13 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/FA_FR/tube/jul/rots' \
+--model_dir='model_weights/tube/rotate' \
 --render_episodes=2 \
 --world_size=3 \
---num_agents=10 \
+--num_agents=3 \
 --num_obstacles=0 \
---seed=0 \
---num_landmarks=10 \
+--seed=1 \
+--num_landmarks=3 \
 --episode_length=100 \
 --use_dones=False \
 --collaborative=False --model_name='FA' \
