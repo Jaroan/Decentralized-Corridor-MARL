@@ -107,6 +107,8 @@ class Scenario(BaseScenario):
 		# fairness args
 		self.fair_wt = args.fair_wt
 		self.fair_rew = args.fair_rew
+		self.world_aspect_ratio = getattr(args, "world_aspect_ratio", 1.0) # temporary patch, world_aspect_ratio not in args
+
 
 		# create heatmap matrix to determine the goal agent pairs
 		self.goal_reached = -1*np.ones(self.num_agents)
@@ -134,7 +136,8 @@ class Scenario(BaseScenario):
 		# 	print('_'*60)
 		# else:
 		# 	self.max_edge_dist = args.max_edge_dist
-
+		
+		self.separation_distance = self.config_class.COLLISION_DISTANCE
 		self.coordination_range = self.config_class.COMMUNICATION_RANGE
 		# self.min_dist_thresh_init = 2 * self.config_class.DISTANCE_TO_GOAL_THRESHOLD
 		self.min_dist_thresh_init = self.config_class.DISTANCE_TO_GOAL_THRESHOLD
@@ -168,7 +171,7 @@ class Scenario(BaseScenario):
 		world.dists_to_goal = -1 * np.ones(self.num_agents)
 		# set any world properties
 		world.dim_c = 2
-		self.use_masking = args.use_masking
+		self.use_masking = getattr(args, "use_masking", False)
 		self.num_landmarks = args.num_landmarks # no. of goals equal to no. of agents
 		num_scripted_agents_goals = self.num_scripted_agents
 		world.collaborative = args.collaborative
