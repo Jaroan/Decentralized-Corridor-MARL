@@ -139,6 +139,10 @@ class Scenario(BaseScenario):
 
 		self.formation_type = args.formation_type
 
+		# patch to disable Gurobi
+		self.use_minmax_assignment = getattr(args, "use_minmax_assignment", False)
+
+
 		# create heatmap matrix to determine the goal agent pairs
 		self.goal_reached = np.full(self.num_agents, -1)
 		self.wrong_goal_reached = np.zeros(self.num_agents)
@@ -710,10 +714,13 @@ class Scenario(BaseScenario):
 
 			# Step 2: Compute cost matrix & solve fair assignment
 			if agent_pos and landmark_pos:
-				costs = dist.cdist(agent_pos, landmark_pos)  # Compute cost matrix
-				x, _ = solve_fair_assignment(costs)  # Solve assignment
-				assigned_goals = np.where(x == 1)[1]  # Get assigned goal indices
-				assigned_goals = np.array(landmark_ids)[assigned_goals]  # Convert to actual landmark IDs
+				if self.use_minmax_assignment:
+					costs = dist.cdist(agent_pos, landmark_pos)  # Compute cost matrix
+					x, _ = solve_fair_assignment(costs)  # Solve assignment
+					assigned_goals = np.where(x == 1)[1]  # Get assigned goal indices
+					assigned_goals = np.array(landmark_ids)[assigned_goals]  # Convert to actual landmark IDs
+				else:
+					assigned_goals = np.array(landmark_ids[:len(agent_pos)])
 			else:
 				assigned_goals = np.array([])
 
