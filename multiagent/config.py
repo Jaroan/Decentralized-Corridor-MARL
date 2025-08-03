@@ -79,6 +79,9 @@ class DoubleIntegratorConfig():
     COLLISION_DISTANCE = 0.5
     # communication distance (entities within this distance are considered in each agent's observations)
     COMMUNICATION_RANGE = 5
+    # Dummy heading threshold (not relevant for holonomic agents)
+    GOAL_HEADING_THRESHOLD = np.pi
+
 
 class RewardWeightConfig():
     # min and max reward at each timestep.
