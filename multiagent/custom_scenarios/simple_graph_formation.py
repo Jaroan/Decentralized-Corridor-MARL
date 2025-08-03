@@ -17,7 +17,7 @@ from scipy.optimize import linear_sum_assignment
 
 from multiagent.core import EntityDynamicsType, World, Agent, Landmark, Entity, Wall
 from multiagent.scenario import BaseScenario
-from multiagent.config import RewardWeightConfig, KinematicVehicleConfig, DoubleIntegratorConfig
+from multiagent.config import RewardWeightConfig, DoubleIntegratorConfig
 # from marl_fair_assign import solve_fair_assignment
 
 entity_mapping = {'agent': 0, 'landmark': 1, 'obstacle':2, 'wall':3}
