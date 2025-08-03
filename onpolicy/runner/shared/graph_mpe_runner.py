@@ -58,7 +58,7 @@ class GMPERunner(Runner):
 					values, actions, action_log_probs, rnn_states, \
 						rnn_states_critic, actions_env = self.collect(step)
 					obs, agent_id, node_obs, adj, rewards, \
-						dones, infos = self.envs.step(actions_env, episode)
+						dones, infos, reset_count = self.envs.step(actions_env, episode)
 					finished,finished_list = self.get_finished(dones)
 					self.active_masks[dones] = np.zeros((((dones).astype(int)).sum(), 1), dtype=np.float32)
 
@@ -89,7 +89,7 @@ class GMPERunner(Runner):
 						rnn_states_critic, actions_env, available_actions = self.collect_with_mask(step,self.active_agents,self.active_masks,finished)
     
 					obs, agent_id, node_obs, adj, rewards, \
-						dones, infos = self.envs.step(actions_env, episode)
+						dones, infos, reset_count = self.envs.step(actions_env, episode)
 
 					# Calculate the number of elements to update
 					num_elements = np.sum(dones.astype(int))
