@@ -1094,7 +1094,7 @@ class Scenario(BaseScenario):
 					goal_proximity = np.array([np.linalg.norm(self.landmark_poses[goal] - agent.state.p_pos)  for agent in world.agents])
 					if not np.any(goal_proximity < self.min_dist_thresh):
 						# print("Agent",agent.id,"Nearby goal",goal, "is unoccupied")
-						self.landmark_poses_occupied[goal] = np.min(goal_proximity)  # Reset falsely occupied goals
+						self.landmark_poses_occupied[goal] = 1 - np.min(goal_proximity)  # Reset falsely occupied goals
 
 			if min_dist < self.min_dist_thresh:
 				if agent.status == True:
