@@ -4,6 +4,30 @@ import numpy as np
 
 from multiagent.core import EntityDynamicsType, World, Agent, Landmark, Entity, Wall, BaseEntityState
 
+
+
+
+def _get_theta(state) -> float:
+    # prefer .theta (Safety), fallback to .p_ang (AAM); default 0.0
+    return float(getattr(state, "theta", getattr(state, "p_ang", 0.0)))
+
+def _get_speed(state) -> float:
+    # prefer explicit .speed; otherwise compute from p_vel
+    if hasattr(state, "speed"):
+        return float(state.speed)
+    v = getattr(state, "p_vel", np.zeros(2, dtype=np.float32))
+    return float(np.linalg.norm(v))
+
+def _get_pos(state) -> np.ndarray:
+    return np.asarray(getattr(state, "p_pos"), dtype=np.float32)
+
+def _get_vel(state) -> np.ndarray:
+    return np.asarray(getattr(state, "p_vel", np.zeros(2, dtype=np.float32)), dtype=np.float32)
+
+entity_mapping = {'agent': 0, 'landmark': 1, 'obstacle': 2, 'wall': 3}
+
+
+
 ## create a line of goal positions
 # def create_line_of_goals(num_goals: int, goal_spacing: float, goal_y: float, goal_radius: float) -> List[Tuple[float, float]]:
 #     goals = []
@@ -268,3 +292,146 @@ def get_agent_observation_relative_with_heading(agent_position: np.ndarray, agen
 	print("relative_goal_position: ", relative_goal_position, "relative_goal_heading: ", relative_goal_heading, "relative_goal_heading_sincos: ", relative_goal_heading_sincos)
 	print("obs: ", obs)
 	return obs
+
+
+def get_agent_observation_relative_without_heading(agent_position: np.ndarray, agent_velocity: np.ndarray,
+                                                   goal_position: np.ndarray, goal_heading: float, goal_speed: float):
+    # Double integrator (holonomic) version: no agent heading
+    assert goal_heading is not None, "goal_heading should not be None."
+    assert goal_speed is not None, "goal_speed should not be None."
+
+    relative_goal_position = goal_position - agent_position
+    goal_heading_sincos = np.array([np.sin(goal_heading), np.cos(goal_heading)])
+    obs = np.concatenate([
+        np.asarray(agent_velocity, dtype=np.float32),
+        relative_goal_position,
+        goal_heading_sincos,
+        np.array([goal_speed])
+    ])
+    return obs
+
+
+def get_agent_node_observation_relative_with_heading(agent_state: BaseEntityState, 
+                                                     agent_goal_position: np.ndarray, agent_goal_heading: float, agent_goal_speed: float,
+                                                     reference_agent_state: BaseEntityState):
+    # Node features for an AGENT relative to a reference agent (non-holonomic)
+    assert agent_goal_heading is not None, "agent_goal_heading should not be None."
+    assert agent_goal_speed is not None, "agent_goal_speed should not be None."
+
+    ref_pos = _get_pos(reference_agent_state)
+    ref_vel = _get_vel(reference_agent_state)
+    ref_theta = _get_theta(reference_agent_state)
+
+    ag_pos = _get_pos(agent_state)
+    ag_vel = _get_vel(agent_state)
+    ag_theta = _get_theta(agent_state)
+
+    relative_agent_position = get_relative_position_from_reference(ag_pos, ref_pos, ref_theta)
+    relative_agent_heading = ag_theta - ref_theta
+    relative_agent_heading_sincos = np.array([np.sin(relative_agent_heading), np.cos(relative_agent_heading)])
+    relative_speed = np.linalg.norm(ag_vel - ref_vel)
+
+    relative_agent_goal_position = get_relative_position_from_reference(agent_goal_position, ref_pos, ref_theta)
+    relative_agent_goal_heading = agent_goal_heading - ref_theta
+    relative_agent_goal_heading_sincos = np.array([np.sin(relative_agent_goal_heading), np.cos(relative_agent_goal_heading)])
+
+    entity_type = entity_mapping['agent']
+    node_obs = np.concatenate([
+        relative_agent_position,
+        np.array([relative_speed]),
+        relative_agent_heading_sincos,
+        relative_agent_goal_position,
+        relative_agent_goal_heading_sincos,
+        np.array([agent_goal_speed]),
+        np.array([entity_type])
+    ])
+    return node_obs
+
+
+def get_landmark_node_observation_relative_with_heading(landmark_position: np.ndarray, landmark_heading: float, landmark_speed: float,
+                                                        reference_agent_state: BaseEntityState):
+    # Node features for a LANDMARK relative to a reference agent (non-holonomic)
+    assert landmark_heading is not None, "landmark_heading should not be None."
+    assert landmark_speed is not None, "landmark_speed should not be None."
+
+    ref_pos = _get_pos(reference_agent_state)
+    ref_theta = _get_theta(reference_agent_state)
+
+    relative_landmark_position = get_relative_position_from_reference(landmark_position, ref_pos, ref_theta)
+    relative_landmark_heading = landmark_heading - ref_theta
+    relative_landmark_heading_sincos = np.array([np.sin(relative_landmark_heading), np.cos(relative_landmark_heading)])
+
+    # Safety’s pattern includes “dummy” fields to keep shapes consistent with agent nodes
+    dummy_speed = _get_speed(reference_agent_state)
+    dummy_position_info = relative_landmark_position
+    dummy_heading_info = relative_landmark_heading_sincos
+
+    entity_type = entity_mapping['landmark']
+    node_obs = np.concatenate([
+        relative_landmark_position,
+        np.array([dummy_speed]),
+        relative_landmark_heading_sincos,
+        dummy_position_info,
+        dummy_heading_info,
+        np.array([landmark_speed]),
+        np.array([entity_type])
+    ])
+    return node_obs
+
+
+def get_agent_node_observation_relative_without_heading(agent_state: BaseEntityState, 
+                                                        agent_goal_position: np.ndarray, agent_goal_heading: float, agent_goal_speed: float,
+                                                        reference_agent_state: BaseEntityState):
+    # Node features for an AGENT relative to a reference agent (holonomic)
+    assert agent_goal_heading is not None, "agent_goal_heading should not be None."
+    assert agent_goal_speed is not None, "agent_goal_speed should not be None."
+
+    ref_pos = _get_pos(reference_agent_state)
+    ref_vel = _get_vel(reference_agent_state)
+
+    ag_pos = _get_pos(agent_state)
+    ag_vel = _get_vel(agent_state)
+
+    relative_agent_position = ag_pos - ref_pos
+    relative_agent_velocity = ag_vel - ref_vel
+
+    relative_agent_goal_position = agent_goal_position - ref_pos
+    agent_goal_heading_sincos = np.array([np.sin(agent_goal_heading), np.cos(agent_goal_heading)])
+
+    entity_type = entity_mapping['agent']
+    node_obs = np.concatenate([
+        relative_agent_position,
+        relative_agent_velocity,
+        relative_agent_goal_position,
+        agent_goal_heading_sincos,
+        np.array([agent_goal_speed]),
+        np.array([entity_type])
+    ])
+    return node_obs
+
+
+def get_landmark_node_observation_relative_without_heading(landmark_position: np.ndarray, landmark_heading: float, landmark_speed: float,
+                                                           reference_agent_state: BaseEntityState):
+    # Node features for a LANDMARK relative to a reference agent (holonomic)
+    assert landmark_heading is not None, "landmark_heading should not be None."
+    assert landmark_speed is not None, "landmark_speed should not be None."
+
+    ref_pos = _get_pos(reference_agent_state)
+    ref_vel = _get_vel(reference_agent_state)
+
+    relative_landmark_position = landmark_position - ref_pos
+    relative_landmark_velocity = -ref_vel  # relative to reference’s velocity
+
+    dummy_position_info = relative_landmark_position
+    landmark_heading_sincos = np.array([np.sin(landmark_heading), np.cos(landmark_heading)])
+
+    entity_type = entity_mapping['landmark']
+    node_obs = np.concatenate([
+        relative_landmark_position,
+        relative_landmark_velocity,
+        dummy_position_info,
+        landmark_heading_sincos,
+        np.array([landmark_speed]),
+        np.array([entity_type])
+    ])
+    return node_obs
