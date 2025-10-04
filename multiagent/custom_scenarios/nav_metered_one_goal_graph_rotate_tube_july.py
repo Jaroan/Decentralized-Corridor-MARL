@@ -451,8 +451,8 @@ class Scenario(BaseScenario):
 			self.world_size * 0.15  # Minimum width
 		)
 
-		# random_angle = np.random.uniform(-np.pi/2, np.pi/2)
-		random_angle = -np.pi/2
+		random_angle = np.random.uniform(-np.pi/2, np.pi/2)
+		# random_angle = -np.pi/2
 		# print(f"Random Angle: {random_angle*180/np.pi} degrees")
 		# Calculate tube length
 		tube_length = self.world_size * 0.8  # Use 80% of world size for tube length

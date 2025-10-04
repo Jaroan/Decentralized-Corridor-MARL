@@ -1,3 +1,4 @@
+import datetime
 import time
 import numpy as np
 from numpy import ndarray as arr
@@ -500,7 +501,7 @@ class GMPERunner(Runner):
 		# num_total_episode = int(self.all_args.num_env_steps) // self.all_args.episode_length // self.all_args.n_rollout_threads
 
 		obs, agent_id, node_obs, adj = envs.reset(self.all_args.render_episodes)
-		with open(str(self.all_args.model_dir)+'/'+str(self.all_args.model_name)+'_'+str(self.all_args.formation_type)+'_results_collect_apr.csv', 'a', newline="") as f_traj:
+		with open(str(self.all_args.model_dir)+'/'+str(self.all_args.model_name)+'_'+str(self.all_args.formation_type)+'_results_collect_oct.csv', 'a', newline="") as f_traj:
 			# create the csv writer
 			writer = csv.writer(f_traj)
 
@@ -999,7 +1000,7 @@ class GMPERunner(Runner):
 		]
 
 		# open the file in the write mode
-		with open(str(self.all_args.model_dir)+'/'+str(self.all_args.model_name)+'_'+str(self.all_args.formation_type)+'_results_collect_final_split_apr.csv', 'a', newline="") as f:
+		with open(str(self.all_args.model_dir)+'/'+str(self.all_args.model_name)+'_'+str(self.all_args.formation_type)+'_results_collect_final_split_oct.csv', 'a', newline="") as f:
 			# create the csv writer
 			writer = csv.writer(f)
 
@@ -1009,5 +1010,5 @@ class GMPERunner(Runner):
 		
 		if not get_metrics:
 			if self.all_args.save_gifs:
-				imageio.mimsave(str(self.gif_dir) + '/'+str(self.all_args.model_name)+'random_apr_3_'+str(self.all_args.num_agents)+'.gif', 
+				imageio.mimsave(str(self.gif_dir) + '/'+str(self.all_args.model_name)+'random_'+str(self.all_args.num_agents)+'.gif', 
 								all_frames, duration=self.all_args.ifi, loop=0)
