@@ -44,7 +44,7 @@ project_name:
   value: air_corridor_unicycle_3
 experiment_name:
   desc: null
-  value: uv_251004_120430_forced_order_metered5_disconnect_done_tube_eplen200
+  value: uv_251004_160542_forced_order_metered5_disconnect_done_tube_eplen200
 seed:
   desc: null
   value: 0
@@ -354,7 +354,7 @@ _wandb:
     framework: torch
     is_jupyter_run: false
     is_kaggle_kernel: false
-    start_time: 1759593906.9438
+    start_time: 1759608358.106763
     t:
       1:
       - 1
