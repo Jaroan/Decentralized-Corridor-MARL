@@ -50,7 +50,7 @@ datetime_str=$(date '+%y%m%d_%H%M%S')
 if [ "$dynamics_type" == "unicycle_vehicle" ]; then
     str_dynamics_type="uv"
     world_size=4
-    episode_length=200
+    episode_length=150
     num_env_steps=15000000
 elif [ "$dynamics_type" == "double_integrator" ]; then
     str_dynamics_type="di"
