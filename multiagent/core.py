@@ -5,14 +5,14 @@ import numpy as np
 import csv
 from scipy.integrate import solve_ivp
 
-from multiagent.config import DoubleIntegratorConfig, UnicycleVehicleConfig
+from multiagent.config import DoubleIntegratorConfig, UnicycleVehicleConfig, AirTaxiConfig
 # function to check for team or single agent scenarios
 def is_list_of_lists(lst):
     if isinstance(lst, list) and lst:  # Check if it's a non-empty list
         return all(isinstance(item, list) for item in lst)
     return False
 
-class EntityDynamicsType(Enum):
+class (Enum):
     DoubleIntegratorXY = 0
     UnicycleVehicleXY = 1
     AirTaxiXY = 2
@@ -215,6 +215,115 @@ class DoubleIntegratorXYState(BaseEntityState):
     
     def __getitem__(self, idx):
         return self.values[idx]
+    
+
+class AirTaxiXYState(BaseEntityState):
+    """
+    AirTaxi / KinematicVehicle dynamics model.
+    
+    State representation (dim=4):
+        [0] p_x     : position x
+        [1] p_y     : position y
+        [2] theta   : heading angle (rad)
+        [3] v       : forward speed (km/s)
+
+    Actions:
+        action[0] = dtheta (angular rate, rad/s)
+        action[1] = dv     (longitudinal acceleration, km/s^2)
+
+    This model evolves heading + speed (like a Dubins/kinematic car) 
+    rather than vx, vy directly.
+    """
+    def __init__(self, v_min, v_max):
+        super(AirTaxiXYState, self).__init__(4)
+        self.min_speed = v_min
+        self.max_speed = v_max
+
+    # --- Position ---
+    @property
+    def p_pos(self):
+        return self.values[:2]
+
+    @p_pos.setter
+    def p_pos(self, val):
+        self.values[:2] = val
+
+    # --- Heading ---
+    @property
+    def theta(self):
+        return self.values[2]
+
+    @theta.setter
+    def theta(self, val):
+        self.values[2] = val
+
+    # --- Forward speed ---
+    @property
+    def speed(self):
+        return self.values[3]
+
+    @speed.setter
+    def speed(self, val):
+        self.values[3] = val
+
+    # --- Velocity vector (derived from speed & heading) ---
+    @property
+    def p_vel(self):
+        return np.array([
+            self.speed * np.cos(self.theta),
+            self.speed * np.sin(self.theta)
+        ])
+
+    # --- Continuous dynamics ---
+    @staticmethod
+    def dstate(state, action):
+        # state = [x, y, theta, v]
+        # action = [dtheta, dv]
+        dp_x = state[3] * np.cos(state[2])
+        dp_y = state[3] * np.sin(state[2])
+        dtheta = action[0]
+        dv = action[1]
+        return np.array([dp_x, dp_y, dtheta, dv])
+
+    # --- Numerical integration with RK45 ---
+    def update_state(self, action, dt):
+        def ode(t, y):
+            return self.dstate(y, action)
+
+        y0 = self.values
+        sol = solve_ivp(ode, [0, dt], y0, method="RK45")
+        self.values = sol.y[:, -1]
+
+        # enforce speed bounds
+        if self.speed > self.max_speed:
+            self.speed = self.max_speed
+        if self.speed < self.min_speed:
+            self.speed = self.min_speed
+
+        # update distance/time counters
+        self.p_dist += self.speed * dt
+        self.time += dt
+
+    # --- Stop vehicle ---
+    def stop(self):
+        self.theta = 0.0
+        self.speed = 0.0
+
+    # --- Reset velocity ---
+    def reset_velocity(self, theta=None, speed=None):
+        if theta is not None:
+            self.theta = theta
+        else:
+            self.theta = np.random.uniform(0, 2 * np.pi)
+
+        if speed is not None:
+            self.speed = speed
+        else:
+            self.speed = self.min_speed
+
+    def __getitem__(self, idx):
+        return self.values[idx]
+
 
 
 # action of the agent
@@ -318,6 +427,13 @@ class Agent(Entity):
             self.config_class = UnicycleVehicleConfig
             self.state = UnicycleVehicleXYState(v_min=UnicycleVehicleConfig.V_MIN, v_max=UnicycleVehicleConfig.V_MAX)
             self.min_speed = self.state.min_speed
+        elif dynamics_type == EntityDynamicsType.AirTaxiXY:
+            self.config_class = AirTaxiConfig
+            self.state = AirTaxiXYState(
+                v_min=AirTaxiConfig.V_MIN,
+                v_max=AirTaxiConfig.V_MAX
+            )
+            self.min_speed = self.state.min_speed
         else:
             raise NotImplementedError("Dynamics type not implemented")
         self.max_speed = self.state.max_speed
@@ -360,12 +476,14 @@ class World(object):
             self.config_class = DoubleIntegratorConfig
         elif dynamics_type == EntityDynamicsType.UnicycleVehicleXY:
             self.config_class = UnicycleVehicleConfig
+        elif dynamics_type == EntityDynamicsType.AirTaxiXY:
+            self.config_class = AirTaxiConfig
         else:
             raise NotImplementedError("Dynamics type not implemented")
-        self.dt = self.config_class.DT
+        self.dt = getattr(self.config_class, "DT", 0.1)
         self.simulation_time = 0.0
         # simulation timestep
-        self.dt = 0.1
+        # self.dt = 0.1
         # physical damping
         self.damping = 0.25
         # contact response parameters

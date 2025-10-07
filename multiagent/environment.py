@@ -6,7 +6,7 @@ import random
 from typing import Callable, List, Tuple, Dict, Union, Optional
 from multiagent.core import EntityDynamicsType, World, Agent, is_list_of_lists
 from multiagent.multi_discrete import MultiDiscrete
-from multiagent.config import DoubleIntegratorConfig, UnicycleVehicleConfig
+from multiagent.config import DoubleIntegratorConfig, UnicycleVehicleConfig, AirTaxiConfig
 
 # update bounds to center around agent
 cam_range = 2
@@ -66,8 +66,14 @@ class MultiAgentBaseEnv(gym.Env):
 			# self.num_accel_x_options = DoubleIntegratorConfig.ACCELX_OPTIONS
 			# self.num_discrete_action = self.num_accel_x_options * self.num_accel_y_options
 			self.num_discrete_action = self.world.total_actions
+		elif dynamics_type == 'air_taxi':    # <--- add this
+			self.dynamics_type = EntityDynamicsType.AirTaxiXY
+			self.num_accel_options = AirTaxiConfig.MOTION_PRIM_ACCEL_OPTIONS
+			self.num_angle_rate_options = AirTaxiConfig.MOTION_PRIM_ANGRATE_OPTIONS
+			self.num_discrete_action = self.num_accel_options * self.num_angle_rate_options
 		else:
 			raise NotImplementedError
+
 		# if true, action is a number 0...N, 
 		# otherwise action is a one-hot N-dimensional vector
 		self.discrete_action_input = False
@@ -307,6 +313,18 @@ class MultiAgentBaseEnv(gym.Env):
 			# u[..., 0] = accel_x_options[accel_x_index]
 			# u[..., 1] = accel_y_options[accel_y_index]
 			#################################################
+		elif self.dynamics_type == EntityDynamicsType.AirTaxiXY:
+			max_angular_rate = AirTaxiConfig.ANGULAR_RATE_MAX
+			max_accel = AirTaxiConfig.ACCEL_MAX
+			min_accel = AirTaxiConfig.ACCEL_MIN
+			accel_options = np.linspace(min_accel, max_accel, self.num_accel_options)
+			angle_rate_options = np.linspace(-max_angular_rate, max_angular_rate, self.num_angle_rate_options)
+			angle_rate_index = action_index // self.num_accel_options
+			accel_index = action_index % self.num_accel_options
+			u = np.zeros((*action_index.shape, self.world.dim_p))
+			u[..., 0] = angle_rate_options[angle_rate_index]
+			u[..., 1] = accel_options[accel_index]
+
 		else:
 			raise NotImplementedError
 		return u
@@ -405,6 +423,19 @@ class MultiAgentBaseEnv(gym.Env):
 						max_angular_rate = UnicycleVehicleConfig.ANGULAR_RATE_MAX
 						max_accel = UnicycleVehicleConfig.ACCEL_MAX
 						min_accel = UnicycleVehicleConfig.ACCEL_MIN
+						accel_options = np.linspace(min_accel, max_accel, self.num_accel_options)
+						angle_rate_options = np.linspace(-max_angular_rate, max_angular_rate, self.num_angle_rate_options)
+						action_index = np.argmax(action[0])
+						angle_rate_index = int(action_index // self.num_accel_options)
+						accel_index = int(action_index - angle_rate_index * self.num_accel_options)
+						agent.action.u[0] = angle_rate_options[angle_rate_index]
+						agent.action.u[1] = accel_options[accel_index]
+						action_description = f"turn: {agent.action.u[0]}, accel: {agent.action.u[1]}"
+					elif self.dynamics_type == EntityDynamicsType.AirTaxiXY:
+						agent.action.u = np.zeros(self.world.dim_p)
+						max_angular_rate = AirTaxiConfig.ANGULAR_RATE_MAX
+						max_accel = AirTaxiConfig.ACCEL_MAX
+						min_accel = AirTaxiConfig.ACCEL_MIN
 						accel_options = np.linspace(min_accel, max_accel, self.num_accel_options)
 						angle_rate_options = np.linspace(-max_angular_rate, max_angular_rate, self.num_angle_rate_options)
 						action_index = np.argmax(action[0])

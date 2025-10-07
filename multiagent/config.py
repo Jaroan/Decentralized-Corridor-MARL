@@ -25,6 +25,8 @@ class AirTaxiConfig():
     # Ref: Preliminary Analysis of Separation Standards for Urban Air Mobility Using Unmitigated Fast-Time
     # Test params: 1500, 1800, 2200, 5000 ft
     SEPARATION_DISTANCE = 1500 * 0.0003048 # (first parameter in ft, converted to km)
+    COLLISION_DISTANCE = SEPARATION_DISTANCE
+
     # COORDINATION_RANGE = 5 # 3 miles to km
     COORDINATION_RANGE = 3 * 1.60934 # 3 miles to km
     VALUE_FUNCTION_FILE_NAME = 'data/airtaxi_value_function.pkl'

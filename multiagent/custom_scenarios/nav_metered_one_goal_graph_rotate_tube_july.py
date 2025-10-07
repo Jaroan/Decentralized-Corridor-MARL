@@ -19,7 +19,7 @@ sys.path.append(os.path.abspath(os.getcwd()))
 
 from multiagent.core import EntityDynamicsType, World, Agent, Landmark, Entity, Wall
 from multiagent.scenario import BaseScenario
-from multiagent.config import UnicycleVehicleConfig, DoubleIntegratorConfig
+from multiagent.config import UnicycleVehicleConfig, DoubleIntegratorConfig, AirTaxiConfig
 from scipy.optimize import linear_sum_assignment
 from multiagent.custom_scenarios.utils import *
 from marl_fair_assign import solve_fair_assignment
