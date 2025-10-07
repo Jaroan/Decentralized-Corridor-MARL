@@ -15,6 +15,7 @@ def is_list_of_lists(lst):
 class EntityDynamicsType(Enum):
     DoubleIntegratorXY = 0
     UnicycleVehicleXY = 1
+    AirTaxiXY = 2
 # Base Class for entity state.
 # physical/external base state of all entites
 class BaseEntityState(object):

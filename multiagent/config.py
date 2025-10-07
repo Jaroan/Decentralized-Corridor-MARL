@@ -1,5 +1,36 @@
 import numpy as np
 
+
+class AirTaxiConfig():
+    V_MIN = 60 * 0.514444 * 0.001 # knots to km/s
+    V_MAX = 175 * 0.514444  * 0.001 # knots to km/s
+    V_NOMINAL = 110 * 0.514444  * 0.001 # knots to km/s
+    ACCEL_MIN = -0.001 # km/s^2
+    ACCEL_MAX = 0.002 # km/s^2
+    ANGULAR_RATE_MAX = 0.1 # rad/s
+    MOTION_PRIM_ACCEL_OPTIONS = 5
+    MOTION_PRIM_ANGRATE_OPTIONS = 5
+    CBF_RATE = 3.0
+
+    ENGAGEMENT_DISTANCE = 1.4
+    ENGAGEMENT_DISTANCE_REFERENCE_SEPARATION_DISTANCE = 2200 * 0.0003048
+    
+    DT = 1.0
+    # DISTANCE_TO_GOAL_THRESHOLD = 750 * 0.0003048 # ft to km
+    DISTANCE_TO_GOAL_THRESHOLD = 0.35
+    GOAL_HEADING_THRESHOLD = np.pi/4
+    # GOAL_SPEED_THRESHOLD = 20 * 0.514444 * 0.001 # knots to km/s
+    GOAL_SPEED_THRESHOLD = 0.03 # knots to km/s
+    
+    # Ref: Preliminary Analysis of Separation Standards for Urban Air Mobility Using Unmitigated Fast-Time
+    # Test params: 1500, 1800, 2200, 5000 ft
+    SEPARATION_DISTANCE = 1500 * 0.0003048 # (first parameter in ft, converted to km)
+    # COORDINATION_RANGE = 5 # 3 miles to km
+    COORDINATION_RANGE = 3 * 1.60934 # 3 miles to km
+    VALUE_FUNCTION_FILE_NAME = 'data/airtaxi_value_function.pkl'
+    TTR_FILE_NAME = 'data/airtaxi_ttr_function.pkl'
+
+
 class UnicycleVehicleConfig():
     V_MIN = 0.4
     V_MAX = 0.75

@@ -157,6 +157,11 @@ class Scenario(BaseScenario):
 			self.dynamics_type = EntityDynamicsType.DoubleIntegratorXY
 			self.config_class = DoubleIntegratorConfig
 			self.min_turn_radius = 0.0
+		
+		elif args.dynamics_type == 'air_taxi':
+			self.dynamics_type = EntityDynamicsType.AirTaxiXY
+			self.config_class = AirTaxiConfig
+			self.min_turn_radius = 0.0
 		else:
 			raise NotImplementedError
 		self.coordination_range = self.config_class.COMMUNICATION_RANGE
