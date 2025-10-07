@@ -12,7 +12,7 @@ def is_list_of_lists(lst):
         return all(isinstance(item, list) for item in lst)
     return False
 
-class (Enum):
+class EntityDynamicsType(Enum):
     DoubleIntegratorXY = 0
     UnicycleVehicleXY = 1
     AirTaxiXY = 2
