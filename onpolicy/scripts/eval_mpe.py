@@ -24,6 +24,7 @@ def make_render_env(all_args:argparse.Namespace):
                 env = MPEEnv(all_args)
             elif all_args.env_name == "GraphMPE":
                 env = GraphMPEEnv(all_args)
+
             else:
                 print(f"Can not support the {all_args.env_name} environment.")
                 raise NotImplementedError
@@ -69,10 +70,17 @@ def parse_args(args, parser):
                         default=True, help="Whether we want to use the 'done=True' " 
                         "when agent has reached the goal or just return False like "
                         "the `simple.py` or `simple_spread.py`")
+    '''
+    parser.add_argument("--dynamics_type", type=str,
+                        default="unicycle_vehicle",
+                        choices=["unicycle_vehicle", "double_integrator", "air_taxi"],
+                        help="Dynamics model type for agents.")
+    '''
 
     all_args = parser.parse_known_args(args)[0]
 
     return all_args
+
 
 def modify_args(model_dir:str, 
                 args:argparse.Namespace, 
@@ -81,10 +89,11 @@ def modify_args(model_dir:str,
                                 'seed', 'save_gifs', 'use_render', 'episode_length',
                                 'use_dones', 'goal_rew','collaborative', 
                                 'min_dist_thresh', 'scenario_name','fair_rew','model_name',
-                                'num_walls','zero_shift','min_obs_dist','max_edge_dist','total_actions',
-                                'formation_type', 'formation_rew']):
+                                'num_walls','zero_shift','min_obs_dist','max_edge_dist',
+                                'total_actions', 'formation_type', 'formation_rew']):
     """
-        Modify the args used to train the model
+    Update args using model config.yaml — but only fill missing values.
+    User-provided CLI args take priority.
     """
     import yaml
     with open(str(model_dir) + '/config.yaml') as f:
@@ -93,23 +102,21 @@ def modify_args(model_dir:str,
     print('_'*50)
     for k, v in ydict.items():
         if k in exclude_args:
-            print(f"Using {k} = {vars(args)[k]}")
-            # print(f"Skipping {k} with value {args.k}")
+            print(f"Keeping CLI-provided {k} = {vars(args)[k]}")
             continue
-        # all args have 'values' and 'desc' as keys
-        if type(v) == dict:
-            if 'value' in v.keys():
-                # print(f'Setting attr {k} to {ydict[k]["value"]}')
-                setattr(args, k, ydict[k]['value'])
+        if isinstance(v, dict) and 'value' in v:
+            # only update if CLI didn't specify
+            if not hasattr(args, k) or getattr(args, k) is None:
+                setattr(args, k, v['value'])
     print('_'*50)
 
-    # set some args manually
+    # manual overrides
     args.cuda = False
     args.use_wandb = False
     args.use_render = True
-    # args.save_gifs = True
     args.n_rollout_threads = 1
     return args
+
 
 def main(args):
     # model_dir = 'trained_models/navigation/Navigation/rmappo/wandb/offline-run-20210720_220614-1eqhk4l1/files'

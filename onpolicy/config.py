@@ -176,7 +176,7 @@ def get_config():
     parser.add_argument("--total_actions", type=int,
                         default=5,help="choice of action space")    
     parser.add_argument("--dynamics_type", type=str,
-                        default=False, help="Agent's dynamics type: 'unicycle_vehicle', 'double_integrator'")
+                        default=False, help="Agent's dynamics type: 'unicycle_vehicle', 'double_integrator', 'air_taxi'")
 
     # formation_type
     parser.add_argument("--formation_type", type=str,

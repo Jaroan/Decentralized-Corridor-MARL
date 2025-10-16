@@ -164,7 +164,7 @@ class Scenario(BaseScenario):
 			self.min_turn_radius = 0.0
 		else:
 			raise NotImplementedError
-		self.coordination_range = self.config_class.COMMUNICATION_RANGE
+		self.coordination_range = self.config_class.COORDINATION_RANGE
 		self.min_dist_thresh = self.config_class.DISTANCE_TO_GOAL_THRESHOLD
 		self.separation_distance = self.config_class.COLLISION_DISTANCE
 

@@ -5,7 +5,7 @@ import numpy as np
 import csv
 from scipy.integrate import solve_ivp
 
-from multiagent.config import DoubleIntegratorConfig, UnicycleVehicleConfig, AirTaxiConfig
+from multiagent.config import UnicycleVehicleConfig, DoubleIntegratorConfig, AirTaxiConfig
 # function to check for team or single agent scenarios
 def is_list_of_lists(lst):
     if isinstance(lst, list) and lst:  # Check if it's a non-empty list
@@ -508,7 +508,7 @@ class World(object):
         self.cached_dist_vect = None
         self.cached_dist_mag = None
 
-        self.coordination_range = self.config_class.COMMUNICATION_RANGE
+        self.coordination_range = self.config_class.COORDINATION_RANGE
         self.min_dist_thresh = self.config_class.DISTANCE_TO_GOAL_THRESHOLD
 
 

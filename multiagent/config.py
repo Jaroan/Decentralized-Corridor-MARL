@@ -50,7 +50,7 @@ class UnicycleVehicleConfig():
     # separation distance between agents for safety
     COLLISION_DISTANCE = 0.4
     # communication distance (entities within this distance are considered in each agent's observations)
-    COMMUNICATION_RANGE = 5
+    COORDINATION_RANGE = 5
 
 # class UnicycleVehicleConfig():
 #     V_MIN = 0.04 # km/s scaled by 10
@@ -69,7 +69,7 @@ class UnicycleVehicleConfig():
 #     # separation distance between agents for safety
 #     COLLISION_DISTANCE = 0.4 # km
 #     # communication distance (entities within this distance are considered in each agent's observations)
-#     COMMUNICATION_RANGE = 5
+#     COORDINATION_RANGE = 5
 
 # class UnicycleVehicleConfig():
 #     V_MIN = 0.04 # km/s scaled by 10
@@ -88,7 +88,7 @@ class UnicycleVehicleConfig():
 #     # separation distance between agents for safety
 #     COLLISION_DISTANCE = 0.4 # km
 #     # communication distance (entities within this distance are considered in each agent's observations)
-#     COMMUNICATION_RANGE = 5
+#     COORDINATION_RANGE = 5
 
 
 class DoubleIntegratorConfig():
@@ -111,7 +111,7 @@ class DoubleIntegratorConfig():
     # separation distance between agents for safety
     COLLISION_DISTANCE = 0.5
     # communication distance (entities within this distance are considered in each agent's observations)
-    COMMUNICATION_RANGE = 5
+    COORDINATION_RANGE = 5
     # Dummy heading threshold (not relevant for holonomic agents)
     GOAL_HEADING_THRESHOLD = np.pi
 
@@ -125,3 +125,5 @@ class RewardWeightConfig():
     CONFLICT = -20 # if agent is within separation distance of another agent
 
 eval_scenario_type = "left_to_right_merge_and_land"
+
+
