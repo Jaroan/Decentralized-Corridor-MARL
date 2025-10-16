@@ -134,12 +134,15 @@ class UnicycleVehicleXYState(BaseEntityState):
         self.theta = 0
         self.speed = 0
     
-    def reset_velocity(self, theta=None):
+    def reset_velocity(self, theta=None, speed=None):
         if theta is not None:
             self.theta = theta
         else:
             self.theta = np.random.uniform(0, 2 * np.pi)
-        self.speed = self.min_speed
+        if speed is not None:
+            self.speed = speed
+        else:
+            self.speed = self.min_speed
     
     def __getitem__(self, idx):
         return self.values[idx]
@@ -395,7 +398,11 @@ class Entity(object):
 class Landmark(Entity):
     def __init__(self):
         super(Landmark, self).__init__()
-
+        # if heading and speed are None, goal-reaching reward is only based on position.
+        # if they have specific values, we evaluate reward based on heading and speed as well.
+        self.heading = None # rad
+        self.speed = None # m/s
+        
 # properties of agent entities
 class Agent(Entity):
     def __init__(self, dynamics_type: EntityDynamicsType):
@@ -593,7 +600,6 @@ class World(object):
 
         raw_action_list = self.get_action()
         safe_action_list = raw_action_list
-
         # integrate physical state
         self.update_agent_state(safe_action_list)
 
@@ -610,15 +616,9 @@ class World(object):
         # # integrate physical state
         # self.integrate_state(p_force)
         # update agent state
-        if is_list_of_lists(self.agents):
-            for team in self.agents:
-                for agent in team:
-                    agent.t += self.dt
-                    self.update_agent_communication_state(agent)
-        else:
-            for agent in self.agents:
-                agent.t += self.dt
-                self.update_agent_communication_state(agent)
+        for agent in self.agents:
+            agent.t += self.dt
+            self.update_agent_communication_state(agent)
         if self.cache_dists:
             self.calculate_distances()
 
@@ -643,26 +643,17 @@ class World(object):
 
     # gather agent action forces
     def apply_action_force(self, p_force):
-        # set applied forces
-        if is_list_of_lists(self.agents):
-            flattened_agents = [agent for team in self.agents for agent in team]
-            for i,agent in enumerate(flattened_agents):
-                if agent.movable:
-                    noise = np.random.randn(*agent.action.u.shape) * agent.u_noise if agent.u_noise else 0.0
-                    p_force[i] = (
-                                agent.mass * agent.accel if agent.accel is not None 
-                                else agent.mass) * agent.action.u + noise
-        else:
-            for i,agent in enumerate(self.agents):
-                if agent.movable:
-                    noise = np.random.randn(*agent.action.u.shape) * agent.u_noise if agent.u_noise else 0.0
-                    p_force[i] = (
-                                agent.mass * agent.accel if agent.accel is not None 
-                                else agent.mass) * agent.action.u + noise
-                # if agent.id == 8:
-                #     print("agent force",p_force[i])
-                # print("mass",agent.mass,"accel",agent.accel,"action",agent.action.u) 
-                # print("force",p_force[i])                
+
+        for i,agent in enumerate(self.agents):
+            if agent.movable:
+                noise = np.random.randn(*agent.action.u.shape) * agent.u_noise if agent.u_noise else 0.0
+                p_force[i] = (
+                            agent.mass * agent.accel if agent.accel is not None 
+                            else agent.mass) * agent.action.u + noise
+            # if agent.id == 8:
+            #     print("agent force",p_force[i])
+            # print("mass",agent.mass,"accel",agent.accel,"action",agent.action.u) 
+            # print("force",p_force[i])                
         return p_force
 
     # gather physical forces acting on entities
@@ -689,7 +680,6 @@ class World(object):
                     if wf is not None:
                         # print("p_force",p_force[a])
                         if p_force[a] is None: p_force[a] = 0.0
-                        csv_data = [wf[0],wf[1],p_force[a][0], p_force[0][0],(p_force[a] + wf)[0],(p_force[a] + wf)[1]]
 
                         p_force[a] = p_force[a] + wf
 

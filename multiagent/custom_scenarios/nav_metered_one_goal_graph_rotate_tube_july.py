@@ -59,6 +59,10 @@ def leaky_ReLU(x):
 
 
 class Scenario(BaseScenario):
+
+	def get_aspect_ratio_for_scenario(self) -> float:
+		return 1.0
+
 	def make_world(self, args:argparse.Namespace) -> World:
 		"""
 			Parameters in args
@@ -108,6 +112,7 @@ class Scenario(BaseScenario):
 		if not hasattr(self, 'world_size'):
 			self.world_size = args.world_size
 		self.args = args
+		self.world_aspect_ratio = self.get_aspect_ratio_for_scenario()
 		self.num_agents = args.num_agents
 		self.num_scripted_agents = args.num_scripted_agents
 		self.num_obstacles = args.num_obstacles
@@ -215,6 +220,7 @@ class Scenario(BaseScenario):
 		## determine the number of actions from arguments
 		world.total_actions = args.total_actions
 		#############
+
 		# add agents
 		global_id = 0
 		world.agents = [Agent(self.dynamics_type) for i in range(self.num_agents)]
@@ -267,8 +273,15 @@ class Scenario(BaseScenario):
 		self.zeroshift = args.zeroshift
 		self.reset_world(world)
 		world.world_size = self.world_size
-		# world.world_aspect_ratio = self.world_aspect_ratio
+		world.world_aspect_ratio = self.world_aspect_ratio
+
+		if hasattr(self, 'with_background'):
+			world.with_background = self.with_background
+		else:
+			world.with_background = False
 		return world
+
+
 
 	def reset_world(self, world:World, num_current_episode: int = 0) -> None:
 		# print("RESET WORLD")
