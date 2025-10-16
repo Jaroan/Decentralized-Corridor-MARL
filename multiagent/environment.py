@@ -523,8 +523,8 @@ class MultiAgentBaseEnv(gym.Env):
 				# (and don't import for headless machines)
 				# from gym.envs.classic_control import rendering
 				from multiagent import rendering
-				self.viewers[i] = rendering.Viewer(self.world_aspect_ratio * default_height,
-												   default_height)
+				self.viewers[i] = rendering.Viewer(int(self.world_aspect_ratio * default_height),
+												   int(default_height))
     
 		cam_range_height = self.world_size
 		cam_range_width = self.world_size * self.world_aspect_ratio

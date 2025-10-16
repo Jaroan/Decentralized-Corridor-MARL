@@ -100,6 +100,12 @@ def parse_args(args, parser):
                         "when agent has reached the goal or just return False like "
                         "the `simple.py` or `simple_spread.py`")
 
+    parser.add_argument("--dynamics_type", type=str, default="air_taxi",
+    choices=["unicycle_vehicle", "double_integrator", "air_taxi"],
+    help="Type of vehicle dynamics to use.")
+    
+
+
 
     all_args = parser.parse_known_args(args)[0]
 
