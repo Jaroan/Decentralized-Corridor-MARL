@@ -24,8 +24,8 @@ mkdir -p $logs_folder
 seed_max=2
 n_agents=3
 
-# "double_integrator" or "unicycle_vehicle"
-dynamics_type="unicycle_vehicle"
+# "double_integrator" or "unicycle_vehicle or air_taxi"
+dynamics_type="air_taxi"
 formation_type="point"
 
 # graph_feat_types=("global" "global" "relative" "relative")
@@ -47,7 +47,12 @@ done
 seeds=(0 1)
 datetime_str=$(date '+%y%m%d_%H%M%S')
 
-if [ "$dynamics_type" == "unicycle_vehicle" ]; then
+if [ "$dynamics_type" == "air_taxi" ]; then
+    str_dynamics_type="at"
+    world_size=4
+    episode_length=100
+    num_env_steps=10000000
+elif [ "$dynamics_type" == "unicycle_vehicle" ]; then
     str_dynamics_type="uv"
     world_size=4
     episode_length=150
@@ -78,8 +83,8 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
---model_dir "model_weights/FA_FR/metered" \
---experiment_name "${str_dynamics_type}_${datetime_str}_forced_order_metered5_disconnect_done_tube_eplen${episode_length}" \
+--model_dir "model_weights/tube/rot_inv" \
+--experiment_name "${str_dynamics_type}_${datetime_str}_metered5_done_tube_eplen${episode_length}" \
 --scenario_name "nav_metered_one_goal_graph_rotate_tube_july" \
 --dynamics_type ${dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
@@ -106,7 +111,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --increase_fairness "False" \
 --auto_mini_batch_size --target_mini_batch_size 8192 \
 --formation_type ${formation_type} \
-&> $logs_folder/${str_dynamics_type}_${datetime_str}_forced_order_metered5_disconnect_done_tube_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
+&> $logs_folder/${str_dynamics_type}_${datetime_str}_metered5_done_tube_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
 
 
 # python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
