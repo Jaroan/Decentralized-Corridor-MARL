@@ -403,13 +403,15 @@ class Scenario(BaseScenario):
 			# 	world.dim_p
 			# )
 			# Add random jitter if needed
-			jitter = 0.2 * np.random.uniform(-10, 10, world.dim_p)
+			jitter = 0.2 * np.random.uniform(-self.world_size, self.world_size, world.dim_p)
 			angle = world.tube_params['angle']
 			# print("jitter", jitter)
 			perp_dir = np.array([np.sin(angle), np.cos(angle)])
 			# print("Entrance", world.tube_params['entrance'], "perp_dir", perp_dir )
 			# print("self.world_size+(num_agents_added) / 5 * perp_dir",( self.world_size+(num_agents_added)) / 5 * perp_dir)
-			random_pos = world.tube_params['entrance'] +  (self.world_size+(num_agents_added)) / 5 * perp_dir + jitter
+			distance_from_entrance = (self.world_size + num_agents_added) / 5
+			# print("distance_from_entrance", distance_from_entrance, "jitter", jitter)
+			random_pos = world.tube_params['entrance'] + distance_from_entrance * perp_dir + jitter
 			# print(f"Random Position for Agent {num_agents_added}: {random_pos}")
 			# input("Press Enter to continue...")
 			# ## shift agents to bottom half of the world
