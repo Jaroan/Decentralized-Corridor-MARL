@@ -1,21 +1,19 @@
 #!/bin/bash
-
-# to train informarl (the graph version; aka our method)
-
 # Slurm sbatch options
-#SBATCH --job-name rot_metered5
+#SBATCH --job-name airtaxi64
 #SBATCH -a 0-1
 #SBATCH --gres=gpu:volta:1
 ##SBATCH --cpus-per-task=8
 ## SBATCH -n 10 # use with MPI # max cores request limit: -c 48 * 24; -n 48 * 24
-##SBATCH -c 48 # cpus per task
+#SBATCH -c 20 # cpus per task
 
 
 ##export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 # module unload anaconda/2022a
 # Loading the required module
 source /etc/profile
-module load anaconda/2023a
+# module load anaconda/2023a
+module load conda/Python-ML-2025b-pytorch
 # export LD_LIBRARY_PATH=/state/partition1/llgrid/pkg/anaconda/anaconda3-2022a/lib:$LD_LIBRARY_PATH
 
 logs_folder="out_fair_informarl3"
@@ -25,7 +23,7 @@ seed_max=2
 n_agents=3
 
 # "double_integrator" or "unicycle_vehicle or air_taxi"
-dynamics_type="air_taxi"
+chosen_dynamics_type="air_taxi"
 formation_type="point"
 
 # graph_feat_types=("global" "global" "relative" "relative")
@@ -47,30 +45,30 @@ done
 seeds=(0 1)
 datetime_str=$(date '+%y%m%d_%H%M%S')
 
-if [ "$dynamics_type" == "air_taxi" ]; then
+if [ "$chosen_dynamics_type" == "air_taxi" ]; then
     str_dynamics_type="at"
     world_size=4
     episode_length=100
     num_env_steps=10000000
-elif [ "$dynamics_type" == "unicycle_vehicle" ]; then
+elif [ "$chosen_dynamics_type" == "unicycle_vehicle" ]; then
     str_dynamics_type="uv"
     world_size=4
-    episode_length=150
-    num_env_steps=15000000
-elif [ "$dynamics_type" == "double_integrator" ]; then
+    episode_length=100
+    num_env_steps=10000000
+elif [ "$chosen_dynamics_type" == "double_integrator" ]; then
     str_dynamics_type="di"
     world_size=4
     episode_length=25
     num_env_steps=5000000
 else
-    echo "Error: Unsupported dynamics type '$dynamics_type'"
+    echo "Error: Unsupported dynamics type '$chosen_dynamics_type'"
     exit 1  # Exit with a non-zero status to indicate an error
 fi
 
 
 
 echo "datetime_str: ${datetime_str}"
-echo "dynamics_type: ${dynamics_type}"
+echo "dynamics_type: ${chosen_dynamics_type}"
 echo "formation_type: ${formation_type}"
 
 # for seed in `seq ${seed_max}`;
@@ -86,14 +84,14 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --model_dir "model_weights/tube/rot_inv" \
 --experiment_name "${str_dynamics_type}_${datetime_str}_metered5_done_tube_eplen${episode_length}" \
 --scenario_name "nav_metered_one_goal_graph_rotate_tube_july" \
---dynamics_type ${dynamics_type} \
+--dynamics_type ${chosen_dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
 --fair_rew 5 \
 --num_agents=${n_agents} \
 --num_landmarks=${n_agents} \
 --collision_rew 30 \
 --formation_rew 5 \
---n_training_threads 1 --n_rollout_threads 128 \
+--n_training_threads 1 --n_rollout_threads 64 \
 --num_mini_batch 1 \
 --episode_length ${episode_length} \
 --total_actions 9 \
@@ -111,39 +109,39 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --increase_fairness "False" \
 --auto_mini_batch_size --target_mini_batch_size 8192 \
 --formation_type ${formation_type} \
-&> $logs_folder/${str_dynamics_type}_${datetime_str}_metered5_done_tube_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
-
+&> $logs_folder/${str_dynamics_type}_${datetime_str}_64_8192metered5_done_tube_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
 
 # python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
-# --project_name "unicycle_dynamics_3" \
+# --project_name "air_corridor_unicycle_3" \
 # --env_name "GraphMPE" \
 # --algorithm_name "rmappo" \
-# --seed 2 \
-# --experiment_name "tanh5_fafr_nowalls_formation_nocollab_GPU_GoalMatch_1Fair_30goal_5mil" \
-# --scenario_name "nav_fairassign_fairrew_formation_graph" \
-# --dynamics_type "unicycle_vehicle" \
-# --fair_wt 2 \
-# --fair_rew 2 \
+# --seed 0 \
+# --model_dir "model_weights/tube/rot_inv" \
+# --experiment_name "airtaxi_test_metered5_done_tube_eplen100" \
+# --scenario_name "nav_metered_one_goal_graph_rotate_tube_july" \
+# --dynamics_type "air_taxi" \
+# --fair_wt 3 \
+# --fair_rew 5 \
 # --num_agents=3 \
 # --num_landmarks=3 \
 # --collision_rew 30 \
-# --n_training_threads 1 --n_rollout_threads 2 \
+# --formation_rew 5 \
+# --n_training_threads 1 --n_rollout_threads 16 \
 # --num_mini_batch 1 \
-# --episode_length 25 \
+# --episode_length 100 \
 # --total_actions 9 \
-# --num_env_steps 500000 \
+# --num_env_steps 1000000 \
 # --ppo_epoch 10 --use_ReLU --gain 0.01 --lr 7e-4 --critic_lr 7e-4 \
 # --user_name "marl" \
 # --use_cent_obs "False" \
 # --use_dones "False" \
 # --collaborative "False" \
-# --goal_rew 30 \
+# --goal_rew 20 \
 # --num_walls 0 \
-# --zeroshift 5 \
+# --zeroshift 10 \
 # --world_size=4 \
 # --graph_feat_type "relative" \
 # --increase_fairness "False" \
-# --auto_mini_batch_size --target_mini_batch_size 128 \
+# --auto_mini_batch_size --target_mini_batch_size 1024 \
+# --formation_type "point" \
 # --use_wandb
-# &> $logs_folder/tanh5_fairassign_fairrew_nowalls_GoalMatch_GPU_1Fair_30goal_5mil_${seeds[$SLURM_ARRAY_TASK_ID]}
-
