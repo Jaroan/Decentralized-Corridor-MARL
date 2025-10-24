@@ -1,6 +1,6 @@
 #!/bin/bash
 # Slurm sbatch options
-#SBATCH --job-name airtaxi64
+#SBATCH --job-name rot_air_taxi
 #SBATCH -a 0-1
 #SBATCH --gres=gpu:volta:1
 ##SBATCH --cpus-per-task=8
@@ -8,7 +8,7 @@
 #SBATCH -c 20 # cpus per task
 
 
-##export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 # module unload anaconda/2022a
 # Loading the required module
 source /etc/profile
@@ -48,13 +48,13 @@ datetime_str=$(date '+%y%m%d_%H%M%S')
 if [ "$chosen_dynamics_type" == "air_taxi" ]; then
     str_dynamics_type="at"
     world_size=4
-    episode_length=100
-    num_env_steps=10000000
+    episode_length=150
+    num_env_steps=15000000
 elif [ "$chosen_dynamics_type" == "unicycle_vehicle" ]; then
     str_dynamics_type="uv"
     world_size=4
-    episode_length=100
-    num_env_steps=10000000
+    episode_length=150
+    num_env_steps=15000000
 elif [ "$chosen_dynamics_type" == "double_integrator" ]; then
     str_dynamics_type="di"
     world_size=4
@@ -71,6 +71,8 @@ echo "datetime_str: ${datetime_str}"
 echo "dynamics_type: ${chosen_dynamics_type}"
 echo "formation_type: ${formation_type}"
 
+#--model_dir "model_weights/tube/rot_inv" \
+
 # for seed in `seq ${seed_max}`;
 # do
 # # seed=`expr ${seed} + 3`
@@ -81,8 +83,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
---model_dir "model_weights/tube/rot_inv" \
---experiment_name "${str_dynamics_type}_${datetime_str}_metered5_done_tube_eplen${episode_length}" \
+--experiment_name "${str_dynamics_type}_${datetime_str}_rot_inv_tube_eplen${episode_length}" \
 --scenario_name "nav_metered_one_goal_graph_rotate_tube_july" \
 --dynamics_type ${chosen_dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
@@ -107,9 +108,9 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --world_size=${world_size} \
 --graph_feat_type "relative" \
 --increase_fairness "False" \
---auto_mini_batch_size --target_mini_batch_size 8192 \
+--auto_mini_batch_size --target_mini_batch_size 16384 \
 --formation_type ${formation_type} \
-&> $logs_folder/${str_dynamics_type}_${datetime_str}_64_8192metered5_done_tube_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
+&> $logs_folder/${str_dynamics_type}_${datetime_str}_rot_inv_tube_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
 
 # python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 # --project_name "air_corridor_unicycle_3" \
