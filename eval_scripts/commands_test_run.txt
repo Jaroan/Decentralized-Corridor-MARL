@@ -144,7 +144,7 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi' \
+--model_dir='model_weights/tube/rot_inv/unicycle' \
 --render_episodes=2 \
 --world_size=3 \
 --num_agents=3 \
@@ -155,6 +155,30 @@ python onpolicy/scripts/eval_mpe.py \
 --use_dones=False \
 --collaborative=False --model_name='FA' \
 --scenario_name='nav_metered_one_goal_graph_rotate_tube_july' \
+--dynamics_type='unicycle_vehicle' \
+--goal_rew=30 \
+--fair_rew=1 \
+--save_gifs \
+--use_render \
+--num_walls=0 \
+--zeroshift=5 \
+--min_obs_dist 0.5 \
+--total_actions 5 \
+--formation_type 'point'
+
+
+python onpolicy/scripts/eval_mpe.py \
+--model_dir='model_weights/tube/rot_inv/airtaxi' \
+--render_episodes=2 \
+--world_size=3 \
+--num_agents=3 \
+--num_obstacles=0 \
+--seed=1 \
+--num_landmarks=3 \
+--episode_length=200 \
+--use_dones=False \
+--collaborative=False --model_name='FA' \
+--scenario_name='nav_graph_metered_single_corridor_rot_inv' \
 --dynamics_type='air_taxi' \
 --goal_rew=30 \
 --fair_rew=1 \
@@ -165,6 +189,7 @@ python onpolicy/scripts/eval_mpe.py \
 --min_obs_dist 0.5 \
 --total_actions 5 \
 --formation_type 'point'
+
 
 python onpolicy/scripts/eval_mpe.py \
 --model_dir='model_weights/FA_FR/tube/feb15/basic' \
