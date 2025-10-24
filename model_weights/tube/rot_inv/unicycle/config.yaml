@@ -1,5 +1,192 @@
 wandb_version: 1
 
+_wandb:
+  desc: null
+  value:
+    code_path: code/onpolicy/scripts/train_mpe.py
+    python_version: 3.12.11
+    cli_version: 0.22.2
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1761268291
+    t:
+      1:
+      - 1
+      - 105
+      2:
+      - 1
+      - 49
+      - 77
+      - 105
+      3:
+      - 2
+      - 3
+      - 4
+      - 13
+      - 16
+      - 42
+      - 61
+      4: 3.12.11
+      5: 0.22.2
+      10:
+      - 20
+      13: linux-x86_64
+    e:
+      gbfg3vgqnxa1hc22tdcddyzxb4bwp71k:
+        os: Linux-6.1.151-llgrid-x86_64-with-glibc2.39
+        python: CPython 3.12.11
+        started_at: '2025-10-24T01:11:31.520210Z'
+        args:
+        - --use_valuenorm
+        - --use_popart
+        - --project_name
+        - air_corridor_unicycle_3
+        - --env_name
+        - GraphMPE
+        - --algorithm_name
+        - rmappo
+        - --seed
+        - '0'
+        - --experiment_name
+        - uv_251023_211125_rot_inv_tube_eplen150
+        - --scenario_name
+        - nav_graph_metered_single_corridor_rot_inv
+        - --dynamics_type
+        - unicycle_vehicle
+        - --fair_wt
+        - '1'
+        - --fair_rew
+        - '5'
+        - --num_agents=3
+        - --num_landmarks=3
+        - --collision_rew
+        - '30'
+        - --formation_rew
+        - '5'
+        - --n_training_threads
+        - '1'
+        - --n_rollout_threads
+        - '64'
+        - --num_mini_batch
+        - '1'
+        - --episode_length
+        - '150'
+        - --total_actions
+        - '9'
+        - --num_env_steps
+        - '15000000'
+        - --ppo_epoch
+        - '10'
+        - --use_ReLU
+        - --gain
+        - '0.01'
+        - --lr
+        - 7e-4
+        - --critic_lr
+        - 7e-4
+        - --user_name
+        - marl
+        - --use_cent_obs
+        - 'False'
+        - --use_dones
+        - 'False'
+        - --collaborative
+        - 'False'
+        - --goal_rew
+        - '20'
+        - --num_walls
+        - '0'
+        - --zeroshift
+        - '10'
+        - --world_size=4
+        - --graph_feat_type
+        - relative
+        - --increase_fairness
+        - 'False'
+        - --auto_mini_batch_size
+        - --target_mini_batch_size
+        - '16384'
+        - --formation_type
+        - point
+        program: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/scripts/train_mpe.py
+        code_path: onpolicy/scripts/train_mpe.py
+        code_path_local: onpolicy/scripts/train_mpe.py
+        git:
+          remote_url: https://github.com/Jaroan/AAM-Corridor-MARL.git
+          commit: 978c3bd9e0051bd41a3ffa623358fe85c7721f53
+        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/nav_graph_metered_single_corridor_rot_inv/rmappo/uv_251023_211125_rot_inv_tube_eplen150
+        host: d-8-3-2
+        executable: /state/partition1/llgrid/pkg/conda/python-ML-2025b-pytorch/bin/python
+        cpu_count: 40
+        cpu_count_logical: 80
+        gpu_type: Tesla V100-PCIE-32GB
+        gpu_count: 2
+        disk:
+          /:
+            total: '471413596160'
+            used: '20594438144'
+        memory:
+          total: '405413994496'
+        gpu_nvidia:
+        - name: Tesla V100-PCIE-32GB
+          memory_total: '34359738368'
+          cuda_cores: 5120
+          architecture: Volta
+          uuid: GPU-95787916-9bfd-257b-e4ef-de416ffacbce
+        - name: Tesla V100-PCIE-32GB
+          memory_total: '34359738368'
+          cuda_cores: 5120
+          architecture: Volta
+          uuid: GPU-e91346e0-e1f6-d9db-c10a-b5cbec743177
+        cuda_version: '12.9'
+        slurm:
+          tasks_per_node: '1'
+          job_name: rot_unic
+          job_qos: normal
+          topology_addr: d-8-3-2
+          conf: /etc/slurm/slurm.conf
+          gtids: '0'
+          mem_per_cpu: '8500'
+          cpus_on_node: '20'
+          script_context: prolog_task
+          job_user: jaloor
+          task_pid: '2537515'
+          nnodes: '1'
+          nodeid: '0'
+          gpupower: '150'
+          cluster_name: txe1
+          job_partition: xeon-g6-volta
+          array_task_min: '0'
+          job_cpus_per_node: '20'
+          spank_gpupower: WHAT
+          node_aliases: (null)
+          nodelist: d-8-3-2
+          job_end_time: '1761628284'
+          job_start_time: '1761268284'
+          array_task_step: '1'
+          array_job_id: '3480941'
+          job_num_nodes: '1'
+          gpus_on_node: '1'
+          procid: '0'
+          array_task_count: '2'
+          jobid: '3480942'
+          job_id: '3480942'
+          job_account: default_group
+          job_uid: '62375'
+          submit_host: login-2
+          submit_dir: /home/gridsan/jaloor/AAM-Corridor-MARL
+          topology_addr_pattern: node
+          job_gid: '62375'
+          working_cluster: txe1:scheduler-0:6817:9984:109
+          array_task_id: '0'
+          job_nodelist: d-8-3-2
+          job_gpus: '0'
+          localid: '0'
+          cpus_per_task: '20'
+          prio_process: '0'
+          array_task_max: '1'
+        writer_id: gbfg3vgqnxa1hc22tdcddyzxb4bwp71k
 total_actions:
   desc: null
   value: 9
@@ -44,7 +231,7 @@ project_name:
   value: air_corridor_unicycle_3
 experiment_name:
   desc: null
-  value: uv_251008_094021_forced_order_metered5_disconnect_done_tube_eplen100
+  value: uv_251023_211125_rot_inv_tube_eplen150
 seed:
   desc: null
   value: 0
@@ -59,7 +246,7 @@ n_training_threads:
   value: 1
 n_rollout_threads:
   desc: null
-  value: 128
+  value: 64
 n_eval_rollout_threads:
   desc: null
   value: 1
@@ -104,7 +291,7 @@ num_walls:
   value: 0
 episode_length:
   desc: null
-  value: 100
+  value: 150
 share_policy:
   desc: null
   value: true
@@ -182,7 +369,7 @@ clip_param:
   value: 0.2
 num_mini_batch:
   desc: null
-  value: 4
+  value: 1
 entropy_coef:
   desc: null
   value: 0.01
@@ -257,13 +444,13 @@ render_eval:
   value: false
 model_dir:
   desc: null
-  value: model_weights/FA_FR/metered
+  value: null
 verbose:
   desc: null
   value: true
 scenario_name:
   desc: null
-  value: nav_metered_one_goal_graph_rotate_tube_july
+  value: nav_graph_metered_single_corridor_rot_inv
 num_landmarks:
   desc: null
   value: 3
@@ -344,34 +531,4 @@ auto_mini_batch_size:
   value: true
 target_mini_batch_size:
   desc: null
-  value: 8192
-_wandb:
-  desc: null
-  value:
-    code_path: code/onpolicy/scripts/train_mpe.py
-    python_version: 3.9.15
-    cli_version: 0.15.4
-    framework: torch
-    is_jupyter_run: false
-    is_kaggle_kernel: false
-    start_time: 1759930852.446375
-    t:
-      1:
-      - 1
-      - 55
-      2:
-      - 1
-      - 55
-      - 77
-      3:
-      - 2
-      - 3
-      - 4
-      - 13
-      - 16
-      - 23
-      - 42
-      4: 3.9.15
-      5: 0.15.4
-      8:
-      - 5
+  value: 16384

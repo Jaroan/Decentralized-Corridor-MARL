@@ -128,17 +128,17 @@ class GMPERunner(Runner):
                     self.insert(data, active_agents=self.active_agents,active_masks=self.active_masks,finished=finished)
 
             # compute return and update network
-            rollout_end = time.time()
+            # rollout_end = time.time()
             self.compute()
-            compute_end = time.time()
+            # compute_end = time.time()
             train_infos = self.train()
-            train_end = time.time()
+            # train_end = time.time()
 
-            print(f"[Episode {episode}] "
-                f"Rollout: {rollout_end - episode_start:.3f}s | "
-                f"Compute: {compute_end - rollout_end:.3f}s | "
-                f"Train: {train_end - compute_end:.3f}s | "
-                f"Total: {train_end - episode_start:.3f}s")
+            # print(f"[Episode {episode}] "
+            #     f"Rollout: {rollout_end - episode_start:.3f}s | "
+            #     f"Compute: {compute_end - rollout_end:.3f}s | "
+            #     f"Train: {train_end - compute_end:.3f}s | "
+            #     f"Total: {train_end - episode_start:.3f}s")
 
             
             # post process
