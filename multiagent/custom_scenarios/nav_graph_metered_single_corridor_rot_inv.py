@@ -972,10 +972,15 @@ class Scenario(BaseScenario):
 				# Reward if agent moves into tube after exiting
 				rew += self.goal_rew*3  # Positive reward for proper transition
 				self.entry_reward_cooldown[agent.id] = self.phase_reward_cooldown_steps  # Cooldown period to prevent repeated rewards
+
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
 			elif current_phase == 2 :
 				# Rewards if agent moves out of tube
 				rew += self.goal_rew*3
+				# print("Agent",agent.id,"reached fair goal")
+				if agent.status == False:
+					agent.status = True
+					agent.state.reset_velocity()
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
 				# Update the global phase tracker if any agent progresses
 
