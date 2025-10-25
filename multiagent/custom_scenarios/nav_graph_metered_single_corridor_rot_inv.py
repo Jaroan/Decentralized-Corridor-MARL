@@ -885,7 +885,6 @@ class Scenario(BaseScenario):
 	# 	ri, ci = linear_sum_assignment(dists)
 	# 	min_dists = dists[ri, ci]
 	# 	return min_dists
-	
 
 
 	def reward(self, agent: Agent, world: World) -> float:
@@ -1003,7 +1002,7 @@ class Scenario(BaseScenario):
 			# rew -= spacing_error *  self.formation_rew
 			# print("Phase 0 spacing_error",spacing_error)
 			# input("phase 0")
-				
+		"""		
 		elif current_phase == 1:  # In-tube phase
 			# print("formation line",self.formation_rew)
 			# rew += self.formation_rew/2  # Reward for entering tube
@@ -1093,7 +1092,7 @@ class Scenario(BaseScenario):
 
 
 
-
+		"""
 		# print("Agent.status",agent.status)
 		if self.phase_reached[agent.id] == 1 and current_phase == 0:
 			# print("Agent",agent.id,"left corridor")
