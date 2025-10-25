@@ -1,6 +1,6 @@
 #!/bin/bash
 # Slurm sbatch options
-#SBATCH --job-name rot_air_taxi
+#SBATCH --job-name 2phase_air_taxi
 #SBATCH -a 0-1
 #SBATCH --gres=gpu:volta:1
 ##SBATCH --cpus-per-task=8
@@ -83,7 +83,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
---experiment_name "${str_dynamics_type}_${datetime_str}_rot_inv_tube_eplen${episode_length}" \
+--experiment_name "${str_dynamics_type}_${datetime_str}_2phaserot_inv_tube_eplen${episode_length}" \
 --scenario_name "nav_graph_metered_single_corridor_rot_inv" \
 --dynamics_type ${chosen_dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
@@ -110,7 +110,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --increase_fairness "False" \
 --auto_mini_batch_size --target_mini_batch_size 16384 \
 --formation_type ${formation_type} \
-&> $logs_folder/${str_dynamics_type}_${datetime_str}_rot_inv_tube_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
+&> $logs_folder/${str_dynamics_type}_${datetime_str}_2phaserot_inv_tube_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
 
 # python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 # --project_name "air_corridor_unicycle_3" \
