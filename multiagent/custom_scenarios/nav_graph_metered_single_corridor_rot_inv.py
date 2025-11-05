@@ -1000,7 +1000,7 @@ class Scenario(BaseScenario):
 				self.entry_reward_cooldown[agent.id] = self.phase_reward_cooldown_steps  # Cooldown period to prevent repeated rewards
 
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
-			elif current_phase == 2 :
+			if current_phase == 1 :
 				# Rewards if agent moves out of tube
 				# print("Agent in post-tube phase", agent.id)
 				rew += self.goal_rew*3
@@ -1034,7 +1034,7 @@ class Scenario(BaseScenario):
 			# rew -= spacing_error *  self.formation_rew
 			# print("Phase 0 spacing_error",spacing_error)
 			# input("phase 0")
-	
+		"""		
 		elif current_phase == 1:  # In-tube phase
 			# print("formation line",self.formation_rew)
 			# rew += self.formation_rew/2  # Reward for entering tube
@@ -1081,7 +1081,7 @@ class Scenario(BaseScenario):
 			# print("delta_spacing",self.delta_spacing)
 			# print("Agent",agent.id,"delta_spacing",self.delta_spacing[agent.id])
 			# input("phase 1")
-		"""	
+
 		elif current_phase == 2 and self.phase_reached[agent.id] == 0:  # Post-tube phase
 			# print("Agent",agent.id,"post tube phase")
 			# input("Agent entered post tube phase")
