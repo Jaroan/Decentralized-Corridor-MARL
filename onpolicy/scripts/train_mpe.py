@@ -188,7 +188,7 @@ def main(args):
                         save_code=True,
                         # job_type="training",
                         reinit=True)
-        # wandb.run.log_code(".") # save code
+        wandb.run.log_code(".")  # save code
     else:
         if not run_dir.exists():
             curr_run = 'run1'

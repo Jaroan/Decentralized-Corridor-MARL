@@ -998,7 +998,6 @@ class Scenario(BaseScenario):
 				# Reward if agent moves into tube after exiting
 				rew += self.goal_rew  # *3  # Positive reward for proper transition
 				self.entry_reward_cooldown[agent.id] = self.phase_reward_cooldown_steps  # Cooldown period to prevent repeated rewards
-
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
 			elif current_phase == 2 :
 				# Rewards if agent moves out of tube
@@ -1145,13 +1144,13 @@ class Scenario(BaseScenario):
 			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {agent.previous_phase}")
 			rew -= self.collision_rew  #*4
 			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {agent.previous_phase} rew", rew)
-		# if current_phase < self.phase_reached[agent.id]:
-		# 	rew -= self.collision_rew
+		if current_phase < self.phase_reached[agent.id]:
+			rew -= self.collision_rew
 		# 	print(f"Agent {agent.id} tried to move back to phase {current_phase} from {self.phase_reached[agent.id]} rew", rew)
 		# Store current phase for next step
 		agent.previous_phase = current_phase
 		if self._in_tube_rect(s, y, L, half_w) and not current_phase == 1:
-			rew -= self.collision_rew #*2
+			rew -= self.collision_rew  #*2
 			# print(f"Agent {agent.id} is in tube but not in phase 1 rew", rew)
 		# input("Reward calculation complete for agent {}".format(agent.id))
 		# print(f"Agent {agent.id} total reward: ", rew)
@@ -1456,19 +1455,22 @@ class Scenario(BaseScenario):
 		rel_to_entrance_world = tube_entrance - agent_pos
 		rel_to_exit_world = tube_exit - agent_pos
 
-		rot_rel_entrance = get_rotated_position_from_relative(rel_to_entrance_world, agent_heading).astype(np.float32)
+		# rot_rel_entrance = get_rotated_position_from_relative(rel_to_entrance_world, agent_heading).astype(np.float32)
 		rot_rel_exit = get_rotated_position_from_relative(rel_to_exit_world, agent_heading).astype(np.float32)
 
 		# Phase is computed in world coords; keep as scalar to preserve layout
 		phase = float(self.get_agent_phase(agent, world))
+		s, y, L, half_w = self._tube_coords(world, agent_pos)
 
 		tube_params = np.concatenate([
-			rot_rel_entrance,              
+			np.array([s, y]),  # rot_rel_entrance,              
 			rot_rel_exit,                  
 			np.array([tube_width], dtype=np.float32),
 			np.array([phase], dtype=np.float32)
 		], axis=0)
+		# print("Agent", agent.id, "tube_params", tube_params)
 
+		# print("Agent", agent.id, "tube coords s,y,L,half_w:", s, y, L, half_w)
 		# --- Assemble final obs in the SAME field order as before ---
 		# [agent_vel(2), goal_pos(2), nearest_neighbors(4), tube_params(6)] = 14 dims
 		return np.concatenate([

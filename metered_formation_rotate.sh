@@ -48,7 +48,7 @@ datetime_str=$(date '+%y%m%d_%H%M%S')
 if [ "$chosen_dynamics_type" == "air_taxi" ]; then
     str_dynamics_type="at"
     world_size=4
-    episode_length=100
+    episode_length=75
     num_env_steps=10000000
 elif [ "$chosen_dynamics_type" == "unicycle_vehicle" ]; then
     str_dynamics_type="uv"
@@ -71,7 +71,7 @@ echo "datetime_str: ${datetime_str}"
 echo "dynamics_type: ${chosen_dynamics_type}"
 echo "formation_type: ${formation_type}"
 
-#--model_dir "model_weights/tube/rot_inv" \
+#--model_dir "model_weights/tube/rot_inv/airtaxi" \
 
 # for seed in `seq ${seed_max}`;
 # do
@@ -80,7 +80,6 @@ echo "formation_type: ${formation_type}"
 # # execute the script with different params
 python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --project_name "air_corridor_unicycle_${n_agents}" \
---model_dir "model_weights/tube/rot_inv/airtaxi" \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
