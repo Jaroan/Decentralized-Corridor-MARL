@@ -175,7 +175,7 @@ class Scenario(BaseScenario):
 
 		self.phase_reached = np.zeros(self.num_agents)  ## keeps track of which phase each agent is in when it first enters it
 
-		self.phase_reward_cooldown_steps = self.episode_length/10                   # steps to cool down 0->1 reward
+		self.phase_reward_cooldown_steps = self.episode_length                   # steps to cool down 0->1 reward
 
 		# scripted agent dynamics are fixed to double integrator for now (as it was originally)
 		scripted_agent_dynamics_type = EntityDynamicsType.DoubleIntegratorXY
@@ -1000,14 +1000,14 @@ class Scenario(BaseScenario):
 				self.entry_reward_cooldown[agent.id] = self.phase_reward_cooldown_steps  # Cooldown period to prevent repeated rewards
 
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
-			if current_phase == 1 :
+			elif current_phase == 2 :
 				# Rewards if agent moves out of tube
 				# print("Agent in post-tube phase", agent.id)
 				rew += self.goal_rew*3
-				# print("Agent",agent.id,"reached fair goal")
-				if agent.status == False:
-					agent.status = True
-					agent.state.reset_velocity()
+				# # print("Agent",agent.id,"reached fair goal")
+				# if agent.status == False:
+				# 	agent.status = True
+				# 	agent.state.reset_velocity()
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
 				# Update the global phase tracker if any agent progresses
 
@@ -1034,7 +1034,7 @@ class Scenario(BaseScenario):
 			# rew -= spacing_error *  self.formation_rew
 			# print("Phase 0 spacing_error",spacing_error)
 			# input("phase 0")
-		"""		
+
 		elif current_phase == 1:  # In-tube phase
 			# print("formation line",self.formation_rew)
 			# rew += self.formation_rew/2  # Reward for entering tube
@@ -1042,25 +1042,25 @@ class Scenario(BaseScenario):
 			spacing_error = 0
 			max_spacing_error = 0
 
-			####
-			# if front_agent:
-			# 	# print("np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos)", np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos), "desired_spacing", desired_spacing)
-			# 	diff = np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos) - desired_spacing
-			# 	# print("diff", diff)
-			# 	spacing_error += np.abs(diff) if diff < 0 else 0
-			# 	max_spacing_error = max(max_spacing_error, np.abs(diff))
-			# if back_agent:
-			# 	# print("np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos)", np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos), "desired_spacing", desired_spacing)
-			# 	diff = np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos) - desired_spacing
-			# 	# print("diff", diff)
-			# 	max_spacing_error = max(max_spacing_error, np.abs(diff))
-			# 	spacing_error += np.abs(diff) if diff < 0 else 0
-			# if spacing_error > 0:
-			# 	# print("Phase 1 spacing_error",spacing_error)
-			# 	self.spacing_violation[agent.id] += 1
-			# rew -= spacing_error *  self.formation_rew  # Higher weight for maintaining formation in tube
 
-			#####
+			if front_agent:
+				# print("np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos)", np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos), "desired_spacing", desired_spacing)
+				diff = np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos) - desired_spacing
+				# print("diff", diff)
+				spacing_error += np.abs(diff) if diff < 0 else 0
+				max_spacing_error = max(max_spacing_error, np.abs(diff))
+			if back_agent:
+				# print("np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos)", np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos), "desired_spacing", desired_spacing)
+				diff = np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos) - desired_spacing
+				# print("diff", diff)
+				max_spacing_error = max(max_spacing_error, np.abs(diff))
+				spacing_error += np.abs(diff) if diff < 0 else 0
+			if spacing_error > 0:
+				# print("Phase 1 spacing_error",spacing_error)
+				self.spacing_violation[agent.id] += 1
+			rew -= spacing_error *  self.formation_rew  # Higher weight for maintaining formation in tube
+
+
 			# print("Phase 1 spacing_error",max_spacing_error)
 			# Progress through tube
 			# dist_to_exit = np.linalg.norm(world.tube_params['exit'] - agent.state.p_pos)
@@ -1081,7 +1081,7 @@ class Scenario(BaseScenario):
 			# print("delta_spacing",self.delta_spacing)
 			# print("Agent",agent.id,"delta_spacing",self.delta_spacing[agent.id])
 			# input("phase 1")
-
+		
 		elif current_phase == 2 and self.phase_reached[agent.id] == 0:  # Post-tube phase
 			# print("Agent",agent.id,"post tube phase")
 			# input("Agent entered post tube phase")
@@ -1130,7 +1130,7 @@ class Scenario(BaseScenario):
 
 
 
-		"""
+
 		# print("Agent.status",agent.status)
 		if self.phase_reached[agent.id] == 1 and current_phase == 0:
 			# print("Agent",agent.id,"left corridor")
@@ -1150,7 +1150,7 @@ class Scenario(BaseScenario):
 			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {self.phase_reached[agent.id]} rew", rew)
 		# Store current phase for next step
 		agent.previous_phase = current_phase
-		if self._in_tube_rect(s, y, L, half_w) and not current_phase ==1:
+		if self._in_tube_rect(s, y, L, half_w) and not current_phase == 1:
 			rew -= self.collision_rew*2
 			# print(f"Agent {agent.id} is in tube but not in phase 1 rew", rew)
 		# input("Reward calculation complete for agent {}".format(agent.id))
