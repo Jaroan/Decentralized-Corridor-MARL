@@ -1001,7 +1001,7 @@ class Scenario(BaseScenario):
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
 			elif current_phase == 2 :
 				# Rewards if agent moves out of tube
-				# print("Agent in post-tube phase", agent.id)
+				print("Agent in post-tube phase", agent.id)
 				rew += self.goal_rew  # *3
 				# # print("Agent",agent.id,"reached fair goal")
 				# if agent.status == False:
@@ -1095,7 +1095,7 @@ class Scenario(BaseScenario):
 					rew += self.goal_rew*5
 					self.goal_tracker[agent.id] = self.goal_match_index[agent.id]
 
-					# print("Phase 2 Agent",agent.id,"reached goal")
+					print("Phase 2 Agent", agent.id, "reached goal")
 
 			else:
 					# print("dist_to_goal",dist_to_goal, "rew", rew)
