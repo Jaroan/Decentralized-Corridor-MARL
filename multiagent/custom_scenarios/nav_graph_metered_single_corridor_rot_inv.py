@@ -978,7 +978,7 @@ class Scenario(BaseScenario):
 		if current_phase == 2 and current_phase > agent.previous_phase + 1:
 			# Only penalize clear phase skips (e.g., 0 to 2)
 			# print("self.goal_rew",self.goal_rew)
-			rew -= self.goal_rew*3  # Reduced penalty
+			rew -= self.goal_rew  #*3  # Reduced penalty
 			# print(f"Agent {agent.id} penalized for skipping from phase {agent.previous_phase} to {current_phase} rew", rew)
 		tube_direction_vector = tube_direction / tube_length
 		entrance_to_agent = agent.state.p_pos - world.tube_params['entrance']
@@ -996,14 +996,14 @@ class Scenario(BaseScenario):
 				# print("distance check", proj, entrance_dist)
 
 				# Reward if agent moves into tube after exiting
-				rew += self.goal_rew*3  # Positive reward for proper transition
+				rew += self.goal_rew  # *3  # Positive reward for proper transition
 				self.entry_reward_cooldown[agent.id] = self.phase_reward_cooldown_steps  # Cooldown period to prevent repeated rewards
 
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
 			elif current_phase == 2 :
 				# Rewards if agent moves out of tube
 				# print("Agent in post-tube phase", agent.id)
-				rew += self.goal_rew*3
+				rew += self.goal_rew  # *3
 				# # print("Agent",agent.id,"reached fair goal")
 				# if agent.status == False:
 				# 	agent.status = True
@@ -1143,7 +1143,7 @@ class Scenario(BaseScenario):
 		## penalize for moving from higher phase to lower phase
 		if current_phase < agent.previous_phase:
 			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {agent.previous_phase}")
-			rew -= self.collision_rew*4
+			rew -= self.collision_rew  #*4
 			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {agent.previous_phase} rew", rew)
 		# if current_phase < self.phase_reached[agent.id]:
 		# 	rew -= self.collision_rew
@@ -1151,7 +1151,7 @@ class Scenario(BaseScenario):
 		# Store current phase for next step
 		agent.previous_phase = current_phase
 		if self._in_tube_rect(s, y, L, half_w) and not current_phase == 1:
-			rew -= self.collision_rew*2
+			rew -= self.collision_rew #*2
 			# print(f"Agent {agent.id} is in tube but not in phase 1 rew", rew)
 		# input("Reward calculation complete for agent {}".format(agent.id))
 		# print(f"Agent {agent.id} total reward: ", rew)
