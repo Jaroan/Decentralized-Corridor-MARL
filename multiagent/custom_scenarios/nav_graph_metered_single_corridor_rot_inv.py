@@ -1059,7 +1059,7 @@ class Scenario(BaseScenario):
 				# print("Phase 1 spacing_error",spacing_error)
 				self.spacing_violation[agent.id] += 1
 			rew -= spacing_error *  self.formation_rew  # Higher weight for maintaining formation in tube
-
+			# print("Phase 1 spacing_error", spacing_error)
 
 			# print("Phase 1 spacing_error",max_spacing_error)
 			# Progress through tube
@@ -1090,7 +1090,7 @@ class Scenario(BaseScenario):
 			dist_to_goal = np.linalg.norm(agent.state.p_pos - self.landmark_poses[self.goal_match_index[agent.id]])
 			if dist_to_goal < self.min_dist_thresh:
 				# print("Agent",agent.id,"reached fair goal")
-				if agent.status ==False:
+				if agent.status is False:
 					agent.status = True
 					agent.state.reset_velocity()
 					rew += self.goal_rew*5
@@ -1145,9 +1145,9 @@ class Scenario(BaseScenario):
 			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {agent.previous_phase}")
 			rew -= self.collision_rew*4
 			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {agent.previous_phase} rew", rew)
-		if current_phase < self.phase_reached[agent.id]:
-			rew -= self.collision_rew
-			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {self.phase_reached[agent.id]} rew", rew)
+		# if current_phase < self.phase_reached[agent.id]:
+		# 	rew -= self.collision_rew
+		# 	print(f"Agent {agent.id} tried to move back to phase {current_phase} from {self.phase_reached[agent.id]} rew", rew)
 		# Store current phase for next step
 		agent.previous_phase = current_phase
 		if self._in_tube_rect(s, y, L, half_w) and not current_phase == 1:
