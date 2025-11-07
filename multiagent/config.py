@@ -46,7 +46,7 @@ class UnicycleVehicleConfig():
     # simulation timestep
     DT = 0.1
     # agent within this distance to the landmark is considered to have reached the goal.
-    DISTANCE_TO_GOAL_THRESHOLD = 0.2
+    DISTANCE_TO_GOAL_THRESHOLD = 0.1
     # separation distance between agents for safety
     COLLISION_DISTANCE = 0.4
     # communication distance (entities within this distance are considered in each agent's observations)

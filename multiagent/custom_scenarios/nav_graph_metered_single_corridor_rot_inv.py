@@ -1001,7 +1001,7 @@ class Scenario(BaseScenario):
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
 			elif current_phase == 2 :
 				# Rewards if agent moves out of tube
-				print("Agent in post-tube phase", agent.id)
+				# print("Agent in post-tube phase", agent.id)
 				rew += self.goal_rew  # *3
 				# # print("Agent",agent.id,"reached fair goal")
 				# if agent.status == False:
@@ -1095,12 +1095,12 @@ class Scenario(BaseScenario):
 					rew += self.goal_rew*5
 					self.goal_tracker[agent.id] = self.goal_match_index[agent.id]
 
-					print("Phase 2 Agent", agent.id, "reached goal")
+					# print("Phase 2 Agent", agent.id, "reached goal")
 
 			else:
 					# print("dist_to_goal",dist_to_goal, "rew", rew)
 					rew -= dist_to_goal
-					# print("Agent",agent.id,"not reached goal",dist_to_goal)
+					# print("Agent", agent.id, "not reached goal", dist_to_goal)
 			# input("phase 2")
 
 			# spacing_error = 0
@@ -1266,7 +1266,7 @@ class Scenario(BaseScenario):
 		rel_second_closest_goal = second_closest_goal - agent.state.p_pos
 
 		goal_history = np.array([goal_history])
-		closest_goal_occupied = goal_occupied ##np.array([self.landmark_poses_occupied[top_two_indices[0]]])
+		closest_goal_occupied = goal_occupied  ##np.array([self.landmark_poses_occupied[top_two_indices[0]]])
 		# second_closest_goal_occupied = ## np.array([self.landmark_poses_occupied[top_two_indices[1]]])
 		# input("Press Enter to continue...")
 		return goal_pos, closest_goal_occupied, rel_second_closest_goal, goal_history
@@ -1412,18 +1412,19 @@ class Scenario(BaseScenario):
 		# --- Agent state ---
 		agent_pos = agent.state.p_pos
 		agent_heading = float(getattr(agent.state, "theta", getattr(agent.state, "p_ang", 0.0)))
-		agent_speed = float(getattr(agent.state, "speed", np.linalg.norm(agent.state.p_vel)))
-		agent_vel = np.asarray(agent.state.p_vel, dtype=np.float32)
+		# agent_speed = float(getattr(agent.state, "speed", np.linalg.norm(agent.state.p_vel)))
+		# agent_vel = np.asarray(agent.state.p_vel, dtype=np.float32)
 
 
 		# Rotate own velocity into ego frame
-		rot_agent_vel = get_rotated_position_from_relative(agent_vel, agent_heading).astype(np.float32)
+		# rot_agent_vel = get_rotated_position_from_relative(agent_vel, agent_heading).astype(np.float32)
 
 		# --- Goal related (single fair goal) ---
 		goal_world_pos = self.landmark_poses[self.goal_match_index[agent.id]]
+		# print("Agent", agent.id, "goal_world_pos", goal_world_pos)
 		rel_goal_vec_world = goal_world_pos - agent_pos
 		goal_pos = get_rotated_position_from_relative(rel_goal_vec_world, agent_heading).astype(np.float32)
-
+		# print("Rotated goal_pos", goal_pos)
 
 		# --- Two nearest neighbors (rotated) ---
 		neighbor_dists = []
@@ -1448,33 +1449,50 @@ class Scenario(BaseScenario):
 		nearest_neighbors = np.concatenate(rotated_neighbors, axis=0)
 
 		# --- Tube params (rotated entrance/exit vectors + width + phase) ---
-		tube_entrance = np.asarray(world.tube_params['entrance'], dtype=np.float32)
-		tube_exit = np.asarray(world.tube_params['exit'], dtype=np.float32)
+		# tube_entrance = np.asarray(world.tube_params['entrance'], dtype=np.float32)
+		# tube_exit = np.asarray(world.tube_params['exit'], dtype=np.float32)
 		tube_width = float(world.tube_params['width'])
 
-		rel_to_entrance_world = tube_entrance - agent_pos
-		rel_to_exit_world = tube_exit - agent_pos
+		# rel_to_entrance_world = tube_entrance - agent_pos
+		# rel_to_exit_world = tube_exit - agent_pos
 
 		# rot_rel_entrance = get_rotated_position_from_relative(rel_to_entrance_world, agent_heading).astype(np.float32)
-		rot_rel_exit = get_rotated_position_from_relative(rel_to_exit_world, agent_heading).astype(np.float32)
+		# rot_rel_exit = get_rotated_position_from_relative(rel_to_exit_world, agent_heading).astype(np.float32)
+
 
 		# Phase is computed in world coords; keep as scalar to preserve layout
 		phase = float(self.get_agent_phase(agent, world))
-		s, y, L, half_w = self._tube_coords(world, agent_pos)
 
+		# Heading error to corridor axis (axis vector e)
+		e = world.tube_params['e']
+		tube_axis_angle = float(np.arctan2(e[1], e[0]))
+
+		# print("Agent", agent.id, "tube_axis_angle", (tube_axis_angle+np.pi)%(2*np.pi), "angle", (world.tube_params['angle'] + np.pi/2)%(2*np.pi), "agent_heading", (agent_heading+np.pi)%(2*np.pi))
+		dpsi = agent_heading - tube_axis_angle
+		# Wrap to [-pi, pi]
+		dpsi = (dpsi + np.pi) % (2 * np.pi) - np.pi
+		heading_feat = np.array([np.cos(dpsi), np.sin(dpsi)], dtype=np.float32)
+		# print("Agent", agent.id, "heading_feat", heading_feat)
+
+		s, y, L, half_w = self._tube_coords(world, agent_pos)
+		s_norm = np.clip(s / L, -1.0, 1.5)          # allow slight overshoot
+		y_norm = np.clip(y / (half_w + 1e-9), -1.5, 1.5)
+		dist_in = self._entrance_gate_distance(s, y, half_w) / (L + 1e-9)
+		dist_out = self._exit_gate_distance(s, y, L, half_w) / (L + 1e-9)
 		tube_params = np.concatenate([
-			np.array([s, y]),  # rot_rel_entrance,              
-			rot_rel_exit,                  
+			np.array([s_norm, y_norm]),  # rot_rel_entrance,
+			np.array([dist_in, dist_out], dtype=np.float32),  # rot_rel_exit,
+			heading_feat,                  
 			np.array([tube_width], dtype=np.float32),
 			np.array([phase], dtype=np.float32)
 		], axis=0)
-		# print("Agent", agent.id, "tube_params", tube_params)
+		# print("Agent", agent.id, "tube_params", tube_params, "np.array([agent.state.speed, agent.state.theta])", np.array([agent.state.speed, agent.state.theta]))
 
 		# print("Agent", agent.id, "tube coords s,y,L,half_w:", s, y, L, half_w)
 		# --- Assemble final obs in the SAME field order as before ---
-		# [agent_vel(2), goal_pos(2), nearest_neighbors(4), tube_params(6)] = 14 dims
+		# [agent_vel(2), goal_pos(2), nearest_neighbors(4), tube_params(8)] = 16 dims
 		return np.concatenate([
-			rot_agent_vel,                      # self velocity (2 slots)
+			np.array([agent.state.theta, agent.state.speed]),		# rot_agent_vel, # self velocity (2 slots)
 			goal_pos,                           # rotated goal vector
 			nearest_neighbors,                  # two rotated neighbor vectors
 			tube_params                         # rotated entrance/exit + width + phase
