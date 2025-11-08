@@ -174,7 +174,7 @@ def set_landmarks_in_point(self, world, tube_angle, tube_endpoints):
 			break
 
 		# Set relative position for the landmark (e.g., offset from tube entrance)
-		relative_pos = np.array([0.0, -self.world_size/6])
+		relative_pos = np.array([0.0, -self.world_size/3])
 		# print("relative_pos", relative_pos)
 		# Rotate by tube_angle
 		rotated_pos = get_rotated_position_from_relative(relative_pos, tube_angle)

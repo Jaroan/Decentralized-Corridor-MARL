@@ -283,7 +283,7 @@ class Scenario(BaseScenario):
 		else:
 			world.with_background = False
 		return world
-
+		self.prev_goal_dist = np.full(self.num_agents, np.inf, dtype=np.float32)
 
 
 	def reset_world(self, world:World, num_current_episode: int = 0) -> None:
@@ -408,13 +408,13 @@ class Scenario(BaseScenario):
 			# 	world.dim_p
 			# )
 			# Add random jitter if needed
-			jitter = 0.2 * np.random.uniform(-self.world_size, self.world_size, world.dim_p)
+			jitter = 0.3 * np.random.uniform(-self.world_size, self.world_size, world.dim_p)
 			angle = world.tube_params['angle']
 			# print("jitter", jitter)
 			perp_dir = np.array([np.sin(angle), np.cos(angle)])
 			# print("Entrance", world.tube_params['entrance'], "perp_dir", perp_dir )
 			# print("self.world_size+(num_agents_added) / 5 * perp_dir",( self.world_size+(num_agents_added)) / 5 * perp_dir)
-			distance_from_entrance = (self.world_size + num_agents_added) / 5
+			distance_from_entrance = (self.world_size + num_agents_added) / 3
 			# print("distance_from_entrance", distance_from_entrance, "jitter", jitter)
 			random_pos = world.tube_params['entrance'] + distance_from_entrance * perp_dir + jitter
 			# print(f"Random Position for Agent {num_agents_added}: {random_pos}")
@@ -565,7 +565,7 @@ class Scenario(BaseScenario):
 
 		
 		# Full-width exit gate settings (tunable)
-		self.exit_back_ratio = getattr(self, 'exit_back_ratio', 0.02)    # inside tube near exit
+		self.exit_back_ratio = getattr(self, 'exit_back_ratio', 0.05)    # inside tube near exit
 		self.exit_front_ratio = getattr(self, 'exit_front_ratio', 0.08)  # just outside exit	
 
 	# --- Shared geometry helpers (reduce redundancy) ---
@@ -1085,7 +1085,7 @@ class Scenario(BaseScenario):
 			# print("Agent",agent.id,"post tube phase")
 			# input("Agent entered post tube phase")
 			current_phase = 0  # Reset current phase to 0
-		else:
+		elif current_phase == 2:  # Post-tube phase
 			dist_to_goal = np.linalg.norm(agent.state.p_pos - self.landmark_poses[self.goal_match_index[agent.id]])
 			if dist_to_goal < self.min_dist_thresh:
 				# print("Agent",agent.id,"reached fair goal")
@@ -1096,11 +1096,18 @@ class Scenario(BaseScenario):
 					self.goal_tracker[agent.id] = self.goal_match_index[agent.id]
 
 					# print("Phase 2 Agent", agent.id, "reached goal")
-
 			else:
-					# print("dist_to_goal",dist_to_goal, "rew", rew)
-					rew -= dist_to_goal
-					# print("Agent", agent.id, "not reached goal", dist_to_goal)
+				# print("dist_to_goal",dist_to_goal, "rew", rew)
+				rew -= dist_to_goal
+				# print("Agent", agent.id, "not reached goal", dist_to_goal)
+				# Reward forward progress toward goal
+				# if hasattr(self, 'prev_goal_dist'):
+				# 	delta_goal = self.prev_goal_dist[agent.id] - dist_to_goal
+				# 	rew += self.progress_gain * max(delta_goal, -0.1) * 2.0  # 2x boost in Phase 2
+				
+				# if not hasattr(self, 'prev_goal_dist'):
+				# 	self.prev_goal_dist = np.full(self.num_agents, np.inf, dtype=np.float32)
+				# self.prev_goal_dist[agent.id] = dist_to_goal
 			# input("phase 2")
 
 			# spacing_error = 0

@@ -7,7 +7,7 @@ class AirTaxiConfig():
     V_NOMINAL = 110 * 0.514444  * 0.001 # knots to km/s
     ACCEL_MIN = -0.001 # km/s^2
     ACCEL_MAX = 0.002 # km/s^2
-    ANGULAR_RATE_MAX = 0.1 # rad/s
+    ANGULAR_RATE_MAX = 0.075 # rad/s
     MOTION_PRIM_ACCEL_OPTIONS = 5
     MOTION_PRIM_ANGRATE_OPTIONS = 5
     CBF_RATE = 3.0
@@ -17,14 +17,14 @@ class AirTaxiConfig():
     
     DT = 1.0
     # DISTANCE_TO_GOAL_THRESHOLD = 750 * 0.0003048 # ft to km
-    DISTANCE_TO_GOAL_THRESHOLD = 0.35
+    DISTANCE_TO_GOAL_THRESHOLD = 0.2
     GOAL_HEADING_THRESHOLD = np.pi/4
     # GOAL_SPEED_THRESHOLD = 20 * 0.514444 * 0.001 # knots to km/s
     GOAL_SPEED_THRESHOLD = 0.03 # knots to km/s
     
     # Ref: Preliminary Analysis of Separation Standards for Urban Air Mobility Using Unmitigated Fast-Time
     # Test params: 1500, 1800, 2200, 5000 ft
-    SEPARATION_DISTANCE = 1500 * 0.0003048 # (first parameter in ft, converted to km)
+    SEPARATION_DISTANCE = 1000 * 0.0003048 # (first parameter in ft, converted to km)
     COLLISION_DISTANCE = SEPARATION_DISTANCE
 
     # COORDINATION_RANGE = 5 # 3 miles to km
