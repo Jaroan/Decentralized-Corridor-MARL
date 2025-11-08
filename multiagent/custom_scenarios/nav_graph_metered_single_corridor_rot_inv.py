@@ -1152,8 +1152,8 @@ class Scenario(BaseScenario):
 		if self._in_tube_rect(s, y, L, half_w) and not current_phase == 1:
 			rew -= self.collision_rew  #*2
 			# print(f"Agent {agent.id} is in tube but not in phase 1 rew", rew)
-		# input("Reward calculation complete for agent {}".format(agent.id))
 		# print(f"Agent {agent.id} total reward: ", rew)
+		# input("Reward calculation complete for agent {}".format(agent.id))
 		# input("Press Enter to continue...")
 
 		return np.clip(rew, -4*self.collision_rew, self.goal_rew*5)
@@ -1412,7 +1412,7 @@ class Scenario(BaseScenario):
 		# --- Agent state ---
 		agent_pos = agent.state.p_pos
 		agent_heading = float(getattr(agent.state, "theta", getattr(agent.state, "p_ang", 0.0)))
-		# agent_speed = float(getattr(agent.state, "speed", np.linalg.norm(agent.state.p_vel)))
+		agent_speed = float(getattr(agent.state, "speed", np.linalg.norm(agent.state.p_vel)))
 		# agent_vel = np.asarray(agent.state.p_vel, dtype=np.float32)
 
 
@@ -1475,8 +1475,8 @@ class Scenario(BaseScenario):
 		# # print("Agent", agent.id, "heading_feat", heading_feat)
 
 		s, y, L, half_w = self._tube_coords(world, agent_pos)
-		s_norm = np.clip(s / L, -1.0, 1.5)          # allow slight overshoot
-		y_norm = np.clip(y / (half_w + 1e-9), -1.5, 1.5)
+		s_norm = np.clip(s / L, -2.0, 2.0)          # allow slight overshoot
+		y_norm = np.clip(y / (half_w + 1e-9), -2.0, 2.0)
 		dist_in = self._entrance_gate_distance(s, y, half_w) / (L + 1e-9)
 		dist_out = self._exit_gate_distance(s, y, L, half_w) / (L + 1e-9)
 		tube_params = np.concatenate([
@@ -1486,13 +1486,13 @@ class Scenario(BaseScenario):
 			np.array([tube_width], dtype=np.float32),
 			np.array([phase], dtype=np.float32)
 		], axis=0)
-		# print("Agent", agent.id, "tube_params", tube_params, "np.array([agent.state.speed, agent.state.theta])", np.array([agent.state.speed, agent.state.theta]))
+		# print("Agent", agent.id, "tube_params", tube_params, "np.array([agent.state.speed,agent_speed])", np.array([agent.state.speed, agent_speed]))
 
 		# print("Agent", agent.id, "tube coords s,y,L,half_w:", s, y, L, half_w)
 		# --- Assemble final obs in the SAME field order as before ---
 		# [agent_vel(2), goal_pos(2), nearest_neighbors(4), tube_params(8)] = 16 dims
 		return np.concatenate([
-			np.array([agent.state.theta, agent.state.speed]),		# rot_agent_vel, # self velocity (2 slots)
+			np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]),		#   rot_agent_vel, # self velocity (2 slots)
 			goal_pos,                           # rotated goal vector
 			nearest_neighbors,                  # two rotated neighbor vectors
 			tube_params                         # rotated entrance/exit + width + phase
