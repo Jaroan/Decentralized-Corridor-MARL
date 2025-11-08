@@ -1463,16 +1463,16 @@ class Scenario(BaseScenario):
 		# Phase is computed in world coords; keep as scalar to preserve layout
 		phase = float(self.get_agent_phase(agent, world))
 
-		# Heading error to corridor axis (axis vector e)
-		e = world.tube_params['e']
-		tube_axis_angle = float(np.arctan2(e[1], e[0]))
+		# # Heading error to corridor axis (axis vector e)
+		# e = world.tube_params['e']
+		# tube_axis_angle = float(np.arctan2(e[1], e[0]))
 
-		# print("Agent", agent.id, "tube_axis_angle", (tube_axis_angle+np.pi)%(2*np.pi), "angle", (world.tube_params['angle'] + np.pi/2)%(2*np.pi), "agent_heading", (agent_heading+np.pi)%(2*np.pi))
-		dpsi = agent_heading - tube_axis_angle
-		# Wrap to [-pi, pi]
-		dpsi = (dpsi + np.pi) % (2 * np.pi) - np.pi
-		heading_feat = np.array([np.cos(dpsi), np.sin(dpsi)], dtype=np.float32)
-		# print("Agent", agent.id, "heading_feat", heading_feat)
+		# # print("Agent", agent.id, "tube_axis_angle", (tube_axis_angle+np.pi)%(2*np.pi), "angle", (world.tube_params['angle'] + np.pi/2)%(2*np.pi), "agent_heading", (agent_heading+np.pi)%(2*np.pi))
+		# dpsi = agent_heading - tube_axis_angle
+		# # Wrap to [-pi, pi]
+		# dpsi = (dpsi + np.pi) % (2 * np.pi) - np.pi
+		# heading_feat = np.array([np.cos(dpsi), np.sin(dpsi)], dtype=np.float32)
+		# # print("Agent", agent.id, "heading_feat", heading_feat)
 
 		s, y, L, half_w = self._tube_coords(world, agent_pos)
 		s_norm = np.clip(s / L, -1.0, 1.5)          # allow slight overshoot
@@ -1482,7 +1482,7 @@ class Scenario(BaseScenario):
 		tube_params = np.concatenate([
 			np.array([s_norm, y_norm]),  # rot_rel_entrance,
 			np.array([dist_in, dist_out], dtype=np.float32),  # rot_rel_exit,
-			heading_feat,                  
+			# heading_feat,                  
 			np.array([tube_width], dtype=np.float32),
 			np.array([phase], dtype=np.float32)
 		], axis=0)

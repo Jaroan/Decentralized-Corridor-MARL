@@ -48,8 +48,8 @@ datetime_str=$(date '+%y%m%d_%H%M%S')
 if [ "$chosen_dynamics_type" == "air_taxi" ]; then
     str_dynamics_type="at"
     world_size=4
-    episode_length=75
-    num_env_steps=10000000
+    episode_length=50
+    num_env_steps=4000000
 elif [ "$chosen_dynamics_type" == "unicycle_vehicle" ]; then
     str_dynamics_type="uv"
     world_size=4
@@ -108,7 +108,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --world_size=${world_size} \
 --graph_feat_type "relative" \
 --increase_fairness "False" \
---auto_mini_batch_size --target_mini_batch_size 16384 \
+--auto_mini_batch_size --target_mini_batch_size 8192 \
 --formation_type ${formation_type} \
 &> $logs_folder/${str_dynamics_type}_${datetime_str}_2phaserot_inv_tube_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
 
