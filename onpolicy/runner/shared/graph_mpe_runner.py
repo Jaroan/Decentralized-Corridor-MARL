@@ -171,7 +171,7 @@ class GMPERunner(Runner):
                         f"Dist2goal: {env_infos[str4][0]:.3f} \t "
                         f"Rew: {env_infos[str5][0]:.3f} \t "
                         f"Col: {env_infos[str6][0]:.3f} \t "
-                        f"Phase_reached: {env_infos['agent'+str(agent_id)+'/Phase_reached'][0]:.3f} \t ")
+                        f"Phase_reached: {env_infos['agent'+str(agent_id)+'/phase_reached'][0]:.3f} \t ")
                 self.log_train(train_infos, total_num_steps)
                 self.log_env(env_infos, total_num_steps)
 
