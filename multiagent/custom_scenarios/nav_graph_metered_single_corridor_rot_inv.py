@@ -692,23 +692,31 @@ class Scenario(BaseScenario):
 			if agent.previous_phase == 0:
 				if valid_entrance:
 					# print("Agent", agent.id, "entered tube correctly 1111")
+					agent.previous_phase = 1
 					return 1  # Entered correctly
 				else:
 					return 0  # Reset if entered incorrectly
 			else:
 				# print("Agent", agent.id, "is in tube phase 1111")
+				agent.previous_phase = 1
 				return 1  # Already in tube, stay in phase 1
-		else:
-			if agent.previous_phase == 1:
-				if passed_tube and valid_exit:
-					# print("Agent", agent.id, "exited tube correctly 2222")
-					# agent.previous_phase = 2
+		if passed_tube:
+			if self.phase_reached[agent.id] >= 1:
+				if agent.previous_phase == 1 and valid_exit:
+					# if passed_tube and valid_exit:
+						# print("Agent", agent.id, "exited tube correctly 2222")
+						# agent.previous_phase = 2
+					agent.previous_phase = 2
 					return 2
-			elif agent.previous_phase == 2 and passed_tube:
-				# print("Agent", agent.id, "is in post-tube phase 2222")
-				return 2
-			# print("Agent", agent.id, "didn't correctly exit tube  0000")
-			return 0  # Post-tube phase
+				elif agent.previous_phase == 2:
+					# print("Agent", agent.id, "is in post-tube phase 2222")
+					return 2
+				# print("Agent", agent.id, "didn't correctly exit tube  0000")
+				agent.previous_phase = 0
+				return 0  # Post-tube phase
+        # Default: Phase 0
+		agent.previous_phase = 0
+		return 0
 
 	def initialize_min_time_distance_graph(self, world):
 		for agent in world.agents:
@@ -998,11 +1006,13 @@ class Scenario(BaseScenario):
 				# Reward if agent moves into tube after exiting
 				rew += self.goal_rew  # *3  # Positive reward for proper transition
 				self.entry_reward_cooldown[agent.id] = self.phase_reward_cooldown_steps  # Cooldown period to prevent repeated rewards
+				self.phase_reached[agent.id] = 1  # Mark Phase 1 completed
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
 			elif current_phase == 2 :
 				# Rewards if agent moves out of tube
 				# print("Agent in post-tube phase", agent.id)
 				rew += self.goal_rew  # *3
+				self.phase_reached[agent.id] = 2  # Mark Phase 2 completed
 				# # print("Agent",agent.id,"reached fair goal")
 				# if agent.status == False:
 				# 	agent.status = True
@@ -1095,11 +1105,12 @@ class Scenario(BaseScenario):
 					rew += self.goal_rew*5
 					self.goal_tracker[agent.id] = self.goal_match_index[agent.id]
 
-					# print("Phase 2 Agent", agent.id, "reached goal")
+					# print("Phase 2 Agent", agent.id, "reached goal", dist_to_goal, "rew", rew)
 			else:
-				# print("dist_to_goal",dist_to_goal, "rew", rew)
 				rew -= dist_to_goal
+				# print("dist_to_goal", dist_to_goal, "rew", rew)
 				# print("Agent", agent.id, "not reached goal", dist_to_goal)
+				# input("Not reached goal yet")
 				# Reward forward progress toward goal
 				# if hasattr(self, 'prev_goal_dist'):
 				# 	delta_goal = self.prev_goal_dist[agent.id] - dist_to_goal
