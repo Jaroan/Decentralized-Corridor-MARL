@@ -807,6 +807,7 @@ class Scenario(BaseScenario):
 			'Conformance': self.conformance_percent[agent.id]/self.args.episode_length,
 			'Delta_spacing': self.delta_spacing_sum /(np.sum(self.spacing_violation) if np.sum(self.spacing_violation) != 0 else 1),
 			'Spacing_violations': self.spacing_violation[agent.id]/(self.steps_in_corridor[agent.id] if self.steps_in_corridor[agent.id] != 0 else 1),
+			'Phase_reached': self.phase_reached[agent.id],
 
 
 		}
