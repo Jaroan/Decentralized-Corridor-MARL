@@ -208,6 +208,7 @@ class Runner(object):
 			conformance_percentages_list = []
 			delta_space_list = []
 			spacing_violations_list = []
+			phase_reached_list = []
 			for info in infos:
 				if 'individual_reward' in info[agent_id].keys():
 					idv_rews.append(info[agent_id]['individual_reward'])
@@ -251,6 +252,8 @@ class Runner(object):
 					delta_space_list.append(info[agent_id]['Delta_spacing'])
 				if 'Spacing_violations' in info[agent_id].keys():
 					spacing_violations_list.append(info[agent_id]['Spacing_violations'])
+				if 'Phase_reached' in info[agent_id].keys():
+					phase_reached_list.append(info[agent_id]['Phase_reached'])
 			
 			agent_rew = f'agent{agent_id}/individual_rewards'
 			times     = f'agent{agent_id}/time_to_goal'
@@ -270,6 +273,7 @@ class Runner(object):
 			conformance_percentages  = f'agent{agent_id}/conformance_percentages'
 			delta_space = f'agent{agent_id}/delta_space'
 			spacing_violations = f'agent{agent_id}/spacing_violations'
+			phase_reached = f'agent{agent_id}/phase_reached'
 
 			env_infos[agent_rew] = idv_rews
 			env_infos[times]     = time_to_goals
@@ -289,6 +293,7 @@ class Runner(object):
 			env_infos[conformance_percentages] = conformance_percentages_list
 			env_infos[delta_space] = delta_space_list
 			env_infos[spacing_violations] = spacing_violations_list
+			env_infos[phase_reached] = phase_reached_list
 			# print("CONFORMANCE", conformance_percentages_list)
 		return env_infos
 
