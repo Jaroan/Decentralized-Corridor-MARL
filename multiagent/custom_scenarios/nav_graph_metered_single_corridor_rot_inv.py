@@ -692,13 +692,13 @@ class Scenario(BaseScenario):
 			if agent.previous_phase == 0:
 				if valid_entrance:
 					# print("Agent", agent.id, "entered tube correctly 1111")
-					agent.previous_phase = 1
+					# agent.previous_phase = 1
 					return 1  # Entered correctly
 				else:
 					return 0  # Reset if entered incorrectly
 			else:
 				# print("Agent", agent.id, "is in tube phase 1111")
-				agent.previous_phase = 1
+				# agent.previous_phase = 1
 				return 1  # Already in tube, stay in phase 1
 		if passed_tube:
 			if self.phase_reached[agent.id] >= 1:
@@ -706,16 +706,16 @@ class Scenario(BaseScenario):
 					# if passed_tube and valid_exit:
 						# print("Agent", agent.id, "exited tube correctly 2222")
 						# agent.previous_phase = 2
-					agent.previous_phase = 2
+					# agent.previous_phase = 2
 					return 2
 				elif agent.previous_phase == 2:
 					# print("Agent", agent.id, "is in post-tube phase 2222")
 					return 2
 				# print("Agent", agent.id, "didn't correctly exit tube  0000")
-				agent.previous_phase = 0
+				# agent.previous_phase = 0
 				return 0  # Post-tube phase
         # Default: Phase 0
-		agent.previous_phase = 0
+		# agent.previous_phase = 0
 		return 0
 
 	def initialize_min_time_distance_graph(self, world):
@@ -923,7 +923,7 @@ class Scenario(BaseScenario):
 	def reward(self, agent: Agent, world: World) -> float:
 		rew = 0.0
 		current_phase = self.get_agent_phase(agent, world)
-		# print("Agent", agent.id, "phase", current_phase, "previous_phase", agent.previous_phase)
+		# print("Agent", agent.id, "phase", current_phase, "previous_phase", agent.previous_phase, "phase_reached", self.phase_reached[agent.id])
 		# print("Goalrew",self.goal_rew, "Collisionrew",self.collision_rew)
 		# Common rewards across all phases
 		# Collision penalties
@@ -952,7 +952,7 @@ class Scenario(BaseScenario):
 		s, y, L, half_w = self._tube_coords(world, agent_pos)
 		front_agents = []
 		back_agents = []
-
+		# print("self._in_entrance_gate(s, y, L, half_w)",self._in_entrance_gate(s, y, L, half_w))
 		for other in world.agents:
 			if other is agent:
 				continue
@@ -1045,6 +1045,7 @@ class Scenario(BaseScenario):
 			# input("phase 0")
 
 		elif current_phase == 1:  # In-tube phase
+			# print("Agent", agent.id, "in tube phase 1")
 			# print("formation line",self.formation_rew)
 			# rew += self.formation_rew/2  # Reward for entering tube
 			# Stronger formation rewards inside tube
@@ -1108,7 +1109,7 @@ class Scenario(BaseScenario):
 					# print("Phase 2 Agent", agent.id, "reached goal", dist_to_goal, "rew", rew)
 			else:
 				rew -= dist_to_goal
-				# print("dist_to_goal", dist_to_goal, "rew", rew)
+				# print("Still dist_to_goal", dist_to_goal, "rew", rew)
 				# print("Agent", agent.id, "not reached goal", dist_to_goal)
 				# input("Not reached goal yet")
 				# Reward forward progress toward goal
@@ -1164,7 +1165,7 @@ class Scenario(BaseScenario):
 			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {agent.previous_phase} rew", rew)
 		if current_phase < self.phase_reached[agent.id]:
 			rew -= self.collision_rew
-		# 	print(f"Agent {agent.id} tried to move back to phase {current_phase} from {self.phase_reached[agent.id]} rew", rew)
+			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {self.phase_reached[agent.id]} rew", rew)
 		# Store current phase for next step
 		agent.previous_phase = current_phase
 		if self._in_tube_rect(s, y, L, half_w) and not current_phase == 1:
