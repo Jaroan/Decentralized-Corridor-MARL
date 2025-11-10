@@ -1172,6 +1172,12 @@ class Scenario(BaseScenario):
 		if self._in_tube_rect(s, y, L, half_w) and not current_phase == 1:
 			rew -= self.collision_rew  #*2
 			# print(f"Agent {agent.id} is in tube but not in phase 1 rew", rew)
+
+        # If agent is past exit plane but never entered corridor: continuous penalty
+		if s > L and self.phase_reached[agent.id] < 1:
+			rew -= self.goal_rew
+			# print(f"Agent {agent.id} skipped corridor (s={s:.2f} > L={L:.2f}): penalty {self.goal_rew * 5}")
+        
 		# print(f"Agent {agent.id} total reward: ", rew)
 		# input("Reward calculation complete for agent {}".format(agent.id))
 		# input("Press Enter to continue...")
@@ -1292,135 +1298,6 @@ class Scenario(BaseScenario):
 		return goal_pos, closest_goal_occupied, rel_second_closest_goal, goal_history
 
 
-	# def observation(self, agent: Agent, world: World) -> arr:
-	# 	"""
-	# 	Returns an observation for the agent, including:
-	# 	- Agent velocity
-	# 	- Agent position
-	# 	- Relative positions of the two nearest neighbors
-	# 	- Distances and occupancy status of the two closest goals
-	# 	- Tube-related information (distance to entrance/exit, width, and phase)
-	# 	"""
-	# 	# print(agent.id,',', agent.state.p_pos[0], ',', agent.state.p_pos[1])
-	# 	# if agent.id == 0:
-	# 	# 	world.positions_all_agents0.append(np.array([agent.state.p_pos[0], agent.state.p_pos[1]]))
-	# 	# elif agent.id == 1:
-	# 	# 	world.positions_all_agents1.append(np.array([agent.state.p_pos[0], agent.state.p_pos[1]]))
-	# 	# elif agent.id == 2:
-	# 	# 	world.positions_all_agents2.append(np.array([agent.state.p_pos[0], agent.state.p_pos[1]]))
-	# 	# elif agent.id == 3:
-	# 	# 	world.positions_all_agents3.append(np.array([agent.state.p_pos[0], agent.state.p_pos[1]]))
-	# 	# elif agent.id == 4:
-	# 	# 	world.positions_all_agents4.append(np.array([agent.state.p_pos[0], agent.state.p_pos[1]]))
-	# 	# elif agent.id == 5:
-	# 	# 	world.positions_all_agents5.append(np.array([agent.state.p_pos[0], agent.state.p_pos[1]]))
-	# 	# elif agent.id == 6:
-	# 	# 	world.positions_all_agents6.append(np.array([agent.state.p_pos[0], agent.state.p_pos[1]]))
-	# 	# elif agent.id == 7:
-	# 	# 	world.positions_all_agents7.append(np.array([agent.state.p_pos[0], agent.state.p_pos[1]]))
-	# 	# elif agent.id == 8:
-	# 	# 	world.positions_all_agents8.append(np.array([agent.state.p_pos[0], agent.state.p_pos[1]]))
-	# 	# elif agent.id == 9:
-	# 	# 	world.positions_all_agents9.append(np.array([agent.state.p_pos[0], agent.state.p_pos[1]]))
-	# 	# if agent.status:
-	# 	# 	print(world.positions_all_agents0)
-	# 	# 	print(world.positions_all_agents1)
-	# 	# 	print(world.positions_all_agents2)
-	# 	# 	print(world.positions_all_agents3)
-	# 	# 	print(world.positions_all_agents4)
-	# 	# 	print(world.positions_all_agents5)
-	# 	# 	print(world.positions_all_agents6)
-	# 	# 	print(world.positions_all_agents7)
-	# 	# 	print(world.positions_all_agents8)
-	# 	# 	print(world.positions_all_agents9)
-	# 	agent_pos = agent.state.p_pos
-	# 	agent_heading = agent.state.theta
-	# 	agent_speed = agent.state.speed
-	# 	agent_vel = agent.state.p_vel
-		
-	# 	## only single goal exists
-	# 	agents_goal = self.landmark_poses[self.goal_match_index[agent.id]]
-	# 	goal_pos = agents_goal - agent.state.p_pos
-
-	# 	## TO DO all agents go to the same goal
-	# 	closest_goal_occupied =np.array([self.landmark_poses_occupied[self.goal_match_index[agent.id]]])
-
-	# 	rel_second_closest_goal = goal_pos
-	# 	# goal_pos, closest_goal_occupied, rel_second_closest_goal, goal_history = self.get_agent_nearby_goals(agent, world)
-	# 	# goal_pos = get_rotated_position_from_relative(goal_pos, agent_heading)
-	# 	# rel_second_closest_goal = get_rotated_position_from_relative(rel_second_closest_goal, agent_heading)
-	# 	# goal_heading = agents_goal.heading
-	# 	# goal_speed = agents_goal.speed
-
-
-	# 	# Find two nearest neighbors
-	# 	neighbor_dists = []
-	# 	for other in world.agents:
-	# 		if other is not agent:
-	# 			rel_pos = other.state.p_pos - agent.state.p_pos
-	# 			dist = np.linalg.norm(rel_pos)
-	# 			# print("dist",dist)
-	# 			# print("rel_pos",rel_pos)
-	# 			neighbor_dists.append((dist, rel_pos))
-		
-	# 	# Sort by distance and get two nearest
-	# 	neighbor_dists.sort(key=lambda x: x[0])
-	# 	if len(neighbor_dists) >= 2:
-	# 		nearest_neighbors = [n[1] for n in neighbor_dists[:2]]
-	# 	else:
-	# 		nearest_neighbors = [n[1] for n in neighbor_dists]
-	# 		while len(nearest_neighbors) < 2:
-	# 			nearest_neighbors.append(np.zeros(world.dim_p))
-		
-	# 	nearest_neighbors = np.concatenate(nearest_neighbors)
-	# 	# print("nearest_neighbors",nearest_neighbors)
-
-
-	# 	# # Rotate nearest neighbors relative to agent's heading
-	# 	# rotated_neighbors = [
-	# 	# 	get_rotated_position_from_relative(neighbor, agent_heading)
-	# 	# 	for neighbor in nearest_neighbors
-	# 	# ]
-
-	# 	# # Flatten into a single array
-	# 	# rotated_neighbors = np.concatenate(rotated_neighbors)
-
-	# 	# Tube parameters
-	# 	tube_entrance = world.tube_params['entrance']
-	# 	tube_exit = world.tube_params['exit']
-	# 	tube_width = world.tube_params['width']
-		
-	# 	# Calculate distances and directions to tube entrance/exit
-	# 	rel_to_entrance = tube_entrance - agent_pos
-	# 	rel_to_exit = tube_exit - agent_pos
-
-	# 	# rot_rel_entrance = get_rotated_position_from_relative(rel_to_entrance, agent_heading)
-	# 	# rot_rel_exit = get_rotated_position_from_relative(rel_to_exit, agent_heading)
-
-	# 	dist_to_entrance = np.linalg.norm(rel_to_entrance)
-	# 	dist_to_exit = np.linalg.norm(rel_to_exit)
-		
-	# 	# Calculate phase
-	# 	in_tube = self.is_in_tube(world, agent_pos)
-	# 	phase = self.get_agent_phase(agent, world)
-		
-	# 	tube_params = np.concatenate([
-	# 		rel_to_entrance,  # Vector to tube entrance
-	# 		rel_to_exit,     # Vector to tube exit
-	# 		[tube_width],    # Tube width
-	# 		[phase]          # Current phase
-	# 	])
-	# 	return np.concatenate([
-	# 		agent_pos,
-	# 		agent_vel,
-	# 		goal_pos,
-	# 		closest_goal_occupied,
-	# 		rel_second_closest_goal,
-	# 		nearest_neighbors,
-	# 		tube_params
-	# 	])
-
-
 
 	def observation(self, agent: Agent, world: World) -> arr:
 		"""
@@ -1499,6 +1376,8 @@ class Scenario(BaseScenario):
 		y_norm = np.clip(y / (half_w + 1e-9), -2.0, 2.0)
 		dist_in = self._entrance_gate_distance(s, y, half_w) / (L + 1e-9)
 		dist_out = self._exit_gate_distance(s, y, L, half_w) / (L + 1e-9)
+		# print("Agent", agent.id, "s,y,L,half_w:", s_norm, y_norm, "dist_in:", dist_in, "dist_out:", dist_out)
+
 		tube_params = np.concatenate([
 			np.array([s_norm, y_norm]),  # rot_rel_entrance,
 			np.array([dist_in, dist_out], dtype=np.float32),  # rot_rel_exit,
@@ -1658,86 +1537,6 @@ class Scenario(BaseScenario):
 			raise ValueError(f'{entity.name} not supported')
 
 		return np.hstack([vel, pos, goal_pos, entity_type])
-
-
-	# def _get_entity_feat_relative(self, agent:Agent, entity:Entity, world:World, fairness_param: np.ndarray) -> arr:
-	# 	"""
-	# 		Returns: ([velocity, position, goal_pos, entity_type])
-	# 		in coords relative to the `agent` for the given entity
-	# 	"""
-	# 	agent_pos = agent.state.p_pos
-	# 	agent_speed = agent.state.speed
-	# 	entity_pos = entity.state.p_pos
-	# 	entity_speed = entity.state.speed
-	# 	rel_pos = entity_pos - agent_pos
-	# 	# rel_pos = get_rotated_position_from_relative(rel_pos, agent.state.theta)
-	# 	# rel_speed = entity_speed - agent_speed
-	# 	rel_vel = entity.state.p_vel - agent.state.p_vel
-	# 	if 'agent' in entity.name:
-	# 		# world.dists = np.array([np.linalg.norm(entity.state.p_pos - l) for l in self.landmark_poses])
-	# 		# min_dist = np.min(world.dists)
-	# 		# if min_dist < self.coordination_range:
-	# 		# 	# If the minimum distance is already less than self.min_dist_thresh, use the previous goal.
-	# 		# 	chosen_goal = np.argmin(world.dists)
-	# 		# 	goal_pos = self.landmark_poses[chosen_goal]
-	# 		# 	goal_history = self.goal_history[chosen_goal]
-	# 		# 	goal_occupied = np.array([self.landmark_poses_occupied[chosen_goal]])
-
-	# 		# else:
-	# 		# 	unoccupied_goals = self.landmark_poses[self.landmark_poses_occupied!= self.coordination_range]
-	# 		# 	unoccupied_goals_indices = np.where(self.landmark_poses_occupied != self.coordination_range)[0]
-	# 		# 	if len(unoccupied_goals) > 0:
-
-	# 		# 		## use closest goal
-
-	# 		# 		## determine which goal from self.landmark_poses is this chosen unocccupied goal
-	# 		# 		## use the index of the unoccupied goal to get the goal from self.landmark_poses
-	# 		# 		min_dist_goal = np.argmin(np.linalg.norm(entity.state.p_pos - unoccupied_goals, axis=1))
-	# 		# 		goal_pos = unoccupied_goals[min_dist_goal]
-	# 		# 		## check if the goal is occupied
-	# 		# 		goal_occupied = np.array([self.landmark_poses_occupied[unoccupied_goals_indices[min_dist_goal]]])
-	# 		# 		goal_history = self.goal_history[unoccupied_goals_indices[min_dist_goal]]
-
-	# 		# 	else:
-	# 		# 		# Handle the case when all goals are occupied.
-	# 		# 		goal_pos = entity.state.p_pos
-	# 		# 		self.landmark_poses_occupied = np.zeros(self.num_agents)
-	# 		# 		goal_occupied = np.array([self.landmark_poses_occupied[entity.id]])
-	# 		# 		goal_history = self.goal_history[entity.id]
-
-	# 		# goal_history = np.array([goal_history])
-	# 		goal_pos = self.landmark_poses[entity.id]
-	# 		rel_goal_pos = goal_pos - agent_pos
-	# 		goal_occupied = np.array(self.landmark_poses_occupied[self.goal_match_index[entity.id]])
-	# 		# rel_goal_pos = get_rotated_position_from_relative(rel_goal_pos, agent.state.theta)
-	# 		entity_type = entity_mapping['agent']
-
-
-	# 	elif 'landmark' in entity.name:
-	# 		rel_goal_pos = rel_pos
-	# 		goal_occupied = np.array([1])
-	# 		goal_history = entity.id if entity.id != None else 0
-	# 		entity_type = entity_mapping['landmark']
-
-	# 	elif 'obstacle' in entity.name:
-	# 		rel_goal_pos = rel_pos
-	# 		goal_occupied = np.array([1])
-	# 		goal_history = entity.id if entity.id != None else 0
-	# 		entity_type = entity_mapping['obstacle']
-
-	# 	elif 'wall' in entity.name:
-	# 		rel_goal_pos = rel_pos
-	# 		goal_occupied = np.array([1])
-	# 		goal_history = entity.id if entity.id != None else 0
-	# 		entity_type = entity_mapping['wall']
-	# 		## get wall corner point's relative position
-	# 		wall_o_corner = np.array([entity.endpoints[0],entity.axis_pos+entity.width/2]) - agent_pos
-	# 		wall_d_corner = np.array([entity.endpoints[1],entity.axis_pos-entity.width/2]) - agent_pos
-	# 		return np.hstack([rel_vel, rel_pos, rel_goal_pos,goal_occupied,goal_history,wall_o_corner,wall_d_corner,entity_type])
-
-	# 	else:
-	# 		raise ValueError(f'{entity.name} not supported')
-	# 	return np.hstack([rel_vel, rel_pos, rel_goal_pos,goal_occupied,entity_type])
 
 
 
