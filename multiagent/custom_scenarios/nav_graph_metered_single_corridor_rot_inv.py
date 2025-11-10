@@ -1176,7 +1176,7 @@ class Scenario(BaseScenario):
         # If agent is past exit plane but never entered corridor: continuous penalty
 		if s > L and self.phase_reached[agent.id] < 1:
 			rew -= self.goal_rew
-			# print(f"Agent {agent.id} skipped corridor (s={s:.2f} > L={L:.2f}): penalty {self.goal_rew * 5}")
+			# print(f"Agent {agent.id} skipped corridor (s={s:.2f} > L={L:.2f}): penalty {self.goal_rew}")
         
 		# print(f"Agent {agent.id} total reward: ", rew)
 		# input("Reward calculation complete for agent {}".format(agent.id))
@@ -1380,9 +1380,9 @@ class Scenario(BaseScenario):
 
 		tube_params = np.concatenate([
 			np.array([s_norm, y_norm]),  # rot_rel_entrance,
-			np.array([dist_in, dist_out], dtype=np.float32),  # rot_rel_exit,
+			np.array([dist_out], dtype=np.float32),  # rot_rel_exit, dist_in, 
 			# heading_feat,                  
-			np.array([tube_width], dtype=np.float32),
+			# np.array([tube_width], dtype=np.float32),
 			np.array([phase], dtype=np.float32)
 		], axis=0)
 		# print("Agent", agent.id, "tube_params", tube_params, "np.array([agent.state.speed,agent_speed])", np.array([agent.state.speed, agent_speed]))

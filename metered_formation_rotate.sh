@@ -112,37 +112,36 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --formation_type ${formation_type} \
 &> $logs_folder/${str_dynamics_type}_${datetime_str}_2phaserot_inv_tube_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
 
-# python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
-# --project_name "air_corridor_unicycle_3" \
-# --env_name "GraphMPE" \
-# --algorithm_name "rmappo" \
-# --seed 0 \
-# --model_dir "model_weights/tube/rot_inv" \
-# --experiment_name "airtaxi_test_metered5_done_tube_eplen100" \
-# --scenario_name "nav_metered_one_goal_graph_rotate_tube_july" \
-# --dynamics_type "air_taxi" \
-# --fair_wt 3 \
-# --fair_rew 5 \
-# --num_agents=3 \
-# --num_landmarks=3 \
-# --collision_rew 30 \
-# --formation_rew 5 \
-# --n_training_threads 1 --n_rollout_threads 16 \
-# --num_mini_batch 1 \
-# --episode_length 100 \
-# --total_actions 9 \
-# --num_env_steps 1000000 \
-# --ppo_epoch 10 --use_ReLU --gain 0.01 --lr 7e-4 --critic_lr 7e-4 \
-# --user_name "marl" \
-# --use_cent_obs "False" \
-# --use_dones "False" \
-# --collaborative "False" \
-# --goal_rew 20 \
-# --num_walls 0 \
-# --zeroshift 10 \
-# --world_size=4 \
-# --graph_feat_type "relative" \
-# --increase_fairness "False" \
-# --auto_mini_batch_size --target_mini_batch_size 1024 \
-# --formation_type "point" \
-# --use_wandb
+python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
+--project_name "air_corridor_unicycle_3" \
+--env_name "GraphMPE" \
+--algorithm_name "rmappo" \
+--seed 0 \
+--experiment_name "airtaxi_test_metered5_done_tube_eplen100" \
+--scenario_name "nav_graph_metered_single_corridor_rot_inv" \
+--dynamics_type "air_taxi" \
+--fair_wt 3 \
+--fair_rew 5 \
+--num_agents=3 \
+--num_landmarks=3 \
+--collision_rew 30 \
+--formation_rew 5 \
+--n_training_threads 1 --n_rollout_threads 16 \
+--num_mini_batch 1 \
+--episode_length 100 \
+--total_actions 9 \
+--num_env_steps 1000000 \
+--ppo_epoch 10 --use_ReLU --gain 0.01 --lr 7e-4 --critic_lr 7e-4 \
+--user_name "marl" \
+--use_cent_obs "False" \
+--use_dones "False" \
+--collaborative "False" \
+--goal_rew 20 \
+--num_walls 0 \
+--zeroshift 10 \
+--world_size=4 \
+--graph_feat_type "relative" \
+--increase_fairness "False" \
+--auto_mini_batch_size --target_mini_batch_size 1024 \
+--formation_type "point" \
+--use_wandb
