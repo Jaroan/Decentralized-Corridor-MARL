@@ -790,7 +790,7 @@ class Scenario(BaseScenario):
 		# print("self.spacing_violation",np.sum(self.spacing_violation))
 		# print(self.delta_spacing[agent.id]/(self.spacing_violation[agent.id] if self.spacing_violation[agent.id] != 0 else 1))
 		agent_info = {
-			'Dist_to_goal': world.dist_left_to_goal[agent.id],
+			'Dist_to_goal': np.float32(world.dist_left_to_goal[agent.id]),  # make this into float using numpy float32
 			'Time_req_to_goal': world.times_required[agent.id],
 			# NOTE: total agent collisions is half since we are double counting. # EDIT corrected this.
 			'Num_agent_collisions': world.num_agent_collisions[agent.id], 
@@ -1310,11 +1310,11 @@ class Scenario(BaseScenario):
 		agent_pos = agent.state.p_pos
 		agent_heading = float(getattr(agent.state, "theta", getattr(agent.state, "p_ang", 0.0)))
 		agent_speed = float(getattr(agent.state, "speed", np.linalg.norm(agent.state.p_vel)))
-		# agent_vel = np.asarray(agent.state.p_vel, dtype=np.float32)
+		agent_vel = np.asarray(agent.state.p_vel, dtype=np.float32)
 
 
 		# Rotate own velocity into ego frame
-		# rot_agent_vel = get_rotated_position_from_relative(agent_vel, agent_heading).astype(np.float32)
+		rot_agent_vel = get_rotated_position_from_relative(agent_vel, agent_heading).astype(np.float32)
 
 		# --- Goal related (single fair goal) ---
 		goal_world_pos = self.landmark_poses[self.goal_match_index[agent.id]]
@@ -1391,7 +1391,7 @@ class Scenario(BaseScenario):
 		# --- Assemble final obs in the SAME field order as before ---
 		# [agent_vel(2), goal_pos(2), nearest_neighbors(4), tube_params(8)] = 16 dims
 		return np.concatenate([
-			np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]),		#   rot_agent_vel, # self velocity (2 slots)
+			rot_agent_vel, # np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]),		#   rot_agent_vel, # self velocity (2 slots)
 			goal_pos,                           # rotated goal vector
 			nearest_neighbors,                  # two rotated neighbor vectors
 			tube_params                         # rotated entrance/exit + width + phase
