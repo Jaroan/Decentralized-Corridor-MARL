@@ -476,8 +476,8 @@ class Scenario(BaseScenario):
 			self.world_size * 0.15  # Minimum width
 		)
 
-		random_angle = np.random.uniform(-np.pi/2, np.pi/2)
-		# random_angle = -np.pi/2
+		# random_angle = np.random.uniform(-np.pi/2, np.pi/2)
+		random_angle = -np.pi/2
 		# print(f"Random Angle: {random_angle*180/np.pi} degrees")
 		# Calculate tube length
 		tube_length = self.world_size * 0.8  # Use 80% of world size for tube length
@@ -1391,7 +1391,7 @@ class Scenario(BaseScenario):
 		# --- Assemble final obs in the SAME field order as before ---
 		# [agent_vel(2), goal_pos(2), nearest_neighbors(4), tube_params(8)] = 16 dims
 		return np.concatenate([
-			rot_agent_vel, # np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]),		#   rot_agent_vel, # self velocity (2 slots)
+			np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]), # np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]),		#   rot_agent_vel, # self velocity (2 slots)
 			goal_pos,                           # rotated goal vector
 			nearest_neighbors,                  # two rotated neighbor vectors
 			tube_params                         # rotated entrance/exit + width + phase
