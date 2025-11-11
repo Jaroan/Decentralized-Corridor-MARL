@@ -477,7 +477,7 @@ class Scenario(BaseScenario):
 		)
 
 		# random_angle = np.random.uniform(-np.pi/2, np.pi/2)
-		random_angle = -np.pi/2
+		random_angle = 0.0
 		# print(f"Random Angle: {random_angle*180/np.pi} degrees")
 		# Calculate tube length
 		tube_length = self.world_size * 0.8  # Use 80% of world size for tube length
@@ -1380,7 +1380,7 @@ class Scenario(BaseScenario):
 
 		tube_params = np.concatenate([
 			np.array([s_norm, y_norm]),  # rot_rel_entrance,
-			np.array([dist_out], dtype=np.float32),  # rot_rel_exit, dist_in, 
+			# np.array([dist_out], dtype=np.float32),  # rot_rel_exit, dist_in, 
 			# heading_feat,                  
 			# np.array([tube_width], dtype=np.float32),
 			np.array([phase], dtype=np.float32)
