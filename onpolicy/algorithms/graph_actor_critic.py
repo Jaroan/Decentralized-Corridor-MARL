@@ -1,7 +1,7 @@
 import argparse
 from typing import Tuple, List
 
-import gym
+import gymnasium as gym
 import torch
 from torch import Tensor
 import torch.nn as nn

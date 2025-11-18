@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 from gym import spaces
 from gym.envs.registration import EnvSpec
 import numpy as np

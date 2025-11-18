@@ -1,16 +1,16 @@
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/FA_FR/tube' \
+--model_dir='model_weights/tube/rot_inv/airtaxi' \
 --render_episodes=2 \
 --world_size=3 \
 --num_agents=3 \
 --num_obstacles=0 \
---seed=0 \
+--seed=1 \
 --num_landmarks=3 \
---episode_length=120 \
+--episode_length=50 \
 --use_dones=False \
 --collaborative=False --model_name='FA' \
---scenario_name='nav_fairassign_fairrew_formation_graph' \
---dynamics_type='unicycle_vehicle' \
+--scenario_name='single_phase_graph' \
+--dynamics_type='air_taxi' \
 --goal_rew=30 \
 --fair_rew=1 \
 --save_gifs \
@@ -19,8 +19,31 @@ python onpolicy/scripts/eval_mpe.py \
 --zeroshift=5 \
 --min_obs_dist 0.5 \
 --total_actions 5 \
---formation_type 'line'
+--formation_type 'point'
 
+
+python onpolicy/scripts/eval_mpe.py \
+--model_dir='model_weights/tube/rot_inv/airtaxi' \
+--render_episodes=2 \
+--world_size=3 \
+--num_agents=3 \
+--num_obstacles=0 \
+--seed=1 \
+--num_landmarks=3 \
+--episode_length=50 \
+--use_dones=False \
+--collaborative=False --model_name='FA' \
+--scenario_name='nav_graph_metered_single_corridor_rot_inv' \
+--dynamics_type='air_taxi' \
+--goal_rew=30 \
+--fair_rew=1 \
+--save_gifs \
+--use_render \
+--num_walls=0 \
+--zeroshift=5 \
+--min_obs_dist 0.5 \
+--total_actions 5 \
+--formation_type 'point'
 
 python onpolicy/scripts/eval_mpe.py \
 --model_dir='model_weights/FA_FR/rota_tube' \
@@ -745,7 +768,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --algorithm_name "rmappo" \
 --seed 12 \
 --experiment_name "testing" \
---scenario_name "nav_graph_metered_single_corridor_not_rot_inv" \
+--scenario_name "single_phase_graph" \
 --dynamics_type "air_taxi" \
 --num_agents=3 \
 --num_landmarks=3 \

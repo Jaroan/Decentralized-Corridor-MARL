@@ -3,7 +3,7 @@
 
 import numpy as np
 
-import gym
+import gymnasium as gym
 # from gym.spaces import prng
 
 class MultiDiscrete(gym.Space):

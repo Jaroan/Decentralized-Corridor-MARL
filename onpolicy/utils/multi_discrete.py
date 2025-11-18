@@ -1,4 +1,4 @@
-import gym
+import gymnasium as gym
 import numpy as np
 
 # An old version of OpenAI Gym's multi_discrete.py. (Was getting affected by Gym updates)
