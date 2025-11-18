@@ -1337,21 +1337,21 @@ class Scenario(BaseScenario):
 		while len(nearest) < 2:
 			nearest.append(np.zeros(world.dim_p, dtype=np.float32))
 
-		# Rotate each neighbor vector into ego frame, then flatten to 4 slots
-		rotated_neighbors = [
-			get_rotated_position_from_relative(np.asarray(vec, dtype=np.float32), agent_heading).astype(np.float32)
-			for vec in nearest
-		]
+		# # Rotate each neighbor vector into ego frame, then flatten to 4 slots
+		# rotated_neighbors = [
+		# 	get_rotated_position_from_relative(np.asarray(vec, dtype=np.float32), agent_heading).astype(np.float32)
+		# 	for vec in nearest
+		# ]
 
-		nearest_neighbors = np.concatenate(rotated_neighbors, axis=0)
+		nearest_neighbors = np.concatenate(nearest, axis=0)
 
 		# --- Tube params (rotated entrance/exit vectors + width + phase) ---
-		# tube_entrance = np.asarray(world.tube_params['entrance'], dtype=np.float32)
-		# tube_exit = np.asarray(world.tube_params['exit'], dtype=np.float32)
+		tube_entrance = np.asarray(world.tube_params['entrance'], dtype=np.float32)
+		tube_exit = np.asarray(world.tube_params['exit'], dtype=np.float32)
 		tube_width = float(world.tube_params['width'])
 
-		# rel_to_entrance_world = tube_entrance - agent_pos
-		# rel_to_exit_world = tube_exit - agent_pos
+		rel_to_entrance_world = tube_entrance - agent_pos
+		rel_to_exit_world = tube_exit - agent_pos
 
 		# rot_rel_entrance = get_rotated_position_from_relative(rel_to_entrance_world, agent_heading).astype(np.float32)
 		# rot_rel_exit = get_rotated_position_from_relative(rel_to_exit_world, agent_heading).astype(np.float32)
@@ -1360,16 +1360,6 @@ class Scenario(BaseScenario):
 		# Phase is computed in world coords; keep as scalar to preserve layout
 		phase = float(self.get_agent_phase(agent, world))
 
-		# # Heading error to corridor axis (axis vector e)
-		# e = world.tube_params['e']
-		# tube_axis_angle = float(np.arctan2(e[1], e[0]))
-
-		# # print("Agent", agent.id, "tube_axis_angle", (tube_axis_angle+np.pi)%(2*np.pi), "angle", (world.tube_params['angle'] + np.pi/2)%(2*np.pi), "agent_heading", (agent_heading+np.pi)%(2*np.pi))
-		# dpsi = agent_heading - tube_axis_angle
-		# # Wrap to [-pi, pi]
-		# dpsi = (dpsi + np.pi) % (2 * np.pi) - np.pi
-		# heading_feat = np.array([np.cos(dpsi), np.sin(dpsi)], dtype=np.float32)
-		# # print("Agent", agent.id, "heading_feat", heading_feat)
 
 		s, y, L, half_w = self._tube_coords(world, agent_pos)
 		s_norm = np.clip(s / L, -2.0, 2.0)          # allow slight overshoot
@@ -1379,10 +1369,12 @@ class Scenario(BaseScenario):
 		# print("Agent", agent.id, "s,y,L,half_w:", s_norm, y_norm, "dist_in:", dist_in, "dist_out:", dist_out)
 
 		tube_params = np.concatenate([
-			np.array([s_norm, y_norm]),  # rot_rel_entrance,
-			np.array([dist_out], dtype=np.float32),  # rot_rel_exit, dist_in, 
+			# np.array([s_norm, y_norm]),  # rot_rel_entrance,
+			# np.array([dist_out], dtype=np.float32),  # rot_rel_exit, dist_in, 
 			# heading_feat,                  
-			# np.array([tube_width], dtype=np.float32),
+			rel_to_entrance_world,
+			rel_to_exit_world,
+			np.array([tube_width], dtype=np.float32),
 			np.array([phase], dtype=np.float32)
 		], axis=0)
 		# print("Agent", agent.id, "tube_params", tube_params, "np.array([agent.state.speed,agent_speed])", np.array([agent.state.speed, agent_speed]))
@@ -1391,8 +1383,10 @@ class Scenario(BaseScenario):
 		# --- Assemble final obs in the SAME field order as before ---
 		# [agent_vel(2), goal_pos(2), nearest_neighbors(4), tube_params(8)] = 16 dims
 		return np.concatenate([
-			np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]), # np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]),		#   rot_agent_vel, # self velocity (2 slots)
-			goal_pos,                           # rotated goal vector
+			agent_pos.astype(np.float32),
+			agent_vel,
+			# np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]), # np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]),		#   rot_agent_vel, # self velocity (2 slots)
+			rel_goal_vec_world,                           # rotated goal vector
 			nearest_neighbors,                  # two rotated neighbor vectors
 			tube_params                         # rotated entrance/exit + width + phase
 		], axis=0).astype(np.float32)
@@ -1563,36 +1557,36 @@ class Scenario(BaseScenario):
 		rel_vel_world = entity_vel_world - agent_vel
 
 		# --- Rotate into ego (agent) frame ---
-		rel_pos = get_rotated_position_from_relative(rel_pos_world, agent_heading).astype(np.float32)
-		rel_vel = get_rotated_position_from_relative(rel_vel_world, agent_heading).astype(np.float32)
+		# rel_pos = get_rotated_position_from_relative(rel_pos_world, agent_heading).astype(np.float32)
+		# rel_vel = get_rotated_position_from_relative(rel_vel_world, agent_heading).astype(np.float32)
 
 		if 'agent' in entity.name:
 			# Each agent's goal is the matched landmark pose
 			goal_pos_world = np.asarray(self.landmark_poses[self.goal_match_index[entity.id]], dtype=np.float32)
 			rel_goal_pos_world = goal_pos_world - agent_pos
-			rel_goal_pos = get_rotated_position_from_relative(rel_goal_pos_world, agent_heading).astype(np.float32)
+			# rel_goal_pos = get_rotated_position_from_relative(rel_goal_pos_world, agent_heading).astype(np.float32)
 
 			entity_type = np.array([entity_mapping['agent']], dtype=np.float32)
 
-			return np.hstack([rel_vel, rel_pos, rel_goal_pos, entity_type]).astype(np.float32)
+			return np.hstack([rel_vel_world, rel_pos_world, rel_goal_pos_world, entity_type]).astype(np.float32)
 
 		elif 'landmark' in entity.name:
 			# For landmarks, the "goal" is its own position relative to ego
-			rel_goal_pos = rel_pos.copy()
+			rel_goal_pos = rel_pos_world.copy()
 			entity_type = np.array([entity_mapping['landmark']], dtype=np.float32)
 
-			return np.hstack([rel_vel, rel_pos, rel_goal_pos, entity_type]).astype(np.float32)
+			return np.hstack([rel_vel_world, rel_pos_world, rel_goal_pos, entity_type]).astype(np.float32)
 
 		elif 'obstacle' in entity.name:
 			# Same layout as landmarks
-			rel_goal_pos = rel_pos.copy()
+			rel_goal_pos = rel_pos_world.copy()
 			entity_type = np.array([entity_mapping['obstacle']], dtype=np.float32)
 
-			return np.hstack([rel_vel, rel_pos, rel_goal_pos, entity_type]).astype(np.float32)
+			return np.hstack([rel_vel_world, rel_pos_world, rel_goal_pos, entity_type]).astype(np.float32)
 
 		elif 'wall' in entity.name:
 			# For walls, include rotated corner points as you already did
-			rel_goal_pos = rel_pos.copy()
+			rel_goal_pos = rel_pos_world.copy()
 			goal_history = np.array([entity.id if entity.id is not None else 0], dtype=np.float32)
 			entity_type = np.array([entity_mapping['wall']], dtype=np.float32)
 
@@ -1604,7 +1598,7 @@ class Scenario(BaseScenario):
 			wall_d_corner = get_rotated_position_from_relative(wall_d_corner_world, agent_heading).astype(np.float32)
 
 			return np.hstack([
-				rel_vel, rel_pos, rel_goal_pos, goal_history, wall_o_corner, wall_d_corner, entity_type
+				rel_vel_world, rel_pos_world, rel_goal_pos, goal_history, wall_o_corner, wall_d_corner, entity_type
 			]).astype(np.float32)
 
 		else:
