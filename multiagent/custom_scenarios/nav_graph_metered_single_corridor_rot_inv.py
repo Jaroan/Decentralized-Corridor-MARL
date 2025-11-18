@@ -1121,7 +1121,7 @@ class Scenario(BaseScenario):
 				# if not hasattr(self, 'prev_goal_dist'):
 				# 	self.prev_goal_dist = np.full(self.num_agents, np.inf, dtype=np.float32)
 				# self.prev_goal_dist[agent.id] = dist_to_goal
-			# input("phase 2")
+				# input("phase 2")
 
 			# spacing_error = 0
 			# if front_agent:
@@ -1380,7 +1380,7 @@ class Scenario(BaseScenario):
 
 		tube_params = np.concatenate([
 			np.array([s_norm, y_norm]),  # rot_rel_entrance,
-			# np.array([dist_out], dtype=np.float32),  # rot_rel_exit, dist_in, 
+			np.array([dist_out], dtype=np.float32),  # rot_rel_exit, dist_in, 
 			# heading_feat,                  
 			# np.array([tube_width], dtype=np.float32),
 			np.array([phase], dtype=np.float32)
@@ -1393,7 +1393,7 @@ class Scenario(BaseScenario):
 		return np.concatenate([
 			np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]), # np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]),		#   rot_agent_vel, # self velocity (2 slots)
 			goal_pos,                           # rotated goal vector
-			nearest_neighbors,                  # two rotated neighbor vectors
+			# nearest_neighbors,                  # two rotated neighbor vectors
 			tube_params                         # rotated entrance/exit + width + phase
 		], axis=0).astype(np.float32)
 
@@ -1477,7 +1477,7 @@ class Scenario(BaseScenario):
 		for entity in world.agents:
 			disconnected = entity.status
 			# if entity.status:
-				# print("agent_done",entity.id,disconnected)
+			# 	print("agent_done", entity.id, disconnected)
 			disconnected_mask.append(disconnected)
 
 		# for landmark agent, disconnect if it is reached by the agent.
