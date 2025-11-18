@@ -9,7 +9,7 @@ _wandb:
     framework: torch
     is_jupyter_run: false
     is_kaggle_kernel: false
-    start_time: 1763481056
+    start_time: 1763484915
     t:
       1:
       - 1
@@ -33,10 +33,10 @@ _wandb:
       - 20
       13: linux-x86_64
     e:
-      95wpodsz1bnf3ydpa2o9paquttm5fxfw:
+      kbca2w9rvl6isb7xne46562buqrk7sfm:
         os: Linux-6.1.156-llgrid-x86_64-with-glibc2.39
         python: CPython 3.12.11
-        started_at: '2025-11-18T15:50:55.677181Z'
+        started_at: '2025-11-18T16:55:15.078955Z'
         args:
         - --use_valuenorm
         - --use_popart
@@ -49,7 +49,7 @@ _wandb:
         - --seed
         - '0'
         - --experiment_name
-        - at_251118_105035_2phaserot_inv_tube_eplen75
+        - at_251118_115500_2phaserot_inv_tube_eplen75
         - --scenario_name
         - nav_graph_metered_single_corridor_rot_inv
         - --dynamics_type
@@ -114,9 +114,9 @@ _wandb:
         code_path_local: onpolicy/scripts/train_mpe.py
         git:
           remote_url: https://github.com/Jaroan/AAM-Corridor-MARL.git
-          commit: 9dfd8487eb361cb4cd9d27853743ebea68b339ac
-        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/nav_graph_metered_single_corridor_rot_inv/rmappo/at_251118_105035_2phaserot_inv_tube_eplen75
-        host: d-12-2-2
+          commit: ac9332908a0a57e72a550638236cb7d7c4693498
+        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/nav_graph_metered_single_corridor_rot_inv/rmappo/at_251118_115500_2phaserot_inv_tube_eplen75
+        host: d-8-10-2
         executable: /state/partition1/llgrid/pkg/conda/python-ML-2025b-pytorch/bin/python
         cpu_count: 40
         cpu_count_logical: 80
@@ -125,7 +125,7 @@ _wandb:
         disk:
           /:
             total: '471413596160'
-            used: '20334080000'
+            used: '20303568896'
         memory:
           total: '405413994496'
         gpu_nvidia:
@@ -133,45 +133,45 @@ _wandb:
           memory_total: '34359738368'
           cuda_cores: 5120
           architecture: Volta
-          uuid: GPU-de67ee90-99c0-b9a9-7df2-9b105e653f2f
+          uuid: GPU-d27cd600-162e-ffdb-c1ad-0ddb9d50e7e1
         - name: Tesla V100-PCIE-32GB
           memory_total: '34359738368'
           cuda_cores: 5120
           architecture: Volta
-          uuid: GPU-58a92082-244a-5935-1500-2305cbc378a9
+          uuid: GPU-4081123a-eb84-086b-44c7-05b874d413ce
         cuda_version: '13.0'
         slurm:
           tasks_per_node: '1'
           job_name: 2phase_air_taxi
           job_qos: normal
-          topology_addr: d-12-2-2
+          topology_addr: d-8-10-2
           conf: /etc/slurm/slurm.conf
           gtids: '0'
           cpus_on_node: '20'
           mem_per_cpu: '8500'
           script_context: prolog_task
           job_user: jaloor
-          task_pid: '4024027'
+          task_pid: '331031'
           nnodes: '1'
           nodeid: '0'
-          gpupower: '150'
-          cluster_name: txe1
           job_partition: xeon-g6-volta
+          cluster_name: txe1
+          gpupower: '150'
           array_task_min: '0'
           job_cpus_per_node: '20'
           spank_gpupower: WHAT
           node_aliases: (null)
-          nodelist: d-12-2-2
-          job_end_time: '1763841035'
-          array_job_id: '3595402'
+          nodelist: d-8-10-2
+          job_end_time: '1763844899'
+          job_start_time: '1763484899'
           array_task_step: '1'
-          job_start_time: '1763481035'
-          array_task_count: '2'
+          array_job_id: '3595732'
+          jobid: '3595733'
           gpus_on_node: '1'
           procid: '0'
           job_num_nodes: '1'
-          jobid: '3595403'
-          job_id: '3595403'
+          array_task_count: '2'
+          job_id: '3595733'
           job_account: default_group
           job_uid: '62375'
           submit_host: login-2
@@ -180,13 +180,13 @@ _wandb:
           job_gid: '62375'
           working_cluster: txe1:scheduler-0:6817:9984:109
           array_task_id: '0'
-          job_nodelist: d-12-2-2
+          job_nodelist: d-8-10-2
           job_gpus: '0'
           localid: '0'
           cpus_per_task: '20'
           prio_process: '0'
           array_task_max: '1'
-        writer_id: 95wpodsz1bnf3ydpa2o9paquttm5fxfw
+        writer_id: kbca2w9rvl6isb7xne46562buqrk7sfm
 total_actions:
   desc: null
   value: 9
@@ -231,7 +231,7 @@ project_name:
   value: air_corridor_unicycle_3
 experiment_name:
   desc: null
-  value: at_251118_105035_2phaserot_inv_tube_eplen75
+  value: at_251118_115500_2phaserot_inv_tube_eplen75
 seed:
   desc: null
   value: 0

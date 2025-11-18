@@ -1,6 +1,6 @@
 #!/bin/bash
 # Slurm sbatch options
-#SBATCH --job-name 2phase_air_taxi
+#SBATCH --job-name not_rot_inv
 #SBATCH -a 0-1
 #SBATCH --gres=gpu:volta:1
 ##SBATCH --cpus-per-task=8
@@ -83,7 +83,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
---experiment_name "${str_dynamics_type}_${datetime_str}_2phaserot_inv_tube_eplen${episode_length}" \
+--experiment_name "${str_dynamics_type}_${datetime_str}_not_rot_inv_tube_eplen${episode_length}" \
 --scenario_name "nav_metered_one_goal_graph_rotate_tube_july" \
 --dynamics_type ${chosen_dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
