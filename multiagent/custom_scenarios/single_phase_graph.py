@@ -902,109 +902,20 @@ class Scenario(BaseScenario):
 				self.entry_reward_cooldown[agent.id] = self.phase_reward_cooldown_steps  # Cooldown period to prevent repeated rewards
 				self.phase_reached[agent.id] = 1  # Mark Phase 1 completed
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
-			elif current_phase == 2 :
-				# Rewards if agent moves out of tube
-				# print("Agent in post-tube phase", agent.id)
-				rew += self.goal_rew  # *3
-				self.phase_reached[agent.id] = 2  # Mark Phase 2 completed
-				# # print("Agent",agent.id,"reached fair goal")
-				# if agent.status == False:
-				# 	agent.status = True
-				# 	agent.state.reset_velocity()
-				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
-				# Update the global phase tracker if any agent progresses
-
-		# Phase-specific rewards
-		# print("Agent",agent.id,"current_phase",current_phase,"prev phase_reached",self.phase_reached)
-		if current_phase == 0:  # Pre-tube phase
-			# Reward for getting closer to tube entrance
-			# dist_to_entrance = np.linalg.norm(world.tube_params['entrance'] - agent.state.p_pos)
-			# rew -= dist_to_entrance
-			# print("Agent", agent.id, " Phase 0 dist_to_entrance", dist_to_entrance, "rew", rew)
-			s, y, L, half_w = self._tube_coords(world, agent.state.p_pos)
-			# print("Agent", agent.id, " Phase 0 s,y,L,half_w:", s, y, L, half_w)
-			dist_to_entrance_edge = self._entrance_gate_distance(s, y, half_w)
-			rew -= dist_to_entrance_edge
-			# print("Agent", agent.id, " Phase 0 dist_to_entrance_edge", dist_to_entrance_edge, "rew", rew)
-			# # Formation reward considering front and back agents
-			# spacing_error = 0
-			# if front_agent:
-			# 	diff = np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos) - desired_spacing
-			# 	spacing_error += np.abs(diff) if diff < 0 else 0
-			# if back_agent:
-			# 	diff = np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos) - desired_spacing
-			# 	spacing_error += np.abs(diff) if diff < 0 else 0
-			# rew -= spacing_error *  self.formation_rew
-			# print("Phase 0 spacing_error",spacing_error)
-			# input("phase 0")
-
-		elif current_phase == 1:  # In-tube phase
-			# print("Agent", agent.id, "in tube phase 1")
-			# print("formation line",self.formation_rew)
-			# rew += self.formation_rew/2  # Reward for entering tube
-			# Stronger formation rewards inside tube
-			spacing_error = 0
-			max_spacing_error = 0
-			if agent.status is False:
-				agent.status = True
-				agent.state.reset_velocity()
-				rew += self.goal_rew*5
-				self.goal_tracker[agent.id] = self.goal_match_index[agent.id]
-
-
-			if front_agent:
-				# print("np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos)", np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos), "desired_spacing", desired_spacing)
-				diff = np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos) - desired_spacing
-				# print("diff", diff)
-				spacing_error += np.abs(diff) if diff < 0 else 0
-				max_spacing_error = max(max_spacing_error, np.abs(diff))
-			if back_agent:
-				# print("np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos)", np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos), "desired_spacing", desired_spacing)
-				diff = np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos) - desired_spacing
-				# print("diff", diff)
-				max_spacing_error = max(max_spacing_error, np.abs(diff))
-				spacing_error += np.abs(diff) if diff < 0 else 0
-			if spacing_error > 0:
-				# print("Phase 1 spacing_error",spacing_error)
-				self.spacing_violation[agent.id] += 1
-			rew -= spacing_error *  self.formation_rew  # Higher weight for maintaining formation in tube
-			# print("Phase 1 spacing_error", spacing_error)
-
-			# print("Phase 1 spacing_error",max_spacing_error)
-			# Progress through tube
-			# dist_to_exit = np.linalg.norm(world.tube_params['exit'] - agent.state.p_pos)
-			# rew -= dist_to_exit
-			dist_to_exit_edge = self._exit_gate_distance(s, y, L, half_w)
-			rew -= dist_to_exit_edge
-			# print("Phase1 Agent", agent.id, "dist_to_exit_edge",dist_to_exit_edge, "rew", rew)
-			delta_proj = proj - float(self.prev_proj[agent.id])
-			# Positive reward for forward progress
-			rew += self.progress_gain * max(delta_proj, -0.05)  # clamp small negative drift
-			# print("Phase1 Agent",agent.id,"delta_proj",delta_proj, "rew", rew)
-			# print("dist_to_exit",dist_to_exit, "rew", rew)
-			# print("Agent",agent.id,"Phase 1 spacing_error",spacing_error)
-			self.delta_spacing.append(spacing_error)
-			self.steps_in_corridor[agent.id] += 1
-			self.prev_proj[agent.id] = proj  # update after using delta_s
-
-			# print("delta_spacing",self.delta_spacing)
-			# print("Agent",agent.id,"delta_spacing",self.delta_spacing[agent.id])
-			# input("phase 1")
-		
-		elif current_phase == 2 and self.phase_reached[agent.id] == 0:  # Post-tube phase
-			# print("Agent",agent.id,"post tube phase")
-			# input("Agent entered post tube phase")
-			current_phase = 0  # Reset current phase to 0
-		elif current_phase == 2:  # Post-tube phase
-			dist_to_goal = np.linalg.norm(agent.state.p_pos - self.landmark_poses[self.goal_match_index[agent.id]])
-			if dist_to_goal < self.min_dist_thresh:
-				# print("Agent",agent.id,"reached fair goal")
 				if agent.status is False:
 					agent.status = True
 					agent.state.reset_velocity()
 					rew += self.goal_rew*5
 					self.goal_tracker[agent.id] = self.goal_match_index[agent.id]
 
+		# Phase-specific rewards
+		# print("Agent",agent.id,"current_phase",current_phase,"prev phase_reached",self.phase_reached)
+		if current_phase == 0:  # Pre-tube phase
+			# Reward for getting closer to tube entrance
+			s, y, L, half_w = self._tube_coords(world, agent.state.p_pos)
+			# print("Agent", agent.id, " Phase 0 s,y,L,half_w:", s, y, L, half_w)
+			dist_to_entrance_edge = self._entrance_gate_distance(s, y, half_w)
+			rew -= dist_to_entrance_edge
 
 		# print("Agent.status",agent.status)
 		if self.phase_reached[agent.id] == 1 and current_phase == 0:
