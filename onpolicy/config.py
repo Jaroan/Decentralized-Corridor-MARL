@@ -184,7 +184,11 @@ def get_config():
     ## formation rew
     parser.add_argument("--formation_rew", type=int,
                         default=1,help="formation maintaining reward")
-
+    parser.add_argument("--collision_rew", type=float, default=5, 
+                        help="The reward to be negated for collisions with other "
+                        "agents and obstacles")
+    parser.add_argument("--goal_rew", type=float, default=5, 
+                        help="The reward to be added if agent reaches the goal")
     ## fairness params
     parser.add_argument("--fair_wt", type=int,
                         default=1,help="choice of weight")

@@ -54,11 +54,8 @@ def parse_args(args, parser):
     parser.add_argument("--max_speed", type=float, default=2, 
                         help="Max speed for agents. NOTE that if this is None, "
                         "then max_speed is 2 with discrete action space")
-    parser.add_argument("--collision_rew", type=float, default=5, 
-                        help="The reward to be negated for collisions with other "
-                        "agents and obstacles")
-    parser.add_argument("--goal_rew", type=float, default=20, 
-                        help="The reward to be added if agent reaches the goal")
+    # parser.add_argument("--goal_rew", type=float, default=20, 
+    #                     help="The reward to be added if agent reaches the goal")
     # parser.add_argument("--fair_wt", type=int,
     #                     default=1,help="choice of weight")
     # parser.add_argument("--fair_rew", type=int,

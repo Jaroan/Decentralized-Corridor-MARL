@@ -355,12 +355,25 @@ class Scenario(BaseScenario):
 		self.setup_tube_params(world)
 		num_agents_added = 0
 		agents_added = []
-		boundary_thresh = 0.9
+		boundary_thresh = 0.99
+        # Define sampling region above corridor entrance
+		entrance = world.tube_params['entrance']
+		angle = world.tube_params['angle']
+		rotation_matrix = world.tube_params['rotation_matrix']
 
+		# Define rectangular sampling region in tube-relative coordinates
+		# "Above" entrance means opposite direction from exit
+		sampling_width = self.tube_width * 5  # 5× tube width
+		sampling_depth = self.world_size * 0.3   # 30% of world size "before" entrance
+
+		# Perpendicular direction (left-right across tube)
+		perp_dir = np.array([np.cos(angle), np.sin(angle)])
+		# Backward direction (away from tube along axis)
+		back_dir = rotation_matrix @ np.array([0, 1])  # Opposite of tube direction
 		while True:
 			if num_agents_added == self.num_agents:
 				break
-
+			
 			# Add random jitter if needed
 			jitter = 0.3 * np.random.uniform(-self.world_size, self.world_size, world.dim_p)
 			angle = world.tube_params['angle']
@@ -375,9 +388,29 @@ class Scenario(BaseScenario):
 			agent_size = world.agents[num_agents_added].size
 			obs_collision = self.is_obstacle_collision(random_pos, agent_size, world)
 			# goal_collision = self.is_goal_collision(uniform_pos, agent_size, world)
-
+			
+			# # Sample uniformly in rectangular region
+			# # Lateral offset: [-sampling_width/2, +sampling_width/2]
+			# lateral_offset = np.random.uniform(-sampling_width/2, sampling_width/2)
+			# # Longitudinal offset: [0, sampling_depth] backward from entrance
+			# longitudinal_offset = np.random.uniform(sampling_depth/3, sampling_depth)
+			# distance_from_entrance = num_agents_added /(2*self.num_agents)
+			# print("distance_from_entrance", distance_from_entrance)
+			# random_pos = (entrance + 
+			# 				+ (lateral_offset + distance_from_entrance) * perp_dir 
+			# 				+ (longitudinal_offset + distance_from_entrance) * back_dir)
+			# print("random_pos", random_pos, "thresh", boundary_thresh * self.world_size / 2)
+			# input("check")
+			# # Check collisions
+			# agent_size = world.agents[num_agents_added].size
+			# obs_collision = self.is_obstacle_collision(random_pos, agent_size, world)
 			agent_collision = self.check_agent_collision(random_pos, agent_size, agents_added)
-			if not obs_collision and not agent_collision:
+
+			# # Ensure within world bounds
+			within_bounds = (abs(random_pos[0]) < boundary_thresh * self.world_size / 2 and 
+							abs(random_pos[1]) < boundary_thresh * self.world_size / 2)
+			# print("obs_collision", obs_collision, "agent_collision", agent_collision, "within_bounds", within_bounds)
+			if not obs_collision and not agent_collision and within_bounds:
 				world.agents[num_agents_added].state.p_pos = random_pos
 				world.agents[num_agents_added].state.reset_velocity()
 				world.agents[num_agents_added].state.c = np.zeros(world.dim_c)
@@ -426,7 +459,7 @@ class Scenario(BaseScenario):
 		)
 
 		# random_angle = np.random.uniform(-np.pi/2, np.pi/2)
-		random_angle = 0.0
+		random_angle = np.pi/2  # for consistent tube orientation along y-axis
 		# print(f"Random Angle: {random_angle*180/np.pi} degrees")
 		# Calculate tube length
 		tube_length = self.world_size * 0.8  # Use 80% of world size for tube length
@@ -581,7 +614,6 @@ class Scenario(BaseScenario):
 		if self.entry_reward_cooldown[agent.id] > 0:
 			# print("Decrementing cooldown for agent", agent.id, "from", self.entry_reward_cooldown[agent.id])
 			self.entry_reward_cooldown[agent.id] -= 1
-
 		# Only check valid_entrance when transitioning from phase 0 to 1
 		if not in_tube and not passed_tube:
 			if not hasattr(agent, 'previous_phase'):
@@ -818,7 +850,6 @@ class Scenario(BaseScenario):
 		rew = 0.0
 		current_phase = self.get_agent_phase(agent, world)
 		# print("Agent", agent.id, "phase", current_phase, "previous_phase", agent.previous_phase, "phase_reached", self.phase_reached[agent.id])
-		# print("Goalrew",self.goal_rew, "Collisionrew",self.collision_rew)
 		# Common rewards across all phases
 		# Collision penalties
 		# if agent.collide:
@@ -916,6 +947,22 @@ class Scenario(BaseScenario):
 			# print("Agent", agent.id, " Phase 0 s,y,L,half_w:", s, y, L, half_w)
 			dist_to_entrance_edge = self._entrance_gate_distance(s, y, half_w)
 			rew -= dist_to_entrance_edge
+			# if agent.id == 0:
+			# 	print(f"Agent {agent.id} distance to entrance edge: {dist_to_entrance_edge:.2f} rew", rew)
+			# print("self.world_size * 0.1", self.world_size * 0.1)
+			# === NEW: Heading alignment reward ===
+			# Desired heading: align with corridor direction
+			corridor_vec = world.tube_params['e']  # unit vector along corridor
+			corridor_heading = np.arctan2(corridor_vec[1], corridor_vec[0])
+			# print("corridor_heading (deg):", corridor_heading*180/np.pi, "angle", world.tube_params['angle']*180/np.pi)
+			agent_heading = agent.state.theta
+			heading_error = abs((agent_heading - corridor_heading + np.pi) % (2*np.pi) - np.pi)
+
+			# Only enforce alignment when close to entrance (within 0.5*world_size)
+			if dist_to_entrance_edge < self.world_size * 0.1:
+				# Penalize heading misalignment (max penalty at 180°, none at 0°)
+				rew -= heading_error * self.formation_rew * 0.5
+				# print(f"Agent {agent.id} heading error (deg): {heading_error*180/np.pi:.2f} heading_error * self.formation_rew * 0.5", heading_error * self.formation_rew * 0.5)
 
 		# print("Agent.status",agent.status)
 		if self.phase_reached[agent.id] == 1 and current_phase == 0:
@@ -946,7 +993,6 @@ class Scenario(BaseScenario):
 			# print(f"Agent {agent.id} skipped corridor (s={s:.2f} > L={L:.2f}): penalty {self.goal_rew}")
         
 		# print(f"Agent {agent.id} total reward: ", rew)
-		# input("Reward calculation complete for agent {}".format(agent.id))
 		# input("Press Enter to continue...")
 
 		return np.clip(rew, -4*self.collision_rew, self.goal_rew*5)
