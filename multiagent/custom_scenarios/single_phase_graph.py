@@ -356,7 +356,7 @@ class Scenario(BaseScenario):
 		num_agents_added = 0
 		agents_added = []
 		boundary_thresh = 0.99
-        # Define sampling region above corridor entrance
+		# Define sampling region above corridor entrance
 		entrance = world.tube_params['entrance']
 		angle = world.tube_params['angle']
 		rotation_matrix = world.tube_params['rotation_matrix']
@@ -647,7 +647,7 @@ class Scenario(BaseScenario):
 				# print("Agent", agent.id, "didn't correctly exit tube  0000")
 				# agent.previous_phase = 0
 				return 0  # Post-tube phase
-        # Default: Phase 0
+		# Default: Phase 0
 		# agent.previous_phase = 0
 		return 0
 
@@ -852,15 +852,15 @@ class Scenario(BaseScenario):
 		# print("Agent", agent.id, "phase", current_phase, "previous_phase", agent.previous_phase, "phase_reached", self.phase_reached[agent.id])
 		# Common rewards across all phases
 		# Collision penalties
-		# if agent.collide:
-		# 	for a in world.agents:
-		# 		if a.id == agent.id:
-		# 			continue
-		# 		if self.is_collision(a, agent):
-		# 			rew -= self.collision_rew
-		# 			# print(f"!!!Agent {agent.id} collided with agent {a.id} penalty",self.collision_rew*4 )
-		# 			# print(" self.separation_distance", self.separation_distance)
-		# 			# input("Collision")
+		if agent.collide:
+			for a in world.agents:
+				if a.id == agent.id:
+					continue
+				if self.is_collision(a, agent):
+					rew -= self.collision_rew
+					# print(f"!!!Agent {agent.id} collided with agent {a.id} penalty",self.collision_rew*4 )
+					# print(" self.separation_distance", self.separation_distance)
+					# input("Collision")
 			
 		# 	if self.is_obstacle_collision(pos=agent.state.p_pos,
 		# 								entity_size=agent.size, 
@@ -987,11 +987,11 @@ class Scenario(BaseScenario):
 			rew -= self.collision_rew  #*2
 			# print(f"Agent {agent.id} is in tube but not in phase 1 rew", rew)
 
-        # If agent is past exit plane but never entered corridor: continuous penalty
+		# If agent is past exit plane but never entered corridor: continuous penalty
 		if s > L and self.phase_reached[agent.id] < 1:
 			rew -= self.goal_rew
 			# print(f"Agent {agent.id} skipped corridor (s={s:.2f} > L={L:.2f}): penalty {self.goal_rew}")
-        
+		
 		# print(f"Agent {agent.id} total reward: ", rew)
 		# input("Press Enter to continue...")
 
@@ -1025,6 +1025,9 @@ class Scenario(BaseScenario):
 		neighbor_dists = []
 		for other in world.agents:
 			if other is agent:
+				continue
+			# Skip completed agents (they're "ghosts")
+			if other.status:
 				continue
 			rel_pos_world = other.state.p_pos - agent_pos
 			dist = float(np.linalg.norm(rel_pos_world))
@@ -1060,7 +1063,7 @@ class Scenario(BaseScenario):
 		dist_in = self._entrance_gate_distance(s, y, half_w) / (L + 1e-9)
 		dist_out = self._exit_gate_distance(s, y, L, half_w) / (L + 1e-9)
 		# print("Agent", agent.id, "s,y,L,half_w:", s_norm, y_norm, "dist_in:", dist_in, "dist_out:", dist_out)
-        # === NEW: Add heading alignment feature ===
+		# === NEW: Add heading alignment feature ===
 		corridor_vec = world.tube_params['e']
 		corridor_heading = np.arctan2(corridor_vec[1], corridor_vec[0])
 		heading_error = (agent_heading - corridor_heading + np.pi) % (2*np.pi) - np.pi

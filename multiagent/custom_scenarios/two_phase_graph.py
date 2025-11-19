@@ -866,11 +866,6 @@ class Scenario(BaseScenario):
 		
 		# Calculate desired spacing based on tube length and number of agents
 		desired_spacing = self.separation_distance  # 3 is the number of agents in the tube TODO: harcoded
-
-		# desired_spacing = world.tube_params['width'] / (len(world.agents) + 1)
-		# Reward for line formation
-		# neighbor_dists = [np.linalg.norm(other.state.p_pos - agent.state.p_pos) 
-		# 				for other in world.agents if other is not agent]
 		
 		# Track agent's previous phase if not already stored
 		if not hasattr(agent, 'previous_phase'):
@@ -888,9 +883,6 @@ class Scenario(BaseScenario):
 		# entrance_dist = np.linalg.norm(entrance_to_agent - proj * tube_direction)
 
 		if current_phase == agent.previous_phase+1 and self.phase_reached[agent.id] == current_phase-1:
-			# print("HELLO",agent.id, "current_phase", current_phase, "previous_phase", agent.previous_phase)
-			# print("proj", proj," 0.1 * tube_length", 0.1 * tube_length)
-			# print("entrance_dist", entrance_dist, " 0.2* tube_length", 0.2 * tube_length)
 			# Reward proper phase progression
 			# if current_phase == 1 and 0 <= proj < 0.1 * tube_length and entrance_dist <  0.2 * tube_length and (self.entry_reward_cooldown[agent.id] == 0):
 			if current_phase == 1 and self._in_entrance_gate(s, y, L, half_w) and (self.entry_reward_cooldown[agent.id] == 0):
@@ -911,6 +903,7 @@ class Scenario(BaseScenario):
 				if agent.status == False:
 					agent.status = True
 					agent.state.reset_velocity()
+					rew += self.goal_rew * 5
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
 				# Update the global phase tracker if any agent progresses
 
@@ -940,7 +933,6 @@ class Scenario(BaseScenario):
 			spacing_error = 0
 			max_spacing_error = 0
 
-
 			if front_agent:
 				# print("np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos)", np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos), "desired_spacing", desired_spacing)
 				diff = np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos) - desired_spacing
@@ -956,12 +948,17 @@ class Scenario(BaseScenario):
 			if spacing_error > 0:
 				# print("Phase 1 spacing_error",spacing_error)
 				self.spacing_violation[agent.id] += 1
-			rew -= spacing_error *  self.formation_rew  # Higher weight for maintaining formation in tube
+			rew -= spacing_error * self.formation_rew  # Higher weight for maintaining formation in tube
 			dist_to_exit_edge = self._exit_gate_distance(s, y, L, half_w)
 			rew -= dist_to_exit_edge
 			self.steps_in_corridor[agent.id] += 1
 
-
+			corridor_vec = world.tube_params['e']  # unit vector along corridor
+			corridor_heading = np.arctan2(corridor_vec[1], corridor_vec[0])
+			# print("corridor_heading (deg):", corridor_heading*180/np.pi, "angle", world.tube_params['angle']*180/np.pi)
+			agent_heading = agent.state.theta
+			heading_error = abs((agent_heading - corridor_heading + np.pi) % (2*np.pi) - np.pi)
+			rew -= heading_error * self.formation_rew * 0.1
 
 		# print("Agent.status",agent.status)
 		if self.phase_reached[agent.id] == 1 and current_phase == 0:
@@ -1026,6 +1023,9 @@ class Scenario(BaseScenario):
 		for other in world.agents:
 			if other is agent:
 				continue
+			# Skip completed agents (they're "ghosts")
+			if other.status:
+				continue
 			rel_pos_world = other.state.p_pos - agent_pos
 			dist = float(np.linalg.norm(rel_pos_world))
 			neighbor_dists.append((dist, rel_pos_world))
@@ -1061,11 +1061,15 @@ class Scenario(BaseScenario):
 		dist_in = self._entrance_gate_distance(s, y, half_w) / (L + 1e-9)
 		dist_out = self._exit_gate_distance(s, y, L, half_w) / (L + 1e-9)
 		# print("Agent", agent.id, "s,y,L,half_w:", s_norm, y_norm, "dist_in:", dist_in, "dist_out:", dist_out)
-
+		# === NEW: Add heading alignment feature ===
+		corridor_vec = world.tube_params['e']
+		corridor_heading = np.arctan2(corridor_vec[1], corridor_vec[0])
+		heading_error = (agent_heading - corridor_heading + np.pi) % (2*np.pi) - np.pi
+		heading_alignment = np.array([np.cos(heading_error), np.sin(heading_error)], dtype=np.float32)
 		tube_params = np.concatenate([
 			np.array([s_norm, y_norm]),  # rot_rel_entrance,
 			np.array([dist_out], dtype=np.float32),  # rot_rel_exit, dist_in, 
-			# heading_feat,                  
+			heading_alignment,                  
 			# np.array([tube_width], dtype=np.float32),
 			np.array([phase], dtype=np.float32)
 		], axis=0)
