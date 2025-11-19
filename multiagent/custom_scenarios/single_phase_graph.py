@@ -459,7 +459,7 @@ class Scenario(BaseScenario):
 		)
 
 		# random_angle = np.random.uniform(-np.pi/2, np.pi/2)
-		random_angle = np.pi/2  # for consistent tube orientation along y-axis
+		random_angle = 0.0  # for consistent tube orientation along y-axis
 		# print(f"Random Angle: {random_angle*180/np.pi} degrees")
 		# Calculate tube length
 		tube_length = self.world_size * 0.8  # Use 80% of world size for tube length
@@ -1060,11 +1060,15 @@ class Scenario(BaseScenario):
 		dist_in = self._entrance_gate_distance(s, y, half_w) / (L + 1e-9)
 		dist_out = self._exit_gate_distance(s, y, L, half_w) / (L + 1e-9)
 		# print("Agent", agent.id, "s,y,L,half_w:", s_norm, y_norm, "dist_in:", dist_in, "dist_out:", dist_out)
-
+        # === NEW: Add heading alignment feature ===
+		corridor_vec = world.tube_params['e']
+		corridor_heading = np.arctan2(corridor_vec[1], corridor_vec[0])
+		heading_error = (agent_heading - corridor_heading + np.pi) % (2*np.pi) - np.pi
+		heading_alignment = np.array([np.cos(heading_error), np.sin(heading_error)], dtype=np.float32)
 		tube_params = np.concatenate([
 			np.array([s_norm, y_norm]),  # rot_rel_entrance,
 			np.array([dist_out], dtype=np.float32),  # rot_rel_exit, dist_in, 
-			# heading_feat,                  
+			heading_alignment,                  
 			# np.array([tube_width], dtype=np.float32),
 			np.array([phase], dtype=np.float32)
 		], axis=0)

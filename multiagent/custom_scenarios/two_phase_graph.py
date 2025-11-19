@@ -821,21 +821,21 @@ class Scenario(BaseScenario):
 		# print("Goalrew",self.goal_rew, "Collisionrew",self.collision_rew)
 		# Common rewards across all phases
 		# Collision penalties
-		if agent.collide:
-			for a in world.agents:
-				if a.id == agent.id:
-					continue
-				if self.is_collision(a, agent):
-					rew -= self.collision_rew
-					# print(f"!!!Agent {agent.id} collided with agent {a.id} penalty",self.collision_rew*4 )
-					# print(" self.separation_distance", self.separation_distance)
-					# input("Collision")
+		# if agent.collide:
+		# 	for a in world.agents:
+		# 		if a.id == agent.id:
+		# 			continue
+		# 		if self.is_collision(a, agent):
+		# 			rew -= self.collision_rew
+		# 			# print(f"!!!Agent {agent.id} collided with agent {a.id} penalty",self.collision_rew*4 )
+		# 			# print(" self.separation_distance", self.separation_distance)
+		# 			# input("Collision")
 			
-			if self.is_obstacle_collision(pos=agent.state.p_pos,
-										entity_size=agent.size, 
-										world=world):
-				rew -= self.collision_rew
-				# print(f"Agent {agent.id} collided with obstacle")
+		# 	if self.is_obstacle_collision(pos=agent.state.p_pos,
+		# 								entity_size=agent.size, 
+		# 								world=world):
+		# 		rew -= self.collision_rew
+		# 		# print(f"Agent {agent.id} collided with obstacle")
 
 		# Calculate tube length
 		tube_direction = world.tube_params['exit'] - world.tube_params['entrance']
@@ -922,6 +922,20 @@ class Scenario(BaseScenario):
 			# print("Agent", agent.id, " Phase 0 s,y,L,half_w:", s, y, L, half_w)
 			dist_to_entrance_edge = self._entrance_gate_distance(s, y, half_w)
 			rew -= dist_to_entrance_edge
+
+			# === NEW: Heading alignment reward ===
+			# Desired heading: align with corridor direction
+			corridor_vec = world.tube_params['e']  # unit vector along corridor
+			corridor_heading = np.arctan2(corridor_vec[1], corridor_vec[0])
+			# print("corridor_heading (deg):", corridor_heading*180/np.pi, "angle", world.tube_params['angle']*180/np.pi)
+			agent_heading = agent.state.theta
+			heading_error = abs((agent_heading - corridor_heading + np.pi) % (2*np.pi) - np.pi)
+
+			# Only enforce alignment when close to entrance (within 0.5*world_size)
+			if dist_to_entrance_edge < self.world_size * 0.1:
+				# Penalize heading misalignment (max penalty at 180°, none at 0°)
+				rew -= heading_error * self.formation_rew * 0.5
+
 		elif current_phase == 1:  # In-tube phase
 			spacing_error = 0
 			max_spacing_error = 0
