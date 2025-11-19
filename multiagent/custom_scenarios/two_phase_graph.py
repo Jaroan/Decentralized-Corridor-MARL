@@ -615,7 +615,7 @@ class Scenario(BaseScenario):
 				# print("Agent", agent.id, "didn't correctly exit tube  0000")
 				# agent.previous_phase = 0
 				return 0  # Post-tube phase
-        # Default: Phase 0
+		# Default: Phase 0
 		# agent.previous_phase = 0
 		return 0
 
@@ -929,6 +929,12 @@ class Scenario(BaseScenario):
 				# Penalize heading misalignment (max penalty at 180°, none at 0°)
 				rew -= heading_error * self.formation_rew * 0.5
 
+			# === Penalize lateral approach (agents must approach along corridor axis) ===
+			# If agent is laterally offset from entrance but trying to enter: penalize
+			if abs(y) > half_w * 0.7 and s < 0 and s > -self.world_size * 0.1:
+				# Agent is beside entrance but close: penalize
+				rew -= abs(y) * self.collision_rew * 0.3
+
 		elif current_phase == 1:  # In-tube phase
 			spacing_error = 0
 			max_spacing_error = 0
@@ -983,11 +989,11 @@ class Scenario(BaseScenario):
 			rew -= self.collision_rew  #*2
 			# print(f"Agent {agent.id} is in tube but not in phase 1 rew", rew)
 
-        # If agent is past exit plane but never entered corridor: continuous penalty
+		# If agent is past exit plane but never entered corridor: continuous penalty
 		if s > L and self.phase_reached[agent.id] < 1:
 			rew -= self.goal_rew
 			# print(f"Agent {agent.id} skipped corridor (s={s:.2f} > L={L:.2f}): penalty {self.goal_rew}")
-        
+		
 		# print(f"Agent {agent.id} total reward: ", rew)
 		# input("Reward calculation complete for agent {}".format(agent.id))
 		# input("Press Enter to continue...")

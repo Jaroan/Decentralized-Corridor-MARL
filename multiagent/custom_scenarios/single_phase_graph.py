@@ -962,6 +962,12 @@ class Scenario(BaseScenario):
 			if dist_to_entrance_edge < self.world_size * 0.1:
 				# Penalize heading misalignment (max penalty at 180°, none at 0°)
 				rew -= heading_error * self.formation_rew * 0.5
+
+			# === Penalize lateral approach (agents must approach along corridor axis) ===
+			# If agent is laterally offset from entrance but trying to enter: penalize
+			if abs(y) > half_w * 0.7 and s < 0 and s > -self.world_size * 0.1:
+				# Agent is beside entrance but close: penalize
+				rew -= abs(y) * self.collision_rew * 0.3
 				# print(f"Agent {agent.id} heading error (deg): {heading_error*180/np.pi:.2f} heading_error * self.formation_rew * 0.5", heading_error * self.formation_rew * 0.5)
 
 		# print("Agent.status",agent.status)
