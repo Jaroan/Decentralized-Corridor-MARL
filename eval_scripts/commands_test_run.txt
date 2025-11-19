@@ -1,6 +1,6 @@
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi' \
---render_episodes=2 \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try' \
+--render_episodes=4 \
 --world_size=3 \
 --num_agents=3 \
 --num_obstacles=0 \
@@ -30,7 +30,7 @@ python onpolicy/scripts/eval_mpe.py \
 --num_obstacles=0 \
 --seed=1 \
 --num_landmarks=3 \
---episode_length=50 \
+--episode_length=150 \
 --use_dones=False \
 --collaborative=False --model_name='FA' \
 --scenario_name='nav_graph_metered_single_corridor_rot_inv' \

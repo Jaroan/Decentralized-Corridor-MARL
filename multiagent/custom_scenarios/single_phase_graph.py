@@ -821,21 +821,21 @@ class Scenario(BaseScenario):
 		# print("Goalrew",self.goal_rew, "Collisionrew",self.collision_rew)
 		# Common rewards across all phases
 		# Collision penalties
-		if agent.collide:
-			for a in world.agents:
-				if a.id == agent.id:
-					continue
-				if self.is_collision(a, agent):
-					rew -= self.collision_rew
-					# print(f"!!!Agent {agent.id} collided with agent {a.id} penalty",self.collision_rew*4 )
-					# print(" self.separation_distance", self.separation_distance)
-					# input("Collision")
+		# if agent.collide:
+		# 	for a in world.agents:
+		# 		if a.id == agent.id:
+		# 			continue
+		# 		if self.is_collision(a, agent):
+		# 			rew -= self.collision_rew
+		# 			# print(f"!!!Agent {agent.id} collided with agent {a.id} penalty",self.collision_rew*4 )
+		# 			# print(" self.separation_distance", self.separation_distance)
+		# 			# input("Collision")
 			
-			if self.is_obstacle_collision(pos=agent.state.p_pos,
-										entity_size=agent.size, 
-										world=world):
-				rew -= self.collision_rew
-				# print(f"Agent {agent.id} collided with obstacle")
+		# 	if self.is_obstacle_collision(pos=agent.state.p_pos,
+		# 								entity_size=agent.size, 
+		# 								world=world):
+		# 		rew -= self.collision_rew
+		# 		# print(f"Agent {agent.id} collided with obstacle")
 
 		# Calculate tube length
 		tube_direction = world.tube_params['exit'] - world.tube_params['entrance']
@@ -1030,7 +1030,7 @@ class Scenario(BaseScenario):
 		return np.concatenate([
 			np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]), # np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]),		#   rot_agent_vel, # self velocity (2 slots)
 			rot_rel_entrance,                # rotated goal vector
-			nearest_neighbors,                  # two rotated neighbor vectors
+			# nearest_neighbors,                  # two rotated neighbor vectors
 			tube_params                         # rotated entrance/exit + width + phase
 		], axis=0).astype(np.float32)
 
