@@ -1030,7 +1030,7 @@ class Scenario(BaseScenario):
 		return np.concatenate([
 			np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]), # np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]),		#   rot_agent_vel, # self velocity (2 slots)
 			rot_rel_entrance,                # rotated goal vector
-			# nearest_neighbors,                  # two rotated neighbor vectors
+			nearest_neighbors,                  # two rotated neighbor vectors
 			tube_params                         # rotated entrance/exit + width + phase
 		], axis=0).astype(np.float32)
 
