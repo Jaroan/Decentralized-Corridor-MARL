@@ -49,7 +49,7 @@ if [ "$chosen_dynamics_type" == "air_taxi" ]; then
     str_dynamics_type="at"
     world_size=4
     episode_length=50
-    num_env_steps=2000000
+    num_env_steps=4000000
 elif [ "$chosen_dynamics_type" == "unicycle_vehicle" ]; then
     str_dynamics_type="uv"
     world_size=4

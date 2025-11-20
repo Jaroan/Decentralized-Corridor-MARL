@@ -363,8 +363,10 @@ class Scenario(BaseScenario):
 
 		# Define rectangular sampling region in tube-relative coordinates
 		# "Above" entrance means opposite direction from exit
-		sampling_width = self.tube_width * 5  # 5× tube width
+		sampling_width = self.tube_width * 2.0 # 5× tube width
 		sampling_depth = self.world_size * 0.3   # 30% of world size "before" entrance
+		agent_spacing = self.separation_distance * 1.5  # Spacing between agents along corridor axis
+		base_distance = self.world_size * 0.15  # Base distance from entrance for first agent
 
 		# Perpendicular direction (left-right across tube)
 		perp_dir = np.array([np.cos(angle), np.sin(angle)])
@@ -373,7 +375,7 @@ class Scenario(BaseScenario):
 		while True:
 			if num_agents_added == self.num_agents:
 				break
-			
+			"""
 			# Add random jitter if needed
 			jitter = 0.3 * np.random.uniform(-self.world_size, self.world_size, world.dim_p)
 			angle = world.tube_params['angle']
@@ -384,7 +386,18 @@ class Scenario(BaseScenario):
 			distance_from_entrance = (self.world_size + num_agents_added) / 3
 			# print("distance_from_entrance", distance_from_entrance, "jitter", jitter)
 			random_pos = world.tube_params['entrance'] + distance_from_entrance * perp_dir + jitter
-
+			"""
+			# Staggered positioning along corridor approach direction
+			# Agent 0 closest to entrance, Agent N furthest
+			longitudinal_offset = base_distance + (num_agents_added * agent_spacing)
+			
+			# Small lateral jitter (perpendicular to corridor)
+			lateral_offset = np.random.uniform(-sampling_width, sampling_width)
+			
+			# Position: entrance + backward along corridor + lateral jitter
+			random_pos = (entrance 
+						 + longitudinal_offset * back_dir 
+						 + lateral_offset * perp_dir)
 			agent_size = world.agents[num_agents_added].size
 			obs_collision = self.is_obstacle_collision(random_pos, agent_size, world)
 			# goal_collision = self.is_goal_collision(uniform_pos, agent_size, world)
@@ -406,11 +419,11 @@ class Scenario(BaseScenario):
 			# obs_collision = self.is_obstacle_collision(random_pos, agent_size, world)
 			agent_collision = self.check_agent_collision(random_pos, agent_size, agents_added)
 
-			# # Ensure within world bounds
-			within_bounds = (abs(random_pos[0]) < boundary_thresh * self.world_size / 2 and 
-							abs(random_pos[1]) < boundary_thresh * self.world_size / 2)
-			# print("obs_collision", obs_collision, "agent_collision", agent_collision, "within_bounds", within_bounds)
-			if not obs_collision and not agent_collision and within_bounds:
+			# # # Ensure within world bounds
+			# within_bounds = (abs(random_pos[0]) < boundary_thresh * self.world_size / 2 and 
+			# 				abs(random_pos[1]) < boundary_thresh * self.world_size / 2)
+			# print("obs_collision", obs_collision, "agent_collision", agent_collision)
+			if not obs_collision and not agent_collision:
 				world.agents[num_agents_added].state.p_pos = random_pos
 				world.agents[num_agents_added].state.reset_velocity()
 				world.agents[num_agents_added].state.c = np.zeros(world.dim_c)
@@ -426,7 +439,7 @@ class Scenario(BaseScenario):
 		elif self.formation_type == 'circle':
 			set_landmarks_in_circle(self, world, center=np.array([0.0, world.tube_params['exit'][1]+self.world_size/5]), radius=self.world_size/3)
 		elif self.formation_type == 'point':
-			set_landmarks_in_point(self, world, tube_angle=world.tube_params['angle'], tube_endpoints=world.tube_params['exit'])
+			set_landmarks_in_point(self, world, tube_angle=world.tube_params['angle'], tube_endpoints=world.tube_params['entrance'])
 		# elif self.formation_type == 'random':
 		# 	set_landmarks_random(self, world)
 		# else:
@@ -463,7 +476,7 @@ class Scenario(BaseScenario):
 		# print(f"Random Angle: {random_angle*180/np.pi} degrees")
 		# Calculate tube length
 		tube_length = self.world_size * 0.8  # Use 80% of world size for tube length
-		
+
 		# Scales: make 1 full tube traversal worth ~goal_rew
 		self.progress_gain = self.goal_rew / (tube_length*10)
 		# Calculate center point of the world

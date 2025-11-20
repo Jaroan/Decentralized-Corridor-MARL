@@ -355,12 +355,27 @@ class Scenario(BaseScenario):
 		self.setup_tube_params(world)
 		num_agents_added = 0
 		agents_added = []
-		boundary_thresh = 0.9
+		boundary_thresh = 0.99
+		# Define sampling region above corridor entrance
+		entrance = world.tube_params['entrance']
+		angle = world.tube_params['angle']
+		rotation_matrix = world.tube_params['rotation_matrix']
 
+		# Define rectangular sampling region in tube-relative coordinates
+		# "Above" entrance means opposite direction from exit
+		sampling_width = self.tube_width * 2.0 # 5× tube width
+		sampling_depth = self.world_size * 0.3   # 30% of world size "before" entrance
+		agent_spacing = self.separation_distance * 1.5  # Spacing between agents along corridor axis
+		base_distance = self.world_size * 0.15  # Base distance from entrance for first agent
+
+		# Perpendicular direction (left-right across tube)
+		perp_dir = np.array([np.cos(angle), np.sin(angle)])
+		# Backward direction (away from tube along axis)
+		back_dir = rotation_matrix @ np.array([0, 1])  # Opposite of tube direction
 		while True:
 			if num_agents_added == self.num_agents:
 				break
-
+			"""
 			# Add random jitter if needed
 			jitter = 0.3 * np.random.uniform(-self.world_size, self.world_size, world.dim_p)
 			angle = world.tube_params['angle']
@@ -371,12 +386,28 @@ class Scenario(BaseScenario):
 			distance_from_entrance = (self.world_size + num_agents_added) / 3
 			# print("distance_from_entrance", distance_from_entrance, "jitter", jitter)
 			random_pos = world.tube_params['entrance'] + distance_from_entrance * perp_dir + jitter
-
+			"""
+			# Staggered positioning along corridor approach direction
+			# Agent 0 closest to entrance, Agent N furthest
+			longitudinal_offset = base_distance + (num_agents_added * agent_spacing)
+			
+			# Small lateral jitter (perpendicular to corridor)
+			lateral_offset = np.random.uniform(-sampling_width, sampling_width)
+			
+			# Position: entrance + backward along corridor + lateral jitter
+			random_pos = (entrance 
+						 + longitudinal_offset * back_dir 
+						 + lateral_offset * perp_dir)
 			agent_size = world.agents[num_agents_added].size
 			obs_collision = self.is_obstacle_collision(random_pos, agent_size, world)
 			# goal_collision = self.is_goal_collision(uniform_pos, agent_size, world)
 
 			agent_collision = self.check_agent_collision(random_pos, agent_size, agents_added)
+
+			# # # Ensure within world bounds
+			# within_bounds = (abs(random_pos[0]) < boundary_thresh * self.world_size / 2 and 
+			# 				abs(random_pos[1]) < boundary_thresh * self.world_size / 2)
+			# print("obs_collision", obs_collision, "agent_collision", agent_collision)
 			if not obs_collision and not agent_collision:
 				world.agents[num_agents_added].state.p_pos = random_pos
 				world.agents[num_agents_added].state.reset_velocity()
