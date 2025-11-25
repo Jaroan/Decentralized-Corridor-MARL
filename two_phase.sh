@@ -84,7 +84,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
 --experiment_name "${str_dynamics_type}_${datetime_str}_two_phase_with_neighbors_eplen${episode_length}" \
---scenario_name "two_phase_graph" \
+--scenario_name "old_two_graph" \
 --dynamics_type ${chosen_dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
 --fair_rew 5 \
