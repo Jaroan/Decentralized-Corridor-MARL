@@ -962,10 +962,10 @@ class Scenario(BaseScenario):
 
 			# === Penalize lateral approach (agents must approach along corridor axis) ===
 			# If agent is laterally offset from entrance but trying to enter: penalize
-			if abs(y) > half_w * 0.7 and s < 0 and s > -self.world_size * 0.1:
-				# Agent is beside entrance but close: penalize
-				# print("s", s, "-self.world_size * 0.1", -self.world_size * 0.1, "y", y)
-				rew -= abs(y) * self.collision_rew * 0.1
+			# if abs(y) > half_w * 0.7 and s < 0 and s > -self.world_size * 0.1:
+			# 	# Agent is beside entrance but close: penalize
+			# 	# print("s", s, "-self.world_size * 0.1", -self.world_size * 0.1, "y", y)
+			# 	rew -= abs(y) * self.collision_rew * 0.1
 
 		elif current_phase == 1:  # In-tube phase
 			spacing_error = 0
