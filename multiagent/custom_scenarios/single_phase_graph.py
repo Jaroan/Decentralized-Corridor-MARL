@@ -980,7 +980,9 @@ class Scenario(BaseScenario):
 			# If agent is laterally offset from entrance but trying to enter: penalize
 			if abs(y) > half_w * 0.7 and s < 0 and s > -self.world_size * 0.1:
 				# Agent is beside entrance but close: penalize
+				# print("s", s, "-self.world_size * 0.1", -self.world_size * 0.1, "y", y)
 				rew -= abs(y) * self.collision_rew * 0.3
+
 				# print(f"Agent {agent.id} heading error (deg): {heading_error*180/np.pi:.2f} heading_error * self.formation_rew * 0.5", heading_error * self.formation_rew * 0.5)
 
 		# print("Agent.status",agent.status)

@@ -22,7 +22,7 @@ python onpolicy/scripts/eval_mpe.py \
 --formation_type 'point'
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/two' \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/one' \
 --render_episodes=4 \
 --world_size=3 \
 --num_agents=3 \
@@ -32,6 +32,30 @@ python onpolicy/scripts/eval_mpe.py \
 --episode_length=50 \
 --use_dones=False \
 --collaborative=False --model_name='FA' \
+--scenario_name='two_phase_graph' \
+--dynamics_type='air_taxi' \
+--goal_rew=30 \
+--fair_rew=1 \
+--save_gifs \
+--use_render \
+--num_walls=0 \
+--zeroshift=5 \
+--min_obs_dist 0.5 \
+--total_actions 5 \
+--formation_type 'point'
+
+
+python onpolicy/scripts/eval_mpe.py \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/two' \
+--render_episodes=4 \
+--world_size=3 \
+--num_agents=1 \
+--num_obstacles=0 \
+--seed=1 \
+--num_landmarks=1 \
+--episode_length=50 \
+--use_dones=False \
+--collaborative=False --model_name='One' \
 --scenario_name='two_phase_graph' \
 --dynamics_type='air_taxi' \
 --goal_rew=30 \

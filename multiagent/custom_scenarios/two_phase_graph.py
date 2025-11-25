@@ -925,7 +925,7 @@ class Scenario(BaseScenario):
 				self.entry_reward_cooldown[agent.id] = self.phase_reward_cooldown_steps  # Cooldown period to prevent repeated rewards
 				self.phase_reached[agent.id] = 1  # Mark Phase 1 completed
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
-			elif current_phase == 2 :
+			elif current_phase == 2:
 				# Rewards if agent moves out of tube
 				# print("Agent in post-tube phase", agent.id)
 				rew += self.goal_rew  # *3
@@ -964,7 +964,8 @@ class Scenario(BaseScenario):
 			# If agent is laterally offset from entrance but trying to enter: penalize
 			if abs(y) > half_w * 0.7 and s < 0 and s > -self.world_size * 0.1:
 				# Agent is beside entrance but close: penalize
-				rew -= abs(y) * self.collision_rew * 0.3
+				# print("s", s, "-self.world_size * 0.1", -self.world_size * 0.1, "y", y)
+				rew -= abs(y) * self.collision_rew * 0.1
 
 		elif current_phase == 1:  # In-tube phase
 			spacing_error = 0
@@ -1289,7 +1290,9 @@ class Scenario(BaseScenario):
 
 		if 'agent' in entity.name:
 			# Each agent's goal is the matched landmark pose
-			goal_pos_world = np.asarray(self.landmark_poses[self.goal_match_index[entity.id]], dtype=np.float32)
+			# goal_pos_world = np.asarray(self.landmark_poses[self.goal_match_index[entity.id]], dtype=np.float32)
+			## change the goal to the exit position of the corridor
+			goal_pos_world = np.asarray(world.tube_params['exit'], dtype=np.float32)
 			rel_goal_pos_world = goal_pos_world - agent_pos
 			rel_goal_pos = get_rotated_position_from_relative(rel_goal_pos_world, agent_heading).astype(np.float32)
 
