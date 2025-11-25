@@ -355,7 +355,7 @@ class Scenario(BaseScenario):
 		self.setup_tube_params(world)
 		num_agents_added = 0
 		agents_added = []
-		boundary_thresh = 0.9
+		boundary_thresh = 0.99
 
 		while True:
 			if num_agents_added == self.num_agents:
@@ -615,7 +615,7 @@ class Scenario(BaseScenario):
 				# print("Agent", agent.id, "didn't correctly exit tube  0000")
 				# agent.previous_phase = 0
 				return 0  # Post-tube phase
-        # Default: Phase 0
+		# Default: Phase 0
 		# agent.previous_phase = 0
 		return 0
 
@@ -894,7 +894,7 @@ class Scenario(BaseScenario):
 				self.entry_reward_cooldown[agent.id] = self.phase_reward_cooldown_steps  # Cooldown period to prevent repeated rewards
 				self.phase_reached[agent.id] = 1  # Mark Phase 1 completed
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
-			elif current_phase == 2 :
+			elif current_phase == 2:
 				# Rewards if agent moves out of tube
 				# print("Agent in post-tube phase", agent.id)
 				rew += self.goal_rew  # *3
@@ -928,7 +928,14 @@ class Scenario(BaseScenario):
 			if dist_to_entrance_edge < self.world_size * 0.1:
 				# Penalize heading misalignment (max penalty at 180°, none at 0°)
 				rew -= heading_error * self.formation_rew * 0.5
-
+			# === Penalize lateral approach (agents must approach along corridor axis) ===
+			# If agent is laterally offset from entrance but trying to enter: penalize
+			if abs(y) > half_w * 0.8 and s < 0 and s > -self.world_size * 0.1:
+				# Agent is beside entrance but close: penalize
+				# print("s", s, "-self.world_size * 0.1", -self.world_size * 0.1, "y", y, "half_w*0.7", half_w*0.7)
+				rew -= abs(y) * self.collision_rew * 0.05
+				# print(f"Agent {agent.id} penalized for lateral approach y={y:.2f} rew", rew)
+				# input("Lateral approach penalty applied")
 		elif current_phase == 1:  # In-tube phase
 			spacing_error = 0
 			max_spacing_error = 0
@@ -960,6 +967,9 @@ class Scenario(BaseScenario):
 			heading_error = abs((agent_heading - corridor_heading + np.pi) % (2*np.pi) - np.pi)
 			rew -= heading_error * self.formation_rew * 0.1
 
+
+
+
 		# print("Agent.status",agent.status)
 		if self.phase_reached[agent.id] == 1 and current_phase == 0:
 			# print("Agent",agent.id,"left corridor")
@@ -983,11 +993,11 @@ class Scenario(BaseScenario):
 			rew -= self.collision_rew  #*2
 			# print(f"Agent {agent.id} is in tube but not in phase 1 rew", rew)
 
-        # If agent is past exit plane but never entered corridor: continuous penalty
+		# If agent is past exit plane but never entered corridor: continuous penalty
 		if s > L and self.phase_reached[agent.id] < 1:
 			rew -= self.goal_rew
 			# print(f"Agent {agent.id} skipped corridor (s={s:.2f} > L={L:.2f}): penalty {self.goal_rew}")
-        
+		
 		# print(f"Agent {agent.id} total reward: ", rew)
 		# input("Reward calculation complete for agent {}".format(agent.id))
 		# input("Press Enter to continue...")
@@ -1253,6 +1263,7 @@ class Scenario(BaseScenario):
 		if 'agent' in entity.name:
 			# Each agent's goal is the matched landmark pose
 			# goal_pos_world = np.asarray(self.landmark_poses[self.goal_match_index[entity.id]], dtype=np.float32)
+			## change the goal to the exit position of the corridor
 			goal_pos_world = np.asarray(world.tube_params['exit'], dtype=np.float32)
 			rel_goal_pos_world = goal_pos_world - agent_pos
 			rel_goal_pos = get_rotated_position_from_relative(rel_goal_pos_world, agent_heading).astype(np.float32)

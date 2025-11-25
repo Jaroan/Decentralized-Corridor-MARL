@@ -1038,5 +1038,5 @@ class GMPERunner(Runner):
         
         if not get_metrics:
             if self.all_args.save_gifs:
-                imageio.mimsave(str(self.gif_dir) + '/'+str(self.all_args.model_name)+'random_'+str(self.all_args.num_agents)+'.gif', 
+                imageio.mimsave(str(self.gif_dir) + '/'+str(self.all_args.model_name)+'_testingrandom_'+str(self.all_args.num_agents)+'.gif', 
                                 all_frames, duration=self.all_args.ifi, loop=0)
