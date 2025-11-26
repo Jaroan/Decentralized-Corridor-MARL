@@ -90,7 +90,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --fair_rew 5 \
 --num_agents=${n_agents} \
 --num_landmarks=${n_agents} \
---collision_rew 30 \
+--collision_rew 20 \
 --formation_rew 5 \
 --n_training_threads 1 --n_rollout_threads 64 \
 --num_mini_batch 1 \

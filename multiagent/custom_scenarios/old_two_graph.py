@@ -430,6 +430,7 @@ class Scenario(BaseScenario):
 		# print(f"Random Angle: {random_angle*180/np.pi} degrees")
 		# Calculate tube length
 		tube_length = self.world_size * 0.8  # Use 80% of world size for tube length
+		tube_length += np.random.uniform(-self.world_size*0.3, self.world_size*0.1)  # Add some randomness
 		
 		# Scales: make 1 full tube traversal worth ~goal_rew
 		self.progress_gain = self.goal_rew / (tube_length*10)
@@ -512,7 +513,7 @@ class Scenario(BaseScenario):
 		self.gate_back_ratio = getattr(self, 'gate_back_ratio', 0.02)    # just outside entrance
 		
 		# Full-width exit gate settings (tunable)
-		self.exit_back_ratio = getattr(self, 'exit_back_ratio', 0.05)    # inside tube near exit
+		self.exit_back_ratio = getattr(self, 'exit_back_ratio', 0.02)    # inside tube near exit
 		self.exit_front_ratio = getattr(self, 'exit_front_ratio', 0.08)  # just outside exit	
 
 	# --- Shared geometry helpers (reduce redundancy) ---
@@ -572,11 +573,13 @@ class Scenario(BaseScenario):
 		# in_tube = self.is_in_tube(world, pos)
 		s, y, L, half_w = self._tube_coords(world, pos)
 		in_tube = self._in_tube_rect(s, y, L, half_w)
-		# print("Agent", agent.id, "position", pos, "in_tube:", in_tube)
+
 		passed_tube = (s > L)
 		valid_entrance = self._in_entrance_gate(s, y, L, half_w)
 		valid_exit = self._in_exit_gate(s, y, L, half_w)
-
+		# if agent.id == 2:
+		# 	print("Agent", agent.id, "position", pos, "in_tube:", in_tube)
+		# 	print(f"valid exit: {valid_exit}, passed_tube: {passed_tube}, s: {float(s):.3f}, y: {float(y):.3f}, L: {float(L):.3f}, half_w: {float(half_w):.3f}")
 		# Decrement cooldown here once per call
 		if self.entry_reward_cooldown[agent.id] > 0:
 			# print("Decrementing cooldown for agent", agent.id, "from", self.entry_reward_cooldown[agent.id])
@@ -600,12 +603,19 @@ class Scenario(BaseScenario):
 			else:
 				# print("Agent", agent.id, "is in tube phase 1111")
 				# agent.previous_phase = 1
+
+				if agent.previous_phase == 1 and valid_exit:
+					# if passed_tube and valid_exit:
+					# print("Agent", agent.id, "exited tube correctly YOOO")
+						# agent.previous_phase = 2
+					# agent.previous_phase = 2
+					return 2
 				return 1  # Already in tube, stay in phase 1
 		if passed_tube:
 			if self.phase_reached[agent.id] >= 1:
 				if agent.previous_phase == 1 and valid_exit:
 					# if passed_tube and valid_exit:
-						# print("Agent", agent.id, "exited tube correctly 2222")
+					# print("Agent", agent.id, "exited tube correctly 2222")
 						# agent.previous_phase = 2
 					# agent.previous_phase = 2
 					return 2
@@ -896,11 +906,11 @@ class Scenario(BaseScenario):
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
 			elif current_phase == 2:
 				# Rewards if agent moves out of tube
-				# print("Agent in post-tube phase", agent.id)
+				# print("Agent", agent.id, " in post-tube phase. Status:",  agent.status)
 				rew += self.goal_rew  # *3
 				self.phase_reached[agent.id] = 2  # Mark Phase 2 completed
 				# print("Agent",agent.id,"reached fair goal")
-				if agent.status == False:
+				if agent.status is False:
 					agent.status = True
 					agent.state.reset_velocity()
 					rew += self.goal_rew * 5
@@ -930,10 +940,10 @@ class Scenario(BaseScenario):
 				rew -= heading_error * self.formation_rew * 0.5
 			# === Penalize lateral approach (agents must approach along corridor axis) ===
 			# If agent is laterally offset from entrance but trying to enter: penalize
-			if abs(y) > half_w * 0.8 and s < 0 and s > -self.world_size * 0.1:
-				# Agent is beside entrance but close: penalize
-				# print("s", s, "-self.world_size * 0.1", -self.world_size * 0.1, "y", y, "half_w*0.7", half_w*0.7)
-				rew -= abs(y) * self.collision_rew * 0.05
+			# if abs(y) > half_w * 0.8 and s < 0 and s > -self.world_size * 0.1:
+			# 	# Agent is beside entrance but close: penalize
+			# 	# print("s", s, "-self.world_size * 0.1", -self.world_size * 0.1, "y", y, "half_w*0.7", half_w*0.7)
+			# 	rew -= abs(y) * self.collision_rew * 0.05
 				# print(f"Agent {agent.id} penalized for lateral approach y={y:.2f} rew", rew)
 				# input("Lateral approach penalty applied")
 		elif current_phase == 1:  # In-tube phase
