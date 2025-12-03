@@ -610,6 +610,10 @@ class Scenario(BaseScenario):
 						# agent.previous_phase = 2
 					# agent.previous_phase = 2
 					return 2
+				if agent.previous_phase == 2 and valid_exit:
+					# print("Agent", agent.id, "---- still in tube but in the exit gate YOOO")
+					return 2
+				# print("Agent", agent.id, "is in tube phase 1111", valid_exit)
 				return 1  # Already in tube, stay in phase 1
 		if passed_tube:
 			if self.phase_reached[agent.id] >= 1:
@@ -622,6 +626,9 @@ class Scenario(BaseScenario):
 				elif agent.previous_phase == 2:
 					# print("Agent", agent.id, "is in post-tube phase 2222")
 					return 2
+				# elif agent.previous_phase == 1 and self.phase_reached[agent.id] == 2:  # corner case of exit gate condition where agent can be in the gate but still considered in phase 1
+				# 	print("Agent", agent.id, "is in post-tube phase 2222")
+				# 	return 2
 				# print("Agent", agent.id, "didn't correctly exit tube  0000")
 				# agent.previous_phase = 0
 				return 0  # Post-tube phase
@@ -827,6 +834,7 @@ class Scenario(BaseScenario):
 	def reward(self, agent: Agent, world: World) -> float:
 		rew = 0.0
 		current_phase = self.get_agent_phase(agent, world)
+		# if current_phase == 2:
 		# print("Agent", agent.id, "phase", current_phase, "previous_phase", agent.previous_phase, "phase_reached", self.phase_reached[agent.id])
 		# print("Goalrew",self.goal_rew, "Collisionrew",self.collision_rew)
 		# Common rewards across all phases
@@ -854,6 +862,8 @@ class Scenario(BaseScenario):
 		agent_heading = agent.state.theta
 		heading_vec = np.array([np.cos(agent_heading), np.sin(agent_heading)])
 		s, y, L, half_w = self._tube_coords(world, agent_pos)
+		valid_exit = self._in_exit_gate(s, y, L, half_w)
+
 		front_agents = []
 		back_agents = []
 		# print("self._in_entrance_gate(s, y, L, half_w)",self._in_entrance_gate(s, y, L, half_w))
@@ -910,10 +920,6 @@ class Scenario(BaseScenario):
 				rew += self.goal_rew  # *3
 				self.phase_reached[agent.id] = 2  # Mark Phase 2 completed
 				# print("Agent",agent.id,"reached fair goal")
-				if agent.status is False:
-					agent.status = True
-					agent.state.reset_velocity()
-					rew += self.goal_rew * 5
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
 				# Update the global phase tracker if any agent progresses
 
@@ -979,6 +985,7 @@ class Scenario(BaseScenario):
 
 		elif current_phase == 2:  # Post-tube phase
 			dist_to_goal = np.linalg.norm(agent.state.p_pos - self.landmark_poses[self.goal_match_index[agent.id]])
+			# print("Agent", agent.id, " Phase 2 dist_to_goal:", dist_to_goal)
 			if dist_to_goal < self.min_dist_thresh:
 				# print("Agent",agent.id,"reached fair goal")
 				if agent.status is False:
@@ -1011,7 +1018,7 @@ class Scenario(BaseScenario):
 			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {self.phase_reached[agent.id]} rew", rew)
 		# Store current phase for next step
 		agent.previous_phase = current_phase
-		if self._in_tube_rect(s, y, L, half_w) and not current_phase == 1:
+		if self._in_tube_rect(s, y, L, half_w) and not current_phase == 1 and not valid_exit:
 			rew -= self.collision_rew  #*2
 			# print(f"Agent {agent.id} is in tube but not in phase 1 rew", rew)
 
@@ -1020,6 +1027,7 @@ class Scenario(BaseScenario):
 			rew -= self.goal_rew
 			# print(f"Agent {agent.id} skipped corridor (s={s:.2f} > L={L:.2f}): penalty {self.goal_rew}")
 		
+		# if current_phase == 2:
 		# print(f"Agent {agent.id} total reward: ", rew)
 		# input("Reward calculation complete for agent {}".format(agent.id))
 		# input("Press Enter to continue...")
