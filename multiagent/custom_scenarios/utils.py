@@ -180,7 +180,7 @@ def set_landmarks_in_point(self, world, tube_angle, tube_endpoints):
 		rotated_pos = get_rotated_position_from_relative(relative_pos, tube_angle)
 		# print("rotated_pos", rotated_pos)
 		# Translate by tube_endpoints (tube exit position)
-		landmark_pos = np.array(tube_endpoints) # TODO: Temp fix+ rotated_pos
+		landmark_pos = np.array(tube_endpoints) + rotated_pos
 
 		goal_size = world.landmarks[num_goals_added].size
 		# Optionally check for collisions here
