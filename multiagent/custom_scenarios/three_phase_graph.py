@@ -1085,9 +1085,9 @@ class Scenario(BaseScenario):
 
 		# --- Tube params (rotated entrance/exit vectors + width + phase) ---
 		# tube_entrance = np.asarray(world.tube_params['entrance'], dtype=np.float32)
-		tube_exit = np.asarray(world.tube_params['exit'], dtype=np.float32)
-		rel_to_exit_world = tube_exit - agent_pos
-		rot_rel_exit = get_rotated_position_from_relative(rel_to_exit_world, agent_heading).astype(np.float32)
+		# tube_exit = np.asarray(world.tube_params['exit'], dtype=np.float32)
+		# rel_to_exit_world = tube_exit - agent_pos
+		# rot_rel_exit = get_rotated_position_from_relative(rel_to_exit_world, agent_heading).astype(np.float32)
 
 		# tube_exit = np.asarray(world.tube_params['exit'], dtype=np.float32)
 		# tube_width = float(world.tube_params['width'])
@@ -1120,7 +1120,7 @@ class Scenario(BaseScenario):
 		# [agent_vel(2), goal_pos(2), nearest_neighbors(4), tube_params(8)] = 16 dims
 		return np.concatenate([
 			np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]), # np.array([np.cos(agent.state.theta), np.sin(agent.state.theta), agent.state.speed]),		#   rot_agent_vel, # self velocity (2 slots)
-			rot_rel_exit,                # rotated goal vector
+			goal_pos,                           # rotated goal vector
 			nearest_neighbors,                  # two rotated neighbor vectors
 			tube_params                         # rotated entrance/exit + width + phase
 		], axis=0).astype(np.float32)
@@ -1292,9 +1292,9 @@ class Scenario(BaseScenario):
 
 		if 'agent' in entity.name:
 			# Each agent's goal is the matched landmark pose
-			# goal_pos_world = np.asarray(self.landmark_poses[self.goal_match_index[entity.id]], dtype=np.float32)
+			goal_pos_world = np.asarray(self.landmark_poses[self.goal_match_index[entity.id]], dtype=np.float32)
 			## change the goal to the exit position of the corridor
-			goal_pos_world = np.asarray(world.tube_params['exit'], dtype=np.float32)
+			# goal_pos_world = np.asarray(world.tube_params['exit'], dtype=np.float32)
 			rel_goal_pos_world = goal_pos_world - agent_pos
 			rel_goal_pos = get_rotated_position_from_relative(rel_goal_pos_world, agent_heading).astype(np.float32)
 
