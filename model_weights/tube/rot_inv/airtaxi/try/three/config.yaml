@@ -9,7 +9,7 @@ _wandb:
     framework: torch
     is_jupyter_run: false
     is_kaggle_kernel: false
-    start_time: 1764793152
+    start_time: 1764800142
     t:
       1:
       - 1
@@ -33,10 +33,10 @@ _wandb:
       - 20
       13: linux-x86_64
     e:
-      0kze06rnchdznu0gitvamt5a3k7pnot3:
+      ldrn7xh6j8j6yg0qay8memeoji69wobr:
         os: Linux-6.1.156-llgrid-x86_64-with-glibc2.39
         python: CPython 3.12.11
-        started_at: '2025-12-03T20:19:12.422587Z'
+        started_at: '2025-12-03T22:15:42.046753Z'
         args:
         - --use_valuenorm
         - --use_popart
@@ -47,9 +47,9 @@ _wandb:
         - --algorithm_name
         - rmappo
         - --seed
-        - '0'
+        - '1'
         - --experiment_name
-        - at_251203_151859_three_phase_with_neighbors_eplen75
+        - at_251203_171405_three_phase_with_neighbors_eplen75
         - --scenario_name
         - three_phase_graph
         - --dynamics_type
@@ -114,9 +114,9 @@ _wandb:
         code_path_local: onpolicy/scripts/train_mpe.py
         git:
           remote_url: https://github.com/Jaroan/AAM-Corridor-MARL.git
-          commit: 887d8ea3bbb624e3cca0d35edd326d0f5ecb3d1f
-        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/three_phase_graph/rmappo/at_251203_151859_three_phase_with_neighbors_eplen75
-        host: d-8-2-1
+          commit: a9471a208d64f5a43f83b63cc26d2dda4930ce86
+        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/three_phase_graph/rmappo/at_251203_171405_three_phase_with_neighbors_eplen75
+        host: d-9-10-1
         executable: /state/partition1/llgrid/pkg/conda/python-ML-2025b-pytorch/bin/python
         cpu_count: 40
         cpu_count_logical: 80
@@ -125,7 +125,7 @@ _wandb:
         disk:
           /:
             total: '471413596160'
-            used: '20519178240'
+            used: '20444270592'
         memory:
           total: '405413994496'
         gpu_nvidia:
@@ -133,60 +133,60 @@ _wandb:
           memory_total: '34359738368'
           cuda_cores: 5120
           architecture: Volta
-          uuid: GPU-1890e3b1-79b6-6baf-f4eb-0844a86714cf
+          uuid: GPU-353646c4-1a5f-5941-5d83-1ee319170bf2
         - name: Tesla V100-PCIE-32GB
           memory_total: '34359738368'
           cuda_cores: 5120
           architecture: Volta
-          uuid: GPU-f6f5a727-7d50-d317-6265-47f79487d073
+          uuid: GPU-2197cea3-a68c-a124-de49-871304ad8031
         cuda_version: '13.0'
         slurm:
           tasks_per_node: '1'
           job_name: 3phase_nei
           job_qos: normal
-          topology_addr: d-8-2-1
+          topology_addr: d-9-10-1
           conf: /etc/slurm/slurm.conf
           gtids: '0'
           mem_per_cpu: '8500'
           cpus_on_node: '20'
           script_context: prolog_task
+          task_pid: '3454650'
           job_user: jaloor
-          task_pid: '3731994'
           nnodes: '1'
           nodeid: '0'
           gpupower: '150'
           cluster_name: txe1
           job_partition: xeon-g6-volta
-          job_cpus_per_node: '20'
           array_task_min: '0'
+          job_cpus_per_node: '20'
           spank_gpupower: WHAT
           node_aliases: (null)
-          nodelist: d-8-2-1
-          job_end_time: '1765153138'
-          array_job_id: '3909803'
+          nodelist: d-9-10-1
+          job_end_time: '1765160045'
+          job_start_time: '1764800045'
           array_task_step: '1'
-          job_start_time: '1764793138'
-          array_task_count: '2'
+          array_job_id: '3910049'
+          jobid: '3910049'
           gpus_on_node: '1'
           procid: '0'
-          jobid: '3909804'
+          array_task_count: '2'
           job_num_nodes: '1'
-          job_id: '3909804'
-          job_account: default_group
           job_uid: '62375'
-          submit_host: login-3
-          topology_addr_pattern: node
+          job_account: default_group
+          job_id: '3910049'
+          submit_host: login-4
           submit_dir: /home/gridsan/jaloor/AAM-Corridor-MARL
+          topology_addr_pattern: node
           job_gid: '62375'
           working_cluster: txe1:scheduler-0:6817:9984:109
-          array_task_id: '0'
-          job_nodelist: d-8-2-1
-          job_gpus: '0'
+          array_task_id: '1'
+          job_nodelist: d-9-10-1
+          job_gpus: '1'
           localid: '0'
           cpus_per_task: '20'
-          array_task_max: '1'
           prio_process: '0'
-        writer_id: 0kze06rnchdznu0gitvamt5a3k7pnot3
+          array_task_max: '1'
+        writer_id: ldrn7xh6j8j6yg0qay8memeoji69wobr
 total_actions:
   desc: null
   value: 9
@@ -237,10 +237,10 @@ project_name:
   value: air_corridor_unicycle_3
 experiment_name:
   desc: null
-  value: at_251203_151859_three_phase_with_neighbors_eplen75
+  value: at_251203_171405_three_phase_with_neighbors_eplen75
 seed:
   desc: null
-  value: 0
+  value: 1
 cuda:
   desc: null
   value: true
