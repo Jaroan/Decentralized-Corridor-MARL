@@ -1,0 +1,536 @@
+wandb_version: 1
+
+_wandb:
+  desc: null
+  value:
+    code_path: source-air_corridor_unicycle_3-onpolicy_scripts_train_mpe.py
+    python_version: 3.12.11
+    cli_version: 0.22.2
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1765080625
+    t:
+      1:
+      - 1
+      - 105
+      2:
+      - 1
+      - 49
+      - 77
+      - 105
+      3:
+      - 2
+      - 3
+      - 4
+      - 13
+      - 16
+      - 42
+      - 61
+      4: 3.12.11
+      5: 0.22.2
+      10:
+      - 20
+      13: linux-x86_64
+    e:
+      gxajnah8dml4bgphdnuetospvsuu6w4h:
+        os: Linux-6.1.156-llgrid-x86_64-with-glibc2.39
+        python: CPython 3.12.11
+        started_at: '2025-12-07T04:10:25.524951Z'
+        args:
+        - --use_valuenorm
+        - --use_popart
+        - --project_name
+        - air_corridor_unicycle_3
+        - --model_dir
+        - model_weights/tube/rot_inv/airtaxi/try/three
+        - --env_name
+        - GraphMPE
+        - --algorithm_name
+        - rmappo
+        - --seed
+        - '0'
+        - --experiment_name
+        - at_251206_231009_three_phase_with_collisionrotate_eplen75
+        - --scenario_name
+        - three_phase_graph
+        - --dynamics_type
+        - air_taxi
+        - --fair_wt
+        - '1'
+        - --fair_rew
+        - '5'
+        - --num_agents=3
+        - --num_landmarks=3
+        - --collision_rew
+        - '20'
+        - --formation_rew
+        - '5'
+        - --n_training_threads
+        - '1'
+        - --n_rollout_threads
+        - '64'
+        - --num_mini_batch
+        - '1'
+        - --episode_length
+        - '75'
+        - --total_actions
+        - '9'
+        - --num_env_steps
+        - '4000000'
+        - --ppo_epoch
+        - '10'
+        - --use_ReLU
+        - --gain
+        - '0.01'
+        - --lr
+        - 7e-4
+        - --critic_lr
+        - 7e-4
+        - --user_name
+        - marl
+        - --use_cent_obs
+        - 'False'
+        - --use_dones
+        - 'False'
+        - --collaborative
+        - 'False'
+        - --goal_rew
+        - '20'
+        - --num_walls
+        - '0'
+        - --zeroshift
+        - '10'
+        - --world_size=4
+        - --graph_feat_type
+        - relative
+        - --increase_fairness
+        - 'False'
+        - --auto_mini_batch_size
+        - --target_mini_batch_size
+        - '8192'
+        - --formation_type
+        - point
+        program: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/scripts/train_mpe.py
+        code_path: onpolicy/scripts/train_mpe.py
+        code_path_local: onpolicy/scripts/train_mpe.py
+        git:
+          remote_url: https://github.com/Jaroan/AAM-Corridor-MARL.git
+          commit: a922ad9036238ef1beb4e04c021e6199a1620e34
+        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/three_phase_graph/rmappo/at_251206_231009_three_phase_with_collisionrotate_eplen75
+        host: d-12-14-1
+        executable: /state/partition1/llgrid/pkg/conda/python-ML-2025b-pytorch/bin/python
+        cpu_count: 40
+        cpu_count_logical: 80
+        gpu_type: Tesla V100-PCIE-32GB
+        gpu_count: 2
+        disk:
+          /:
+            total: '471413596160'
+            used: '20523741184'
+        memory:
+          total: '405413994496'
+        gpu_nvidia:
+        - name: Tesla V100-PCIE-32GB
+          memory_total: '34359738368'
+          cuda_cores: 5120
+          architecture: Volta
+          uuid: GPU-2025646f-2808-9263-2cd1-99cde387c8b8
+        - name: Tesla V100-PCIE-32GB
+          memory_total: '34359738368'
+          cuda_cores: 5120
+          architecture: Volta
+          uuid: GPU-175d2021-f870-b43c-1efb-6e270256fe72
+        cuda_version: '13.0'
+        slurm:
+          tasks_per_node: '1'
+          topology_addr: d-12-14-1
+          job_qos: normal
+          job_name: 3ph_colrot
+          conf: /etc/slurm/slurm.conf
+          gtids: '0'
+          mem_per_cpu: '8500'
+          cpus_on_node: '20'
+          script_context: prolog_task
+          job_user: jaloor
+          task_pid: '2401951'
+          nnodes: '1'
+          nodeid: '0'
+          job_partition: xeon-g6-volta
+          cluster_name: txe1
+          gpupower: '150'
+          array_task_min: '0'
+          job_cpus_per_node: '20'
+          spank_gpupower: WHAT
+          node_aliases: (null)
+          nodelist: d-12-14-1
+          job_end_time: '1765440609'
+          array_job_id: '3917600'
+          array_task_step: '1'
+          job_start_time: '1765080609'
+          array_task_count: '2'
+          gpus_on_node: '1'
+          procid: '0'
+          jobid: '3917601'
+          job_num_nodes: '1'
+          job_id: '3917601'
+          job_account: default_group
+          job_uid: '62375'
+          submit_host: login-3
+          topology_addr_pattern: node
+          submit_dir: /home/gridsan/jaloor/AAM-Corridor-MARL
+          job_gid: '62375'
+          working_cluster: txe1:scheduler-0:6817:9984:109
+          array_task_id: '0'
+          job_nodelist: d-12-14-1
+          job_gpus: '0'
+          localid: '0'
+          cpus_per_task: '20'
+          array_task_max: '1'
+          prio_process: '0'
+        writer_id: gxajnah8dml4bgphdnuetospvsuu6w4h
+total_actions:
+  desc: null
+  value: 9
+dynamics_type:
+  desc: null
+  value: air_taxi
+formation_type:
+  desc: null
+  value: point
+formation_rew:
+  desc: null
+  value: 5
+collision_rew:
+  desc: null
+  value: 20.0
+goal_rew:
+  desc: null
+  value: 20.0
+fair_wt:
+  desc: null
+  value: 1
+fair_rew:
+  desc: null
+  value: 5
+num_agents_per_team:
+  desc: null
+  value: 3
+num_teams:
+  desc: null
+  value: 1
+zeroshift:
+  desc: null
+  value: 10
+increase_fairness:
+  desc: null
+  value: false
+min_obs_dist:
+  desc: null
+  value: 0.5
+model_name:
+  desc: null
+  value: FA_FR
+algorithm_name:
+  desc: null
+  value: rmappo
+project_name:
+  desc: null
+  value: air_corridor_unicycle_3
+experiment_name:
+  desc: null
+  value: at_251206_231009_three_phase_with_collisionrotate_eplen75
+seed:
+  desc: null
+  value: 0
+cuda:
+  desc: null
+  value: true
+cuda_deterministic:
+  desc: null
+  value: true
+n_training_threads:
+  desc: null
+  value: 1
+n_rollout_threads:
+  desc: null
+  value: 64
+n_eval_rollout_threads:
+  desc: null
+  value: 1
+n_render_rollout_threads:
+  desc: null
+  value: 1
+num_env_steps:
+  desc: null
+  value: 4000000
+user_name:
+  desc: null
+  value: marl
+use_wandb:
+  desc: null
+  value: true
+env_name:
+  desc: null
+  value: GraphMPE
+use_obs_instead_of_state:
+  desc: null
+  value: false
+world_size:
+  desc: null
+  value: 4.0
+num_scripted_agents:
+  desc: null
+  value: 0
+obs_type:
+  desc: null
+  value: global
+max_edge_dist:
+  desc: null
+  value: 1
+num_nbd_entities:
+  desc: null
+  value: 3
+use_comm:
+  desc: null
+  value: false
+num_walls:
+  desc: null
+  value: 0
+episode_length:
+  desc: null
+  value: 75
+share_policy:
+  desc: null
+  value: true
+use_centralized_V:
+  desc: null
+  value: true
+stacked_frames:
+  desc: null
+  value: 1
+use_stacked_frames:
+  desc: null
+  value: false
+hidden_size:
+  desc: null
+  value: 64
+layer_N:
+  desc: null
+  value: 1
+use_ReLU:
+  desc: null
+  value: false
+use_popart:
+  desc: null
+  value: true
+use_valuenorm:
+  desc: null
+  value: false
+use_feature_normalization:
+  desc: null
+  value: true
+use_orthogonal:
+  desc: null
+  value: true
+gain:
+  desc: null
+  value: 0.01
+split_batch:
+  desc: null
+  value: false
+max_batch_size:
+  desc: null
+  value: 32
+use_naive_recurrent_policy:
+  desc: null
+  value: false
+use_recurrent_policy:
+  desc: null
+  value: true
+recurrent_N:
+  desc: null
+  value: 1
+data_chunk_length:
+  desc: null
+  value: 10
+lr:
+  desc: null
+  value: 0.0007
+critic_lr:
+  desc: null
+  value: 0.0007
+opti_eps:
+  desc: null
+  value: 1.0e-05
+weight_decay:
+  desc: null
+  value: 0
+ppo_epoch:
+  desc: null
+  value: 10
+use_clipped_value_loss:
+  desc: null
+  value: true
+clip_param:
+  desc: null
+  value: 0.2
+num_mini_batch:
+  desc: null
+  value: 1
+entropy_coef:
+  desc: null
+  value: 0.01
+value_loss_coef:
+  desc: null
+  value: 1
+use_max_grad_norm:
+  desc: null
+  value: true
+max_grad_norm:
+  desc: null
+  value: 10.0
+use_gae:
+  desc: null
+  value: true
+gamma:
+  desc: null
+  value: 0.99
+gae_lambda:
+  desc: null
+  value: 0.95
+use_proper_time_limits:
+  desc: null
+  value: false
+use_huber_loss:
+  desc: null
+  value: true
+use_value_active_masks:
+  desc: null
+  value: true
+use_policy_active_masks:
+  desc: null
+  value: true
+huber_delta:
+  desc: null
+  value: 10.0
+use_linear_lr_decay:
+  desc: null
+  value: false
+save_interval:
+  desc: null
+  value: 1
+log_interval:
+  desc: null
+  value: 5
+img_interval:
+  desc: null
+  value: 2
+use_eval:
+  desc: null
+  value: false
+eval_interval:
+  desc: null
+  value: 25
+eval_episodes:
+  desc: null
+  value: 32
+save_gifs:
+  desc: null
+  value: true
+use_render:
+  desc: null
+  value: false
+render_episodes:
+  desc: null
+  value: null
+ifi:
+  desc: null
+  value: 0.1
+render_eval:
+  desc: null
+  value: false
+model_dir:
+  desc: null
+  value: model_weights/tube/rot_inv/airtaxi/try/three
+verbose:
+  desc: null
+  value: true
+scenario_name:
+  desc: null
+  value: three_phase_graph
+num_landmarks:
+  desc: null
+  value: 3
+num_agents:
+  desc: null
+  value: 3
+num_obstacles:
+  desc: null
+  value: 0
+collaborative:
+  desc: null
+  value: false
+max_speed:
+  desc: null
+  value: 2
+min_dist_thresh:
+  desc: null
+  value: 0.05
+use_dones:
+  desc: null
+  value: false
+num_embeddings:
+  desc: null
+  value: 4
+embedding_size:
+  desc: null
+  value: 2
+embed_hidden_size:
+  desc: null
+  value: 16
+embed_layer_N:
+  desc: null
+  value: 1
+embed_use_ReLU:
+  desc: null
+  value: true
+embed_add_self_loop:
+  desc: null
+  value: false
+gnn_hidden_size:
+  desc: null
+  value: 16
+gnn_num_heads:
+  desc: null
+  value: 3
+gnn_concat_heads:
+  desc: null
+  value: false
+gnn_layer_N:
+  desc: null
+  value: 2
+gnn_use_ReLU:
+  desc: null
+  value: true
+graph_feat_type:
+  desc: null
+  value: relative
+actor_graph_aggr:
+  desc: null
+  value: node
+critic_graph_aggr:
+  desc: null
+  value: global
+global_aggr_type:
+  desc: null
+  value: mean
+use_cent_obs:
+  desc: null
+  value: false
+auto_mini_batch_size:
+  desc: null
+  value: true
+target_mini_batch_size:
+  desc: null
+  value: 8192
