@@ -839,15 +839,15 @@ class Scenario(BaseScenario):
 		# print("Goalrew",self.goal_rew, "Collisionrew",self.collision_rew)
 		# Common rewards across all phases
 		# Collision penalties
-		# if agent.collide:
-		# 	for a in world.agents:
-		# 		if a.id == agent.id:
-		# 			continue
-		# 		if self.is_collision(a, agent):
-		# 			rew -= self.collision_rew
-		# 			# print(f"!!!Agent {agent.id} collided with agent {a.id} penalty",self.collision_rew*4 )
-		# 			# print(" self.separation_distance", self.separation_distance)
-		# 			# input("Collision")
+		if agent.collide:
+			for a in world.agents:
+				if a.id == agent.id:
+					continue
+				if self.is_collision(a, agent):
+					rew -= self.collision_rew
+					# print(f"!!!Agent {agent.id} collided with agent {a.id} penalty",self.collision_rew*4 )
+					# print(" self.separation_distance", self.separation_distance)
+					# input("Collision")
 			
 		# 	if self.is_obstacle_collision(pos=agent.state.p_pos,
 		# 								entity_size=agent.size, 
