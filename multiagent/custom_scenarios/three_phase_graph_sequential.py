@@ -1130,7 +1130,7 @@ class Scenario(BaseScenario):
 			dist_to_exit_edge = self._exit_gate_distance(s, y, L, half_w)
 			rew -= dist_to_exit_edge
 			self.steps_in_corridor[agent.id] += 1
-
+			self.delta_spacing.append(spacing_error)
 			corridor_vec = current_tube['e']  # unit vector along corridor
 			corridor_heading = np.arctan2(corridor_vec[1], corridor_vec[0])
 			# print("corridor_heading (deg):", corridor_heading*180/np.pi, "angle", world.tube_params['angle']*180/np.pi)
@@ -1143,7 +1143,7 @@ class Scenario(BaseScenario):
 			self.phase_reached[agent.id] = 0
 			current_phase = 0
 			agent.previous_phase = 0
-			set_landmarks_in_point_seq(self, world, tube_endpoints=world.tube_params[-1]['entrance'], agent_id=agent.id, tube_choice=self.tube_choice)
+			set_landmarks_in_point_seq(self, world, tube_endpoints=world.tube_params[-1]['entrance'], agent_id=agent.id, tube_choice=self.tube_choice, max_tubes=self.max_tubes)
 		elif current_phase == 2 and self.current_tube[agent.id] == 1:  # Post-tube phase
 			dist_to_goal = np.linalg.norm(agent.state.p_pos - self.landmark_poses[self.goal_match_index[agent.id]])
 			# print("Agent", agent.id, " Phase 2 dist_to_goal:", dist_to_goal)

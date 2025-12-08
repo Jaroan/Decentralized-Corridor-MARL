@@ -48,8 +48,8 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/formation' \
---render_episodes=5 \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/collision_rotate' \
+--render_episodes=1 \
 --world_size=4 \
 --num_agents=10 \
 --num_obstacles=0 \
@@ -73,13 +73,13 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/rotate' \
---render_episodes=3 \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/formation' \
+--render_episodes=100 \
 --world_size=4 \
---num_agents=3 \
+--num_agents=10 \
 --num_obstacles=0 \
 --seed=0 \
---num_landmarks=3 \
+--num_landmarks=10 \
 --episode_length=150 \
 --use_dones=False \
 --collaborative=False --model_name='Seq' \
@@ -98,13 +98,13 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/formation' \
---render_episodes=3 \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/collision_rotate' \
+--render_episodes=1 \
 --world_size=4 \
---num_agents=3 \
+--num_agents=10 \
 --num_obstacles=0 \
 --seed=0 \
---num_landmarks=3 \
+--num_landmarks=10 \
 --episode_length=150 \
 --use_dones=False \
 --collaborative=False --model_name='Spl' \

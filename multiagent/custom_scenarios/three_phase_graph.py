@@ -975,6 +975,7 @@ class Scenario(BaseScenario):
 			dist_to_exit_edge = self._exit_gate_distance(s, y, L, half_w)
 			rew -= dist_to_exit_edge
 			self.steps_in_corridor[agent.id] += 1
+			self.delta_spacing.append(spacing_error)
 
 			corridor_vec = world.tube_params['e']  # unit vector along corridor
 			corridor_heading = np.arctan2(corridor_vec[1], corridor_vec[0])
