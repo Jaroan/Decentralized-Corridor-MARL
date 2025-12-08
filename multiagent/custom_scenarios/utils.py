@@ -193,7 +193,7 @@ def set_landmarks_in_point(self, world, tube_angle, tube_endpoints):
 	self.landmark_poses_updated = np.array([landmark.state.p_pos for landmark in world.landmarks])
 
 ##Random Landmark Placement
-def set_landmarks_in_point_seq(self, world, tube_endpoints, agent_id, tube_choice):
+def set_landmarks_in_point_seq(self, world, tube_endpoints, agent_id, tube_choice, max_tubes):
 	##set landmarks (goals) at random positions not colliding with obstacles 
 	##and also check collisions with already placed goals
 	# num_goals_added = 0
@@ -205,12 +205,13 @@ def set_landmarks_in_point_seq(self, world, tube_endpoints, agent_id, tube_choic
 		#                                     self.world_size/2, 
 		#                                     world.dim_p)
 		# random_pos += tube_endpoints
-	# print("tube_choice", tube_choice)
-	# print("agent_id", agent_id)
-	if tube_choice %2== 1:
-		random_pos = np.array([tube_endpoints[0]+0.5*self.world_size,tube_endpoints[1]])
+
+	if tube_choice % max_tubes == 1:
+		random_pos = np.array([tube_endpoints[0]+0.2*self.world_size,tube_endpoints[1]])
+	elif tube_choice % max_tubes == 2:
+		random_pos = np.array([tube_endpoints[0]-0.2*self.world_size,tube_endpoints[1]])
 	else:
-		random_pos = np.array([tube_endpoints[0]- 0.5*self.world_size,tube_endpoints[1]])
+		random_pos = np.array([tube_endpoints[0]-0.2*self.world_size, tube_endpoints[1]])
 
 
 	goal_size = world.landmarks[agent_id].size
