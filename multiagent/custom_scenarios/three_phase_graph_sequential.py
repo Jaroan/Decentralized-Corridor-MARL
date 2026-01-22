@@ -436,7 +436,7 @@ class Scenario(BaseScenario):
 		)
 		
 		# === TUBE 1: Vertical tube ===
-		tube1_length = self.world_size * 0.8
+		tube1_length = self.world_size * 1.0
 		# tube1_length += np.random.uniform(-self.world_size*0.3, self.world_size*0.1)
 		tube1_angle = 0.0  # Vertical
 		
@@ -464,7 +464,7 @@ class Scenario(BaseScenario):
 		# Randomly choose left or right direction
 		self.tube_choice = np.random.choice([0, 1])
 		
-		tube2_length = self.world_size * 0.4  # Slightly shorter second tube
+		tube2_length = self.world_size * 0.3  # Slightly shorter second tube
 		tube2_angle = np.pi/2  # Horizontal
 		
 		# Entrance of tube 2 starts near exit of tube 1 with some offset
@@ -1143,7 +1143,7 @@ class Scenario(BaseScenario):
 			self.phase_reached[agent.id] = 0
 			current_phase = 0
 			agent.previous_phase = 0
-			set_landmarks_in_point_seq(self, world, tube_endpoints=world.tube_params[-1]['entrance'], agent_id=agent.id, tube_choice=self.tube_choice, max_tubes=self.max_tubes)
+			set_landmarks_in_point_seq(self, world, tube_endpoints=world.tube_params[-1]['exit'], agent_id=agent.id, tube_choice=self.tube_choice, max_tubes=self.max_tubes)
 		elif current_phase == 2 and self.current_tube[agent.id] == 1:  # Post-tube phase
 			dist_to_goal = np.linalg.norm(agent.state.p_pos - self.landmark_poses[self.goal_match_index[agent.id]])
 			# print("Agent", agent.id, " Phase 2 dist_to_goal:", dist_to_goal)

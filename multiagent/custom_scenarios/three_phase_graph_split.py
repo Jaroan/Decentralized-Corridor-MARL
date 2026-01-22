@@ -436,7 +436,7 @@ class Scenario(BaseScenario):
 		)
 		
 		# === TUBE 1: Vertical tube ===
-		tube1_length = self.world_size * 0.8
+		tube1_length = self.world_size * 1.0
 		# tube1_length += np.random.uniform(-self.world_size*0.3, self.world_size*0.1)
 		tube1_angle = 0.0  # Vertical
 		

@@ -283,6 +283,8 @@ class Scenario(BaseScenario):
 		self.entry_reward_cooldown = np.zeros(self.num_agents, dtype=np.int32)
 		# Store previous longitudinal position (s) for progress reward
 		self.prev_proj = np.zeros(self.num_agents, dtype=np.float32)
+		# Store previous goal distance for progress reward in Phase 2
+		self.prev_goal_dist = np.full(self.num_agents, np.inf, dtype=np.float32)
 
 		#################### set colours ####################
 		# set colours for agents
@@ -328,6 +330,12 @@ class Scenario(BaseScenario):
 		# self.update_curriculum(world, num_current_episode)
 		self.random_scenario(world)
 		self.initialize_min_time_distance_graph(world)
+		# Initialize progress baselines after positions/goals are set
+		for agent in world.agents:
+			s, _, _, _ = self._tube_coords(world, agent.state.p_pos)
+			self.prev_proj[agent.id] = s
+			goal_pos = self.landmark_poses[self.goal_match_index[agent.id]]
+			self.prev_goal_dist[agent.id] = np.linalg.norm(agent.state.p_pos - goal_pos)
 	
 	def update_curriculum(self, world:World, num_current_episode:int) -> None:
 
@@ -590,6 +598,11 @@ class Scenario(BaseScenario):
 			if not hasattr(agent, 'previous_phase'):
 				# print("Agent", agent.id, "is in pre-tube phase")
 				agent.previous_phase = 0
+
+			if hasattr(agent, 'previous_phase') and agent.previous_phase >= 1:
+				agent.previous_phase = 0
+				# self.phase_reached[agent.id] = 0
+				self.entry_reward_cooldown[agent.id] = 0
 			# print("Agent {} is in pre-tube phase 000".format(agent.id))
 			return 0  # Pre-tube phase
 		elif in_tube:
@@ -863,6 +876,8 @@ class Scenario(BaseScenario):
 		heading_vec = np.array([np.cos(agent_heading), np.sin(agent_heading)])
 		s, y, L, half_w = self._tube_coords(world, agent_pos)
 		valid_exit = self._in_exit_gate(s, y, L, half_w)
+		# Longitudinal progress along corridor direction (s-axis)
+		delta_proj = float(s) - float(self.prev_proj[agent.id])
 
 		front_agents = []
 		back_agents = []
@@ -931,6 +946,9 @@ class Scenario(BaseScenario):
 			# print("Agent", agent.id, " Phase 0 s,y,L,half_w:", s, y, L, half_w)
 			dist_to_entrance_edge = self._entrance_gate_distance(s, y, half_w)
 			rew -= dist_to_entrance_edge
+			# Encourage forward progress toward the entrance (discourage circling)
+			rew += self.progress_gain * max(delta_proj, -0.05)
+			self.prev_proj[agent.id] = s
 
 			# === NEW: Heading alignment reward ===
 			# Desired heading: align with corridor direction
@@ -976,6 +994,9 @@ class Scenario(BaseScenario):
 			rew -= dist_to_exit_edge
 			self.steps_in_corridor[agent.id] += 1
 			self.delta_spacing.append(spacing_error)
+			# Reward forward progress through the tube (discourage oscillations)
+			rew += self.progress_gain * max(delta_proj, -0.05)
+			self.prev_proj[agent.id] = s
 
 			corridor_vec = world.tube_params['e']  # unit vector along corridor
 			corridor_heading = np.arctan2(corridor_vec[1], corridor_vec[0])
@@ -998,6 +1019,12 @@ class Scenario(BaseScenario):
 					# print("Phase 2 Agent", agent.id, "reached goal", dist_to_goal, "rew", rew)
 			else:
 				rew -= dist_to_goal
+				# Reward progress toward goal to avoid circling near goals
+				if np.isfinite(self.prev_goal_dist[agent.id]):
+					delta_goal = self.prev_goal_dist[agent.id] - dist_to_goal
+					rew += self.progress_gain * max(delta_goal, -0.1) * 1.0
+				# Always update after using it (or initialize on first visit)
+				self.prev_goal_dist[agent.id] = dist_to_goal
 
 
 		# print("Agent.status",agent.status)
