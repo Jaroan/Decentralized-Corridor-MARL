@@ -48,7 +48,7 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/collision_rotate' \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026' \
 --render_episodes=3 \
 --world_size=4 \
 --num_agents=3 \
