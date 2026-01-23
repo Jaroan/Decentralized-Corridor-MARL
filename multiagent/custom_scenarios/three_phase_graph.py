@@ -886,7 +886,7 @@ class Scenario(BaseScenario):
 			if other is agent:
 				continue
 			rel_vec = other.state.p_pos - agent_pos
-			proj = np.dot(rel_vec, heading_vec)
+			proj = np.dot(rel_vec, world.tube_params['e']) # Longitudinal projection along corridor direction
 			if proj > 0:
 				front_agents.append((proj, other))
 			else:
@@ -899,8 +899,7 @@ class Scenario(BaseScenario):
 		# print("front_agent", front_agent.id if front_agent else "None")
 		# print("back_agent", back_agent.id if back_agent else "None")
 		
-		# Calculate desired spacing based on tube length and number of agents
-		desired_spacing = self.separation_distance  # 3 is the number of agents in the tube TODO: harcoded
+
 		
 		# Track agent's previous phase if not already stored
 		if not hasattr(agent, 'previous_phase'):
@@ -949,6 +948,10 @@ class Scenario(BaseScenario):
 			# Encourage forward progress toward the entrance (discourage circling)
 			rew += self.progress_gain * max(delta_proj, -0.05)
 			self.prev_proj[agent.id] = s
+			# Reward forward velocity along corridor direction
+			corridor_vec = world.tube_params['e']
+			forward_speed = float(np.dot(agent.state.p_vel, corridor_vec))
+			rew += self.progress_gain * 0.5 * max(forward_speed, 0.0)
 
 			# === NEW: Heading alignment reward ===
 			# Desired heading: align with corridor direction
@@ -962,6 +965,10 @@ class Scenario(BaseScenario):
 			if dist_to_entrance_edge < self.world_size * 0.1:
 				# Penalize heading misalignment (max penalty at 180°, none at 0°)
 				rew -= heading_error * self.formation_rew * 0.5
+
+				# Penalize lateral approach to avoid circling parallel to the corridor
+				lateral_norm = abs(y) / (half_w + 1e-9)
+				rew -= lateral_norm * self.formation_rew * 0.5
 			# === Penalize lateral approach (agents must approach along corridor axis) ===
 			# If agent is laterally offset from entrance but trying to enter: penalize
 			# if abs(y) > half_w * 0.8 and s < 0 and s > -self.world_size * 0.1:
@@ -971,6 +978,14 @@ class Scenario(BaseScenario):
 				# print(f"Agent {agent.id} penalized for lateral approach y={y:.2f} rew", rew)
 				# input("Lateral approach penalty applied")
 		elif current_phase == 1:  # In-tube phase
+
+			# Calculate desired spacing based on tube length and number of agents
+			desired_spacing = self.separation_distance
+			# If corridor is too short to fit agents at separation_distance,
+			# reduce spacing penalty instead of shrinking spacing.
+			# required_length = desired_spacing * (self.num_agents + 1)
+			# feasibility = min(1.0, tube_length / max(1e-6, required_length))
+			# print("spacing_weight", spacing_weight)
 			spacing_error = 0
 			max_spacing_error = 0
 
@@ -981,6 +996,7 @@ class Scenario(BaseScenario):
 				spacing_error += np.abs(diff) if diff < 0 else 0
 				max_spacing_error = max(max_spacing_error, np.abs(diff))
 			if back_agent:
+				# print(back_agent.state.p_pos - agent.state.p_pos)
 				# print("np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos)", np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos), "desired_spacing", desired_spacing)
 				diff = np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos) - desired_spacing
 				# print("diff", diff)
@@ -992,11 +1008,18 @@ class Scenario(BaseScenario):
 			rew -= spacing_error * self.formation_rew  # Higher weight for maintaining formation in tube
 			dist_to_exit_edge = self._exit_gate_distance(s, y, L, half_w)
 			rew -= dist_to_exit_edge
+			# print("Phase 1 dist_to_exit_edge", dist_to_exit_edge)
 			self.steps_in_corridor[agent.id] += 1
 			self.delta_spacing.append(spacing_error)
 			# Reward forward progress through the tube (discourage oscillations)
 			rew += self.progress_gain * max(delta_proj, -0.05)
+			# print("  Reward forward progress through the tube", self.progress_gain * max(delta_proj, -0.05))
 			self.prev_proj[agent.id] = s
+			# Reward forward velocity along corridor direction
+			corridor_vec = world.tube_params['e']
+			forward_speed = float(np.dot(agent.state.p_vel, corridor_vec))
+			rew += self.progress_gain * max(forward_speed, 0.0)
+			# print("Phase 1 forward speed reward", self.progress_gain * max(forward_speed, 0.0))
 
 			corridor_vec = world.tube_params['e']  # unit vector along corridor
 			corridor_heading = np.arctan2(corridor_vec[1], corridor_vec[0])
@@ -1004,6 +1027,7 @@ class Scenario(BaseScenario):
 			agent_heading = agent.state.theta
 			heading_error = abs((agent_heading - corridor_heading + np.pi) % (2*np.pi) - np.pi)
 			rew -= heading_error * self.formation_rew * 0.1
+			# print("Phase 1 heading error penalty", heading_error * self.formation_rew * 0.1)
 
 		elif current_phase == 2:  # Post-tube phase
 			dist_to_goal = np.linalg.norm(agent.state.p_pos - self.landmark_poses[self.goal_match_index[agent.id]])
@@ -1056,9 +1080,9 @@ class Scenario(BaseScenario):
 			# print(f"Agent {agent.id} skipped corridor (s={s:.2f} > L={L:.2f}): penalty {self.goal_rew}")
 		
 		# if current_phase == 2:
-		# print(f"Agent {agent.id} total reward: ", rew)
+		# print(f"Agent {agent.id} total reward: ", rew, "curr phase", current_phase, "phase reached", self.phase_reached[agent.id])
 		# input("Reward calculation complete for agent {}".format(agent.id))
-		# input("Press Enter to continue...")
+		# input("Press Enter to continue...\n")
 
 		return np.clip(rew, -4*self.collision_rew, self.goal_rew*5)
 

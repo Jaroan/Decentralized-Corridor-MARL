@@ -49,12 +49,12 @@ python onpolicy/scripts/eval_mpe.py \
 
 python onpolicy/scripts/eval_mpe.py \
 --model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026' \
---render_episodes=3 \
+--render_episodes=1 \
 --world_size=4 \
---num_agents=3 \
+--num_agents=4 \
 --num_obstacles=0 \
 --seed=0 \
---num_landmarks=3 \
+--num_landmarks=4 \
 --episode_length=150 \
 --use_dones=False \
 --collaborative=False --model_name='3' \
@@ -64,6 +64,7 @@ python onpolicy/scripts/eval_mpe.py \
 --collision_rew=20 \
 --fair_rew=1 \
 --save_gifs \
+--formation_rew 10 \
 --use_render \
 --num_walls=0 \
 --zeroshift=5 \
@@ -73,7 +74,7 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/collision_rotate' \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026' \
 --render_episodes=2 \
 --world_size=4 \
 --num_agents=3 \
@@ -87,6 +88,7 @@ python onpolicy/scripts/eval_mpe.py \
 --dynamics_type='air_taxi' \
 --goal_rew=20 \
 --collision_rew=20 \
+--formation_rew 10 \
 --fair_rew=1 \
 --save_gifs \
 --use_render \
@@ -98,7 +100,7 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/formation' \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026' \
 --render_episodes=2 \
 --world_size=4 \
 --num_agents=2 \
@@ -112,6 +114,7 @@ python onpolicy/scripts/eval_mpe.py \
 --dynamics_type='air_taxi' \
 --goal_rew=20 \
 --collision_rew=20 \
+--formation_rew 10 \
 --fair_rew=1 \
 --save_gifs \
 --use_render \
