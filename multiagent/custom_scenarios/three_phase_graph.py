@@ -946,11 +946,14 @@ class Scenario(BaseScenario):
 			dist_to_entrance_edge = self._entrance_gate_distance(s, y, half_w)
 			rew -= dist_to_entrance_edge
 			# Encourage forward progress toward the entrance (discourage circling)
+			# print("Phase 0 dist_to_entrance_edge", dist_to_entrance_edge, "rew", rew)
+			# print("progress gain dist rew", self.progress_gain * max(delta_proj, -0.05),  " delta_proj", delta_proj)
 			rew += self.progress_gain * max(delta_proj, -0.05)
 			self.prev_proj[agent.id] = s
 			# Reward forward velocity along corridor direction
 			corridor_vec = world.tube_params['e']
 			forward_speed = float(np.dot(agent.state.p_vel, corridor_vec))
+			# print("Phase 0 forward speed", forward_speed, "rew", self.progress_gain * 0.5 * max(forward_speed, 0.0))
 			rew += self.progress_gain * 0.5 * max(forward_speed, 0.0)
 
 			# === NEW: Heading alignment reward ===
@@ -962,13 +965,15 @@ class Scenario(BaseScenario):
 			heading_error = abs((agent_heading - corridor_heading + np.pi) % (2*np.pi) - np.pi)
 
 			# Only enforce alignment when close to entrance (within 0.5*world_size)
-			if dist_to_entrance_edge < self.world_size * 0.1:
+			if dist_to_entrance_edge < self.world_size * 0.2:
 				# Penalize heading misalignment (max penalty at 180°, none at 0°)
+				# print("Phase 0 heading_error (deg):", heading_error*180/np.pi, "penalty", heading_error * self.formation_rew * 0.5)
 				rew -= heading_error * self.formation_rew * 0.5
 
 				# Penalize lateral approach to avoid circling parallel to the corridor
 				lateral_norm = abs(y) / (half_w + 1e-9)
-				rew -= lateral_norm * self.formation_rew * 0.5
+				# print("Phase 0 lateral_norm:", lateral_norm, "penalty", lateral_norm * self.formation_rew * 0.1, "rew", rew)
+				rew -= lateral_norm * self.formation_rew * 0.1
 			# === Penalize lateral approach (agents must approach along corridor axis) ===
 			# If agent is laterally offset from entrance but trying to enter: penalize
 			# if abs(y) > half_w * 0.8 and s < 0 and s > -self.world_size * 0.1:
@@ -1050,7 +1055,7 @@ class Scenario(BaseScenario):
 				# Always update after using it (or initialize on first visit)
 				self.prev_goal_dist[agent.id] = dist_to_goal
 
-
+		# print(f"Agent {agent.id} phase {current_phase} reward so far: ", rew)
 		# print("Agent.status",agent.status)
 		if self.phase_reached[agent.id] == 1 and current_phase == 0:
 			# print("Agent",agent.id,"left corridor")

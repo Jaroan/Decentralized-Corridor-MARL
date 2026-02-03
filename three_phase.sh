@@ -80,7 +80,7 @@ echo "formation_type: ${formation_type}"
 # # execute the script with different params
 python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --project_name "air_corridor_unicycle_${n_agents}" \
---model_dir "model_weights/tube/rot_inv/airtaxi/try/three" \
+--model_dir "model_weights/tube/rot_inv/airtaxi/try/three/test2026" \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
@@ -88,7 +88,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --scenario_name "three_phase_graph" \
 --dynamics_type ${chosen_dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
---fair_rew 5 \
+--fair_rew ${args_fair_rew[$SLURM_ARRAY_TASK_ID]} \
 --num_agents=${n_agents} \
 --num_landmarks=${n_agents} \
 --collision_rew 20 \
