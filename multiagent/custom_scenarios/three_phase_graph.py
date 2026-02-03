@@ -433,8 +433,8 @@ class Scenario(BaseScenario):
 			self.world_size * 0.15  # Minimum width
 		)
 
-		# random_angle = np.random.uniform(-np.pi/2, np.pi/2)
-		random_angle = 0.0
+		random_angle = np.random.uniform(-np.pi/2, np.pi/2)
+		# random_angle = 0.0
 		# print(f"Random Angle: {random_angle*180/np.pi} degrees")
 		# Calculate tube length
 		tube_length = self.world_size * 0.8  # Use 80% of world size for tube length
@@ -964,16 +964,21 @@ class Scenario(BaseScenario):
 			agent_heading = agent.state.theta
 			heading_error = abs((agent_heading - corridor_heading + np.pi) % (2*np.pi) - np.pi)
 
+			# Penalize lateral approach to avoid circling parallel to the corridor
+			lateral_norm = abs(y) / (half_w + 1e-9)
+			# print("Phase 0 lateral_norm:", lateral_norm, "penalty", lateral_norm * self.formation_rew * 0.1, "rew", rew)
+			rew -= lateral_norm * self.formation_rew * 0.1
+
 			# Only enforce alignment when close to entrance (within 0.5*world_size)
 			if dist_to_entrance_edge < self.world_size * 0.2:
 				# Penalize heading misalignment (max penalty at 180°, none at 0°)
 				# print("Phase 0 heading_error (deg):", heading_error*180/np.pi, "penalty", heading_error * self.formation_rew * 0.5)
 				rew -= heading_error * self.formation_rew * 0.5
 
-				# Penalize lateral approach to avoid circling parallel to the corridor
-				lateral_norm = abs(y) / (half_w + 1e-9)
+				# # Penalize lateral approach to avoid circling parallel to the corridor
+				# lateral_norm = abs(y) / (half_w + 1e-9)
 				# print("Phase 0 lateral_norm:", lateral_norm, "penalty", lateral_norm * self.formation_rew * 0.1, "rew", rew)
-				rew -= lateral_norm * self.formation_rew * 0.1
+				# rew -= lateral_norm * self.formation_rew * 0.1
 			# === Penalize lateral approach (agents must approach along corridor axis) ===
 			# If agent is laterally offset from entrance but trying to enter: penalize
 			# if abs(y) > half_w * 0.8 and s < 0 and s > -self.world_size * 0.1:
