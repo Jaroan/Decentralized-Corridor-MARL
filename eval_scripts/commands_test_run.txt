@@ -103,10 +103,10 @@ python onpolicy/scripts/eval_mpe.py \
 --model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026' \
 --render_episodes=2 \
 --world_size=4 \
---num_agents=2 \
+--num_agents=5 \
 --num_obstacles=0 \
 --seed=0 \
---num_landmarks=2 \
+--num_landmarks=5 \
 --episode_length=150 \
 --use_dones=False \
 --collaborative=False --model_name='Spl' \

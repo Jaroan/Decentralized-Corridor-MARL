@@ -1,6 +1,6 @@
 #!/bin/bash
 # Slurm sbatch options
-#SBATCH --job-name 3rotphase_col
+#SBATCH --job-name 3rot_col25
 #SBATCH -a 0-1
 #SBATCH --gres=gpu:volta:1
 ##SBATCH --cpus-per-task=8
@@ -84,14 +84,14 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
---experiment_name "${str_dynamics_type}_${datetime_str}_three_phase_with_coll_spacing10rot_eplen${episode_length}" \
+--experiment_name "${str_dynamics_type}_${datetime_str}_three_phase_with_coll25_spacing10rot_eplen${episode_length}" \
 --scenario_name "three_phase_graph" \
 --dynamics_type ${chosen_dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
 --fair_rew ${args_fair_rew[$SLURM_ARRAY_TASK_ID]} \
 --num_agents=${n_agents} \
 --num_landmarks=${n_agents} \
---collision_rew 30 \
+--collision_rew 25 \
 --formation_rew 10 \
 --n_training_threads 1 --n_rollout_threads 64 \
 --num_mini_batch 1 \
@@ -111,4 +111,4 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --increase_fairness "False" \
 --auto_mini_batch_size --target_mini_batch_size 8192 \
 --formation_type ${formation_type} \
-&> $logs_folder/${str_dynamics_type}_${datetime_str}_three_phase_with_coll_spacing10rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
+&> $logs_folder/${str_dynamics_type}_${datetime_str}_three_phase_with_coll25_spacing10rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
