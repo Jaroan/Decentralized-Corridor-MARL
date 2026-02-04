@@ -944,7 +944,7 @@ class Scenario(BaseScenario):
 			s, y, L, half_w = self._tube_coords(world, agent.state.p_pos)
 			# print("Agent", agent.id, " Phase 0 s,y,L,half_w:", s, y, L, half_w)
 			dist_to_entrance_edge = self._entrance_gate_distance(s, y, half_w)
-			rew -= dist_to_entrance_edge if s < 0 else dist_to_entrance_edge*10
+			rew -= dist_to_entrance_edge if s < 0 else dist_to_entrance_edge*2
 
 			# Encourage forward progress toward the entrance (discourage circling)
 			# print("Phase 0 dist_to_entrance_edge", dist_to_entrance_edge, "rew", rew, "s", s, "y", y)
