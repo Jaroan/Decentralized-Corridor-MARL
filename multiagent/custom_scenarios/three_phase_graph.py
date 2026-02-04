@@ -944,9 +944,10 @@ class Scenario(BaseScenario):
 			s, y, L, half_w = self._tube_coords(world, agent.state.p_pos)
 			# print("Agent", agent.id, " Phase 0 s,y,L,half_w:", s, y, L, half_w)
 			dist_to_entrance_edge = self._entrance_gate_distance(s, y, half_w)
-			rew -= dist_to_entrance_edge
+			rew -= dist_to_entrance_edge if s < 0 else dist_to_entrance_edge*10
+
 			# Encourage forward progress toward the entrance (discourage circling)
-			# print("Phase 0 dist_to_entrance_edge", dist_to_entrance_edge, "rew", rew)
+			# print("Phase 0 dist_to_entrance_edge", dist_to_entrance_edge, "rew", rew, "s", s, "y", y)
 			# print("progress gain dist rew", self.progress_gain * max(delta_proj, -0.05),  " delta_proj", delta_proj)
 			rew += self.progress_gain * max(delta_proj, -0.05)
 			self.prev_proj[agent.id] = s
@@ -970,7 +971,7 @@ class Scenario(BaseScenario):
 			rew -= lateral_norm * self.formation_rew * 0.1
 
 			# Only enforce alignment when close to entrance (within 0.5*world_size)
-			if dist_to_entrance_edge < self.world_size * 0.2:
+			if dist_to_entrance_edge < self.world_size * 0.2 and abs(y) < half_w * 1.5:
 				# Penalize heading misalignment (max penalty at 180°, none at 0°)
 				# print("Phase 0 heading_error (deg):", heading_error*180/np.pi, "penalty", heading_error * self.formation_rew * 0.5)
 				rew -= heading_error * self.formation_rew * 0.5
@@ -1089,10 +1090,10 @@ class Scenario(BaseScenario):
 			rew -= self.goal_rew
 			# print(f"Agent {agent.id} skipped corridor (s={s:.2f} > L={L:.2f}): penalty {self.goal_rew}")
 		
-		# if current_phase == 2:
-		# print(f"Agent {agent.id} total reward: ", rew, "curr phase", current_phase, "phase reached", self.phase_reached[agent.id])
-		# input("Reward calculation complete for agent {}".format(agent.id))
-		# input("Press Enter to continue...\n")
+		# if agent.id == 3:
+		# 	print(f"Agent {agent.id} total reward: ", rew, "curr phase", current_phase, "phase reached", self.phase_reached[agent.id])
+		# 	# input("Reward calculation complete for agent {}".format(agent.id))
+		# 	input("Press Enter to continue...\n")
 
 		return np.clip(rew, -4*self.collision_rew, self.goal_rew*5)
 
