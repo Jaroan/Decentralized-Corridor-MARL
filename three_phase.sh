@@ -91,7 +91,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --fair_rew ${args_fair_rew[$SLURM_ARRAY_TASK_ID]} \
 --num_agents=${n_agents} \
 --num_landmarks=${n_agents} \
---collision_rew 20 \
+--collision_rew 30 \
 --formation_rew 10 \
 --n_training_threads 1 --n_rollout_threads 64 \
 --num_mini_batch 1 \

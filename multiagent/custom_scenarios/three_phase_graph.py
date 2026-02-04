@@ -858,7 +858,7 @@ class Scenario(BaseScenario):
 					continue
 				if self.is_collision(a, agent):
 					rew -= self.collision_rew
-					# print(f"!!!Agent {agent.id} collided with agent {a.id} penalty",self.collision_rew*4 )
+					# print(f"!!!Agent {agent.id} collided with agent {a.id} penalty",self.collision_rew )
 					# print(" self.separation_distance", self.separation_distance)
 					# input("Collision")
 			
@@ -1053,10 +1053,12 @@ class Scenario(BaseScenario):
 
 					# print("Phase 2 Agent", agent.id, "reached goal", dist_to_goal, "rew", rew)
 			else:
+				# print("dist_to_goal", dist_to_goal)
 				rew -= dist_to_goal
 				# Reward progress toward goal to avoid circling near goals
 				if np.isfinite(self.prev_goal_dist[agent.id]):
 					delta_goal = self.prev_goal_dist[agent.id] - dist_to_goal
+					# print("Phase 2 delta_goal", delta_goal, "reward", self.progress_gain * max(delta_goal, -0.1) * 1.0)
 					rew += self.progress_gain * max(delta_goal, -0.1) * 1.0
 				# Always update after using it (or initialize on first visit)
 				self.prev_goal_dist[agent.id] = dist_to_goal
@@ -1090,10 +1092,10 @@ class Scenario(BaseScenario):
 			rew -= self.goal_rew
 			# print(f"Agent {agent.id} skipped corridor (s={s:.2f} > L={L:.2f}): penalty {self.goal_rew}")
 		
-		# if agent.id == 3:
-		# 	print(f"Agent {agent.id} total reward: ", rew, "curr phase", current_phase, "phase reached", self.phase_reached[agent.id])
-		# 	# input("Reward calculation complete for agent {}".format(agent.id))
-		# 	input("Press Enter to continue...\n")
+		# if current_phase == 2:
+		# print(f"Agent {agent.id} total reward: ", rew, "curr phase", current_phase, "phase reached", self.phase_reached[agent.id])
+		# input("Reward calculation complete for agent {}".format(agent.id))
+		# input("Press Enter to continue...\n")
 
 		return np.clip(rew, -4*self.collision_rew, self.goal_rew*5)
 
