@@ -1055,6 +1055,15 @@ class Scenario(BaseScenario):
 			else:
 				# print("dist_to_goal", dist_to_goal)
 				rew -= dist_to_goal
+
+				# Alignment penalty: heading should face the goal
+				goal_vec = self.landmark_poses[self.goal_match_index[agent.id]] - agent.state.p_pos
+				goal_heading = np.arctan2(goal_vec[1], goal_vec[0])
+				agent_heading = agent.state.theta
+				heading_error = abs((agent_heading - goal_heading + np.pi) % (2*np.pi) - np.pi)
+				# print("Phase 2 heading_error (deg):", heading_error*180/np.pi, "penalty", heading_error * self.formation_rew * 0.1)
+				rew -= heading_error * self.formation_rew * 0.1
+
 				# Reward progress toward goal to avoid circling near goals
 				if np.isfinite(self.prev_goal_dist[agent.id]):
 					delta_goal = self.prev_goal_dist[agent.id] - dist_to_goal
@@ -1093,9 +1102,9 @@ class Scenario(BaseScenario):
 			# print(f"Agent {agent.id} skipped corridor (s={s:.2f} > L={L:.2f}): penalty {self.goal_rew}")
 		
 		# if current_phase == 2:
-		# print(f"Agent {agent.id} total reward: ", rew, "curr phase", current_phase, "phase reached", self.phase_reached[agent.id])
-		# input("Reward calculation complete for agent {}".format(agent.id))
-		# input("Press Enter to continue...\n")
+		# 	print(f"Agent {agent.id} total reward: ", rew, "curr phase", current_phase, "phase reached", self.phase_reached[agent.id])
+		# 	# input("Reward calculation complete for agent {}".format(agent.id))
+		# 	input("Press Enter to continue...\n")
 
 		return np.clip(rew, -4*self.collision_rew, self.goal_rew*5)
 

@@ -45,6 +45,7 @@ train_test_commands_v2.txt
 LLSUB.*/
 # Ignore files starting with fair_assign_LLsub.sh.log-.
 fair_assign_LLsub.sh.log-*
+bluesky/
 
 # ignoring hanabi and starcraft related files after pushing them to the repo
 onpolicy/results
