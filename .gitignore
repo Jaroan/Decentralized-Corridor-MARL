@@ -46,6 +46,7 @@ LLSUB.*/
 # Ignore files starting with fair_assign_LLsub.sh.log-.
 fair_assign_LLsub.sh.log-*
 bluesky/
+mpe_to_bluesky_bridge.py
 
 # ignoring hanabi and starcraft related files after pushing them to the repo
 onpolicy/results

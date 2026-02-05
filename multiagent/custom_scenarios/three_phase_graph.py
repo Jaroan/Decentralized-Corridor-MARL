@@ -1062,7 +1062,7 @@ class Scenario(BaseScenario):
 				agent_heading = agent.state.theta
 				heading_error = abs((agent_heading - goal_heading + np.pi) % (2*np.pi) - np.pi)
 				# print("Phase 2 heading_error (deg):", heading_error*180/np.pi, "penalty", heading_error * self.formation_rew * 0.1)
-				rew -= heading_error * self.formation_rew * 0.1
+				rew -= heading_error * self.formation_rew * 0.05
 
 				# Reward progress toward goal to avoid circling near goals
 				if np.isfinite(self.prev_goal_dist[agent.id]):
