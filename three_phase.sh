@@ -80,11 +80,11 @@ echo "formation_type: ${formation_type}"
 # # execute the script with different params
 python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --project_name "air_corridor_unicycle_${n_agents}" \
---model_dir "model_weights/tube/rot_inv/airtaxi/try/three/test2026" \
+--model_dir "model_weights/tube/rot_inv/airtaxi/try/three" \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
---experiment_name "${str_dynamics_type}_${datetime_str}_3_phase_test2026_with_coll20_spacing10rot_eplen${episode_length}" \
+--experiment_name "${str_dynamics_type}_${datetime_str}_3_phase_with_coll20_spacing10rot_eplen${episode_length}" \
 --scenario_name "three_phase_graph" \
 --dynamics_type ${chosen_dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
@@ -111,4 +111,4 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --increase_fairness "False" \
 --auto_mini_batch_size --target_mini_batch_size 8192 \
 --formation_type ${formation_type} \
-&> $logs_folder/${str_dynamics_type}_${datetime_str}_3_phase_test2026_with_coll20_spacing10rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
+&> $logs_folder/${str_dynamics_type}_${datetime_str}_3_phase_with_coll20_spacing10rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}

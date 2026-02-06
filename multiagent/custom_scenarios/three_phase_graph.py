@@ -1056,13 +1056,13 @@ class Scenario(BaseScenario):
 				# print("dist_to_goal", dist_to_goal)
 				rew -= dist_to_goal
 
-				# Alignment penalty: heading should face the goal
-				goal_vec = self.landmark_poses[self.goal_match_index[agent.id]] - agent.state.p_pos
-				goal_heading = np.arctan2(goal_vec[1], goal_vec[0])
-				agent_heading = agent.state.theta
-				heading_error = abs((agent_heading - goal_heading + np.pi) % (2*np.pi) - np.pi)
-				# print("Phase 2 heading_error (deg):", heading_error*180/np.pi, "penalty", heading_error * self.formation_rew * 0.1)
-				rew -= heading_error * self.formation_rew * 0.05
+				# # Alignment penalty: heading should face the goal
+				# goal_vec = self.landmark_poses[self.goal_match_index[agent.id]] - agent.state.p_pos
+				# goal_heading = np.arctan2(goal_vec[1], goal_vec[0])
+				# agent_heading = agent.state.theta
+				# heading_error = abs((agent_heading - goal_heading + np.pi) % (2*np.pi) - np.pi)
+				# # print("Phase 2 heading_error (deg):", heading_error*180/np.pi, "penalty", heading_error * self.formation_rew * 0.1)
+				# rew -= heading_error * self.formation_rew * 0.05
 
 				# Reward progress toward goal to avoid circling near goals
 				if np.isfinite(self.prev_goal_dist[agent.id]):
