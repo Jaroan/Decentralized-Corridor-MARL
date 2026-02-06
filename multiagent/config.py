@@ -17,7 +17,7 @@ class AirTaxiConfig():
     
     DT = 1.0
     # DISTANCE_TO_GOAL_THRESHOLD = 750 * 0.0003048 # ft to km
-    DISTANCE_TO_GOAL_THRESHOLD = 0.25
+    DISTANCE_TO_GOAL_THRESHOLD = 0.35
     GOAL_HEADING_THRESHOLD = np.pi/4
     # GOAL_SPEED_THRESHOLD = 20 * 0.514444 * 0.001 # knots to km/s
     GOAL_SPEED_THRESHOLD = 0.03 # knots to km/s

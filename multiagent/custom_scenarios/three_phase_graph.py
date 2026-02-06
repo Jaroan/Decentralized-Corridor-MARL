@@ -433,8 +433,8 @@ class Scenario(BaseScenario):
 			self.world_size * 0.15  # Minimum width
 		)
 
-		random_angle = np.random.uniform(-np.pi/2, np.pi/2)
-		# random_angle = 0.0
+		# random_angle = np.random.uniform(-np.pi/2, np.pi/2)
+		random_angle = 0.0
 		# print(f"Random Angle: {random_angle*180/np.pi} degrees")
 		# Calculate tube length
 		tube_length = self.world_size * 0.8  # Use 80% of world size for tube length
@@ -1059,11 +1059,30 @@ class Scenario(BaseScenario):
 				# # Alignment penalty: heading should face the goal
 				# goal_vec = self.landmark_poses[self.goal_match_index[agent.id]] - agent.state.p_pos
 				# goal_heading = np.arctan2(goal_vec[1], goal_vec[0])
-				# agent_heading = agent.state.theta
+				agent_heading = agent.state.theta
 				# heading_error = abs((agent_heading - goal_heading + np.pi) % (2*np.pi) - np.pi)
-				# # print("Phase 2 heading_error (deg):", heading_error*180/np.pi, "penalty", heading_error * self.formation_rew * 0.1)
-				# rew -= heading_error * self.formation_rew * 0.05
 
+				# Alignment penalty: heading should match corridor direction (fixed)
+				corridor_vec = world.tube_params['e']
+				corridor_heading = np.arctan2(corridor_vec[1], corridor_vec[0])
+				heading_error = abs((agent_heading - corridor_heading + np.pi) % (2 * np.pi) - np.pi)
+
+				heading_thresh = float(self.config_class.GOAL_HEADING_THRESHOLD)
+
+				# if agent.id == 0:
+
+
+
+					# print("corridor_heading:", corridor_heading*180/np.pi, "angle", world.tube_params['angle']*180/np.pi)
+
+					# print("goal_heading:", goal_heading*180/np.pi)
+					# print("agent_heading:", agent_heading*180/np.pi)
+
+					# print("Phase 2 heading_error:", heading_error*180/np.pi, "heading thresh", heading_thresh*180/np.pi, "penalty", heading_error * self.formation_rew * 0.05)
+				# rew -= heading_error * self.formation_rew * 0.05
+				if heading_error > heading_thresh:
+					# print("Phase 2 heading error above threshold! Agent:", agent.id, "heading_error (deg):", heading_error*180/np.pi, "threshold (deg):", heading_thresh*180/np.pi, "penalty", (heading_error - heading_thresh) * self.formation_rew * 0.05)
+					rew -= (heading_error - heading_thresh) * self.formation_rew * 0.05
 				# Reward progress toward goal to avoid circling near goals
 				if np.isfinite(self.prev_goal_dist[agent.id]):
 					delta_goal = self.prev_goal_dist[agent.id] - dist_to_goal
@@ -1157,6 +1176,7 @@ class Scenario(BaseScenario):
 
 		nearest_neighbors = np.concatenate(rotated_neighbors, axis=0)
 
+
 		# --- Tube params (rotated entrance/exit vectors + width + phase) ---
 		# tube_entrance = np.asarray(world.tube_params['entrance'], dtype=np.float32)
 		# tube_exit = np.asarray(world.tube_params['exit'], dtype=np.float32)
@@ -1188,7 +1208,6 @@ class Scenario(BaseScenario):
 			np.array([phase], dtype=np.float32)
 		], axis=0)
 		# print("Agent", agent.id, "tube_params", tube_params, "np.array([agent.state.speed,agent_speed])", np.array([agent.state.speed, agent_speed]))
-
 		# print("Agent", agent.id, "tube coords s,y,L,half_w:", s, y, L, half_w)
 		# --- Assemble final obs in the SAME field order as before ---
 		# [agent_vel(2), goal_pos(2), nearest_neighbors(4), tube_params(8)] = 16 dims
@@ -1292,6 +1311,8 @@ class Scenario(BaseScenario):
 		# print("disconnected_mask",disconnected_mask)
 		adj[disconnected_mask, :] = 0   # Mask rows for done agents
 		adj[:, disconnected_mask] = 0   # Mask columns for done agents
+
+		# print("Agent.id", agent.id, "Adjacency matrix after masking:\n", adj)
 		return node_obs, adj
 
 	def update_graph(self, world:World):
