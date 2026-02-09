@@ -403,7 +403,7 @@ class Scenario(BaseScenario):
 		elif self.formation_type == 'circle':
 			set_landmarks_in_circle(self, world, center=np.array([0.0, current_tube['exit'][1]+self.world_size/5]), radius=self.world_size/3)
 		elif self.formation_type == 'point':
-			set_landmarks_in_point(self, world, tube_angle=current_tube['angle'], tube_endpoints=current_tube['exit'])
+			set_landmarks_in_point(self, world, tube_angle=current_tube['angle'], tube_endpoints=current_tube['exit']+np.array([self.world_size/10,0.0]))
 		# elif self.formation_type == 'random':
 		# 	set_landmarks_random(self, world)
 		# else:
@@ -486,18 +486,6 @@ class Scenario(BaseScenario):
 		# Set progress gain based on total path length
 		# total_length = tube1_length + np.linalg.norm(exit2 - entrance2)
 		# self.progress_gain = self.goal_rew / (total_length * 10)
-
-	def _set_landmark_for_agent(self, world, agent_id, tube_angle, tube_endpoints):
-		relative_pos = np.array([0.0, -self.world_size/4])
-		rotated_pos = get_rotated_position_from_relative(relative_pos, tube_angle)
-		landmark_pos = np.array(tube_endpoints) + rotated_pos
-
-		world.landmarks[agent_id].state.p_pos = landmark_pos
-		world.landmarks[agent_id].state.reset_velocity()
-
-		self.landmark_poses = np.array([landmark.state.p_pos for landmark in world.landmarks])
-		self.landmark_poses_occupied = np.zeros(self.num_agents)
-		self.landmark_poses_updated = np.array([landmark.state.p_pos for landmark in world.landmarks])
 
 
 	def _build_tube_params(self, entrance, exit, width, angle, length, rotation_matrix):
