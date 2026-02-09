@@ -48,14 +48,14 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026' \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/' \
 --render_episodes=1 \
 --world_size=4 \
---num_agents=10 \
+--num_agents=30 \
 --num_obstacles=0 \
 --seed=0 \
---num_landmarks=10 \
---episode_length=100 \
+--num_landmarks=30 \
+--episode_length=150 \
 --use_dones=False \
 --collaborative=False --model_name='3' \
 --scenario_name='three_phase_graph' \
