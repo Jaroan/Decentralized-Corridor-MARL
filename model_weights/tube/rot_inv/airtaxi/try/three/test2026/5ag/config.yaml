@@ -3,13 +3,13 @@ wandb_version: 1
 _wandb:
   desc: null
   value:
-    code_path: source-air_corridor_unicycle_3-onpolicy_scripts_train_mpe.py
+    code_path: source-air_corridor_unicycle_5-onpolicy_scripts_train_mpe.py
     python_version: 3.12.11
     cli_version: 0.22.2
     framework: torch
     is_jupyter_run: false
     is_kaggle_kernel: false
-    start_time: 1770683096
+    start_time: 1770661513
     t:
       1:
       - 1
@@ -33,25 +33,25 @@ _wandb:
       - 20
       13: linux-x86_64
     e:
-      fzqa5n4afb6yfmw65vu57rx9hce2j4qx:
+      2n4g5w9sxbhzymus7k22fikpy4aetz42:
         os: Linux-6.1.159-llgrid-x86_64-with-glibc2.39
         python: CPython 3.12.11
-        started_at: '2026-02-10T00:24:56.561124Z'
+        started_at: '2026-02-09T18:25:13.074313Z'
         args:
         - --use_valuenorm
         - --use_popart
         - --project_name
-        - air_corridor_unicycle_3
+        - air_corridor_unicycle_5
         - --model_dir
-        - model_weights/tube/rot_inv/airtaxi/try/three/test2026
+        - model_weights/tube/rot_inv/airtaxi/try/three
         - --env_name
         - GraphMPE
         - --algorithm_name
         - rmappo
         - --seed
-        - '0'
+        - '1'
         - --experiment_name
-        - at_260209_192449_3test2026_phase_with_coll20_spacing10_eplen100
+        - at_260209_132459_3_phase_with_coll20_spacing10_eplen75
         - --scenario_name
         - three_phase_graph
         - --dynamics_type
@@ -60,8 +60,8 @@ _wandb:
         - '1'
         - --fair_rew
         - '10'
-        - --num_agents=3
-        - --num_landmarks=3
+        - --num_agents=5
+        - --num_landmarks=5
         - --collision_rew
         - '20'
         - --formation_rew
@@ -73,11 +73,11 @@ _wandb:
         - --num_mini_batch
         - '1'
         - --episode_length
-        - '100'
+        - '75'
         - --total_actions
         - '9'
         - --num_env_steps
-        - '5000000'
+        - '4000000'
         - --ppo_epoch
         - '10'
         - --use_ReLU
@@ -117,8 +117,8 @@ _wandb:
         git:
           remote_url: https://github.com/Jaroan/AAM-Corridor-MARL.git
           commit: afc80b5b29765629296ddf3821fbb05daf4bb23c
-        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/three_phase_graph/rmappo/at_260209_192449_3test2026_phase_with_coll20_spacing10_eplen100
-        host: d-8-2-1
+        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/three_phase_graph/rmappo/at_260209_132459_3_phase_with_coll20_spacing10_eplen75
+        host: d-12-16-1
         executable: /state/partition1/llgrid/pkg/conda/python-ML-2025b-pytorch/bin/python
         cpu_count: 40
         cpu_count_logical: 80
@@ -127,7 +127,7 @@ _wandb:
         disk:
           /:
             total: '471413596160'
-            used: '20522647552'
+            used: '20519309312'
         memory:
           total: '405413998592'
         gpu_nvidia:
@@ -135,60 +135,60 @@ _wandb:
           memory_total: '34359738368'
           cuda_cores: 5120
           architecture: Volta
-          uuid: GPU-1890e3b1-79b6-6baf-f4eb-0844a86714cf
+          uuid: GPU-4f1276a4-58eb-2597-9e2a-c281dc35b16d
         - name: Tesla V100-PCIE-32GB
           memory_total: '34359738368'
           cuda_cores: 5120
           architecture: Volta
-          uuid: GPU-f6f5a727-7d50-d317-6265-47f79487d073
+          uuid: GPU-e763804c-fc8c-4beb-bf2e-80cf2d9f36fd
         cuda_version: '13.0'
         slurm:
           tasks_per_node: '1'
-          topology_addr: d-8-2-1
+          topology_addr: d-12-16-1
           job_qos: normal
-          job_name: 3_col20
+          job_name: 5_col20
           conf: /etc/slurm/slurm.conf
           gtids: '0'
-          mem_per_cpu: '8500'
           cpus_on_node: '20'
+          mem_per_cpu: '8500'
           script_context: prolog_task
-          task_pid: '2857372'
           job_user: jaloor
+          task_pid: '2334856'
           nnodes: '1'
           nodeid: '0'
           gpupower: '150'
           cluster_name: txe1
           job_partition: xeon-g6-volta
-          array_task_min: '0'
           job_cpus_per_node: '20'
+          array_task_min: '0'
           spank_gpupower: WHAT
-          job_end_time: '1771043089'
-          nodelist: d-8-2-1
+          job_end_time: '1771021499'
+          nodelist: d-12-16-1
           node_aliases: (null)
-          array_job_id: '4135246'
+          job_start_time: '1770661499'
           array_task_step: '1'
-          job_start_time: '1770683089'
+          array_job_id: '4134582'
           job_num_nodes: '1'
           gpus_on_node: '1'
           procid: '0'
           array_task_count: '2'
-          jobid: '4135248'
-          job_id: '4135248'
-          job_account: default_group
+          jobid: '4134582'
           job_uid: '62375'
+          job_account: default_group
+          job_id: '4134582'
           submit_host: login-4
-          submit_dir: /home/gridsan/jaloor/AAM-Corridor-MARL
           topology_addr_pattern: node
+          submit_dir: /home/gridsan/jaloor/AAM-Corridor-MARL
           job_gid: '62375'
           working_cluster: txe1:scheduler-0:6817:9984:109
-          array_task_id: '0'
-          job_nodelist: d-8-2-1
-          job_gpus: '0'
+          array_task_id: '1'
+          job_nodelist: d-12-16-1
+          job_gpus: '1'
           localid: '0'
           cpus_per_task: '20'
           array_task_max: '1'
           prio_process: '0'
-        writer_id: fzqa5n4afb6yfmw65vu57rx9hce2j4qx
+        writer_id: 2n4g5w9sxbhzymus7k22fikpy4aetz42
 total_actions:
   desc: null
   value: 9
@@ -236,13 +236,13 @@ algorithm_name:
   value: rmappo
 project_name:
   desc: null
-  value: air_corridor_unicycle_3
+  value: air_corridor_unicycle_5
 experiment_name:
   desc: null
-  value: at_260209_192449_3test2026_phase_with_coll20_spacing10_eplen100
+  value: at_260209_132459_3_phase_with_coll20_spacing10_eplen75
 seed:
   desc: null
-  value: 0
+  value: 1
 cuda:
   desc: null
   value: true
@@ -263,7 +263,7 @@ n_render_rollout_threads:
   value: 1
 num_env_steps:
   desc: null
-  value: 5000000
+  value: 4000000
 user_name:
   desc: null
   value: marl
@@ -299,7 +299,7 @@ num_walls:
   value: 0
 episode_length:
   desc: null
-  value: 100
+  value: 75
 share_policy:
   desc: null
   value: true
@@ -452,7 +452,7 @@ render_eval:
   value: false
 model_dir:
   desc: null
-  value: model_weights/tube/rot_inv/airtaxi/try/three/test2026
+  value: model_weights/tube/rot_inv/airtaxi/try/three
 verbose:
   desc: null
   value: true
@@ -461,10 +461,10 @@ scenario_name:
   value: three_phase_graph
 num_landmarks:
   desc: null
-  value: 3
+  value: 5
 num_agents:
   desc: null
-  value: 3
+  value: 5
 num_obstacles:
   desc: null
   value: 0

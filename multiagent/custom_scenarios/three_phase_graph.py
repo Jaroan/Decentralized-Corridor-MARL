@@ -1358,7 +1358,6 @@ class Scenario(BaseScenario):
 		return np.hstack([vel, pos, goal_pos, entity_type])
 
 
-
 	def _get_entity_feat_relative(self, agent: Agent, entity: Entity, world: World, fairness_param: np.ndarray) -> arr:
 		"""
 		Returns rotation-invariant node features for `entity` relative to `agent`.
