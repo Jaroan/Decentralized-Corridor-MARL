@@ -1,6 +1,6 @@
 #!/bin/bash
 # Slurm sbatch options
-#SBATCH --job-name 3_col20
+#SBATCH --job-name 3rot_col20
 #SBATCH -a 0-1
 #SBATCH --gres=gpu:volta:1
 ##SBATCH --cpus-per-task=8
@@ -84,7 +84,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
---experiment_name "${str_dynamics_type}_${datetime_str}_3_phase_with_coll20_spacing10_eplen${episode_length}" \
+--experiment_name "${str_dynamics_type}_${datetime_str}_3_phase_with_coll20_spacing10_rot_eplen${episode_length}" \
 --scenario_name "three_phase_graph" \
 --dynamics_type ${chosen_dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
@@ -111,4 +111,4 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --increase_fairness "False" \
 --auto_mini_batch_size --target_mini_batch_size 8192 \
 --formation_type ${formation_type} \
-&> $logs_folder/${str_dynamics_type}_${datetime_str}_3_phase_with_coll20_spacing10_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
+&> $logs_folder/${str_dynamics_type}_${datetime_str}_3_phase_with_coll20_spacing10_rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
