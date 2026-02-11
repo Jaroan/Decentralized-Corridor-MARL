@@ -9,7 +9,7 @@ _wandb:
     framework: torch
     is_jupyter_run: false
     is_kaggle_kernel: false
-    start_time: 1770685996
+    start_time: 1770782986
     t:
       1:
       - 1
@@ -33,27 +33,27 @@ _wandb:
       - 20
       13: linux-x86_64
     e:
-      59clopubz7xxuknxsd4gzaz9iys3c820:
-        os: Linux-6.1.159-llgrid-x86_64-with-glibc2.39
+      go3nfxj38p43n7nm1npv1sykja9ej1ht:
+        os: Linux-6.1.161-llgrid-x86_64-with-glibc2.39
         python: CPython 3.12.11
-        started_at: '2026-02-10T01:13:15.876161Z'
+        started_at: '2026-02-11T04:09:46.500229Z'
         args:
         - --use_valuenorm
         - --use_popart
         - --project_name
         - air_corridor_unicycle_4
         - --model_dir
-        - model_weights/tube/rot_inv/airtaxi/try/three/
+        - model_weights/tube/rot_inv/airtaxi/try/three
         - --env_name
         - GraphMPE
         - --algorithm_name
         - rmappo
         - --seed
-        - '0'
+        - '1'
         - --experiment_name
-        - at_260209_201313_3_phase_with_coll20_spacing10_eplen150
+        - at_260210_230934_updated_with_coll20_spacing10_rot_eplen85
         - --scenario_name
-        - three_phase_graph
+        - three_phase_graph_updated
         - --dynamics_type
         - air_taxi
         - --fair_wt
@@ -73,11 +73,11 @@ _wandb:
         - --num_mini_batch
         - '1'
         - --episode_length
-        - '150'
+        - '85'
         - --total_actions
         - '9'
         - --num_env_steps
-        - '6000000'
+        - '10000000'
         - --ppo_epoch
         - '10'
         - --use_ReLU
@@ -116,9 +116,9 @@ _wandb:
         code_path_local: onpolicy/scripts/train_mpe.py
         git:
           remote_url: https://github.com/Jaroan/AAM-Corridor-MARL.git
-          commit: afc80b5b29765629296ddf3821fbb05daf4bb23c
-        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/three_phase_graph/rmappo/at_260209_201313_3_phase_with_coll20_spacing10_eplen150
-        host: d-8-1-2
+          commit: 67e0ab68e8fda8e5ba46c2d3075e75a27d9b9c63
+        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/three_phase_graph_updated/rmappo/at_260210_230934_updated_with_coll20_spacing10_rot_eplen85
+        host: d-12-15-1
         executable: /state/partition1/llgrid/pkg/conda/python-ML-2025b-pytorch/bin/python
         cpu_count: 40
         cpu_count_logical: 80
@@ -127,68 +127,68 @@ _wandb:
         disk:
           /:
             total: '471413596160'
-            used: '20498042880'
+            used: '18230120448'
         memory:
-          total: '405413998592'
+          total: '405413994496'
         gpu_nvidia:
         - name: Tesla V100-PCIE-32GB
           memory_total: '34359738368'
           cuda_cores: 5120
           architecture: Volta
-          uuid: GPU-51077d26-d19a-db48-eb5f-4d0989329484
+          uuid: GPU-75c5ba62-3e56-95b2-43d9-dfc60b12d658
         - name: Tesla V100-PCIE-32GB
           memory_total: '34359738368'
           cuda_cores: 5120
           architecture: Volta
-          uuid: GPU-628b9271-9976-5f03-b38f-4ada134b1004
+          uuid: GPU-42ce0213-d4cd-d418-0188-8a9184079632
         cuda_version: '13.0'
         slurm:
           tasks_per_node: '1'
-          job_name: 4_col20
+          job_name: 4rot_col20
           job_qos: normal
-          topology_addr: d-8-1-2
+          topology_addr: d-12-15-1
           conf: /etc/slurm/slurm.conf
           gtids: '0'
           mem_per_cpu: '8500'
           cpus_on_node: '20'
           script_context: prolog_task
-          task_pid: '3225032'
           job_user: jaloor
+          task_pid: '72074'
           nnodes: '1'
           nodeid: '0'
           gpupower: '150'
           cluster_name: txe1
           job_partition: xeon-g6-volta
-          job_cpus_per_node: '20'
           array_task_min: '0'
+          job_cpus_per_node: '20'
           spank_gpupower: WHAT
-          job_end_time: '1771045992'
-          nodelist: d-8-1-2
           node_aliases: (null)
-          job_start_time: '1770685992'
+          nodelist: d-12-15-1
+          job_end_time: '1771142973'
+          job_start_time: '1770782973'
           array_task_step: '1'
-          array_job_id: '4135264'
-          array_task_count: '2'
+          array_job_id: '4137950'
+          job_num_nodes: '1'
           gpus_on_node: '1'
           procid: '0'
-          jobid: '4135382'
-          job_num_nodes: '1'
-          job_id: '4135382'
+          jobid: '4137950'
+          array_task_count: '2'
+          job_id: '4137950'
           job_account: default_group
           job_uid: '62375'
-          submit_host: login-4
-          topology_addr_pattern: node
+          submit_host: login-3
           submit_dir: /home/gridsan/jaloor/AAM-Corridor-MARL
+          topology_addr_pattern: node
           job_gid: '62375'
           working_cluster: txe1:scheduler-0:6817:9984:109
-          array_task_id: '0'
-          job_nodelist: d-8-1-2
-          job_gpus: '0'
+          array_task_id: '1'
+          job_nodelist: d-12-15-1
+          job_gpus: '1'
           localid: '0'
           cpus_per_task: '20'
-          array_task_max: '1'
           prio_process: '0'
-        writer_id: 59clopubz7xxuknxsd4gzaz9iys3c820
+          array_task_max: '1'
+        writer_id: go3nfxj38p43n7nm1npv1sykja9ej1ht
 total_actions:
   desc: null
   value: 9
@@ -239,10 +239,10 @@ project_name:
   value: air_corridor_unicycle_4
 experiment_name:
   desc: null
-  value: at_260209_201313_3_phase_with_coll20_spacing10_eplen150
+  value: at_260210_230934_updated_with_coll20_spacing10_rot_eplen85
 seed:
   desc: null
-  value: 0
+  value: 1
 cuda:
   desc: null
   value: true
@@ -263,7 +263,7 @@ n_render_rollout_threads:
   value: 1
 num_env_steps:
   desc: null
-  value: 6000000
+  value: 10000000
 user_name:
   desc: null
   value: marl
@@ -299,7 +299,7 @@ num_walls:
   value: 0
 episode_length:
   desc: null
-  value: 150
+  value: 85
 share_policy:
   desc: null
   value: true
@@ -377,7 +377,7 @@ clip_param:
   value: 0.2
 num_mini_batch:
   desc: null
-  value: 4
+  value: 2
 entropy_coef:
   desc: null
   value: 0.01
@@ -452,13 +452,13 @@ render_eval:
   value: false
 model_dir:
   desc: null
-  value: model_weights/tube/rot_inv/airtaxi/try/three/
+  value: model_weights/tube/rot_inv/airtaxi/try/three
 verbose:
   desc: null
   value: true
 scenario_name:
   desc: null
-  value: three_phase_graph
+  value: three_phase_graph_updated
 num_landmarks:
   desc: null
   value: 4

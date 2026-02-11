@@ -854,6 +854,9 @@ class Scenario(BaseScenario):
 				return False
 
 	def reward(self, agent: Agent, world: World) -> float:
+		# Done agents get zero reward — they are stationary ghosts
+		if agent.status:
+			return 0.0
 		rew = 0.0
 		current_phase = self.get_agent_phase(agent, world)
 		# if current_phase == 2:
@@ -1018,22 +1021,26 @@ class Scenario(BaseScenario):
 			max_spacing_error = 0
 
 			if front_agent:
-				# print("np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos)", np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos), "desired_spacing", desired_spacing)
-				diff = np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos) - desired_spacing
-				# print("diff", diff)
+				dist_front = np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos)
+				diff = dist_front - desired_spacing
 				spacing_error += np.abs(diff) if diff < 0 else 0
 				max_spacing_error = max(max_spacing_error, np.abs(diff))
+				# Speed-matching: reward matching the front agent's corridor-speed
+				front_fwd_speed = float(np.dot(front_agent.state.p_vel, world.tube_params['e']))
+				my_fwd_speed = float(np.dot(agent.state.p_vel, world.tube_params['e']))
+				# Only match when too close (otherwise keep own pace)
+				if diff < 0:
+					speed_diff = my_fwd_speed - front_fwd_speed
+					if speed_diff > 0:  # approaching faster than front agent
+						rew -= speed_diff * self.formation_rew * 0.1
 			if back_agent:
-				# print(back_agent.state.p_pos - agent.state.p_pos)
-				# print("np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos)", np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos), "desired_spacing", desired_spacing)
-				diff = np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos) - desired_spacing
-				# print("diff", diff)
+				dist_back = np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos)
+				diff = dist_back - desired_spacing
 				max_spacing_error = max(max_spacing_error, np.abs(diff))
 				spacing_error += np.abs(diff) if diff < 0 else 0
 			if spacing_error > 0:
-				# print("Phase 1 spacing_error",spacing_error)
 				self.spacing_violation[agent.id] += 1
-			rew -= spacing_error * self.formation_rew  # Higher weight for maintaining formation in tube
+			rew -= spacing_error * self.formation_rew  # Maintain formation in tube
 			dist_to_exit_edge = self._exit_gate_distance(s, y, L, half_w)
 			rew -= dist_to_exit_edge
 			# print("Phase 1 dist_to_exit_edge", dist_to_exit_edge)
@@ -1070,8 +1077,8 @@ class Scenario(BaseScenario):
 
 					# print("Phase 2 Agent", agent.id, "reached goal", dist_to_goal, "rew", rew)
 			else:
-				# print("dist_to_goal", dist_to_goal)
-				rew -= dist_to_goal
+				# Normalized distance penalty (bounded to ~[0, 1] by world_size)
+				rew -= dist_to_goal / (self.world_size * 0.5 + 1e-9) * self.goal_rew * 0.5
 
 				# # Alignment penalty: heading should face the goal
 				# goal_vec = self.landmark_poses[self.goal_match_index[agent.id]] - agent.state.p_pos
@@ -1085,27 +1092,13 @@ class Scenario(BaseScenario):
 				heading_error = abs((agent_heading - corridor_heading + np.pi) % (2 * np.pi) - np.pi)
 
 				heading_thresh = float(self.config_class.GOAL_HEADING_THRESHOLD)
-
-				# if agent.id == 0:
-
-
-
-					# print("corridor_heading:", corridor_heading*180/np.pi, "angle", world.tube_params['angle']*180/np.pi)
-
-					# print("goal_heading:", goal_heading*180/np.pi)
-					# print("agent_heading:", agent_heading*180/np.pi)
-
-					# print("Phase 2 heading_error:", heading_error*180/np.pi, "heading thresh", heading_thresh*180/np.pi, "penalty", heading_error * self.formation_rew * 0.05)
-				# rew -= heading_error * self.formation_rew * 0.05
 				if heading_error > heading_thresh:
-					# print("Phase 2 heading error above threshold! Agent:", agent.id, "heading_error (deg):", heading_error*180/np.pi, "threshold (deg):", heading_thresh*180/np.pi, "penalty", (heading_error - heading_thresh) * self.formation_rew * 0.05)
-					rew -= (heading_error - heading_thresh) * self.formation_rew * 0.05
-				# Reward progress toward goal to avoid circling near goals
+					rew -= (heading_error - heading_thresh) * self.formation_rew * 0.02
+
+				# Stronger progress reward toward goal (dominates over proximity noise)
 				if np.isfinite(self.prev_goal_dist[agent.id]):
 					delta_goal = self.prev_goal_dist[agent.id] - dist_to_goal
-					# print("Phase 2 delta_goal", delta_goal, "reward", self.progress_gain * max(delta_goal, -0.1) * 1.0)
-					rew += self.progress_gain * max(delta_goal, -0.1) * 1.0
-				# Always update after using it (or initialize on first visit)
+					rew += self.progress_gain * 3.0 * max(delta_goal, -0.1)
 				self.prev_goal_dist[agent.id] = dist_to_goal
 
 		# print(f"Agent {agent.id} phase {current_phase} reward so far: ", rew)
@@ -1195,8 +1188,11 @@ class Scenario(BaseScenario):
 				closing_rate = 0.0
 			# Normalize by twice max speed
 			closing_rate_norm = np.clip(closing_rate / (2.0 * self.config_class.V_MAX + 1e-9), -1.0, 1.0)
+			# Nearest-neighbor distance normalized by separation distance
+			nn_dist_norm = np.clip(nn_dist / (3.0 * self.separation_distance + 1e-9), 0.0, 2.0)
 		else:
 			closing_rate_norm = 0.0
+			nn_dist_norm = 2.0  # no neighbor → "far away"
 
 		# Rotate each neighbor vector into ego frame, then flatten to 4 slots
 		rotated_neighbors = [
@@ -1232,12 +1228,12 @@ class Scenario(BaseScenario):
 		tube_params = np.concatenate([
 			np.array([s_norm, y_norm]),                                       # tube-frame position
 			np.array([dist_in, dist_out], dtype=np.float32),                  # distance to entrance & exit
-			np.array([closing_rate_norm, phase], dtype=np.float32)            # nearest-neighbor closing rate & phase
+			np.array([closing_rate_norm, nn_dist_norm, phase], dtype=np.float32)  # NN closing rate, NN dist, phase
 		], axis=0)
 		# print("Agent", agent.id, "tube_params", tube_params, "np.array([agent.state.speed,agent_speed])", np.array([agent.state.speed, agent_speed]))
 		# print("Agent", agent.id, "tube coords s,y,L,half_w:", s, y, L, half_w)
 		# --- Assemble final obs (all rotation-invariant) ---
-		# [heading_rel(2), speed(1), goal_pos(2), neighbors(4), tube_params(6)] = 15 dims
+		# [heading_rel(2), speed(1), goal_pos(2), neighbors(4), tube_params(7)] = 16 dims
 		return np.concatenate([
 			np.array([np.cos(heading_error), np.sin(heading_error), agent.state.speed]),  # corridor-relative heading + speed
 			goal_pos,                           # rotated goal vector (ego frame)

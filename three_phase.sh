@@ -98,7 +98,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --episode_length ${episode_length} \
 --total_actions 9 \
 --num_env_steps ${num_env_steps} \
---ppo_epoch 10 --use_ReLU --gain 0.01 --lr 7e-4 --critic_lr 7e-4 \
+--ppo_epoch 10 --use_ReLU --gain 0.01 --lr 5e-4 --critic_lr 5e-4 --entropy_coef 0.02 \
 --user_name "marl" \
 --use_cent_obs "False" \
 --use_dones "False" \

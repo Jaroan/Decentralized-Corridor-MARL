@@ -741,7 +741,7 @@ class MultiAgentBaseEnv(gym.Env):
 			if hasattr(self.world, 'tube_params'):
 				# for tube in self.world.tube_params:
 					# print("tube: ", tube)
-					tube= self.world.tube_params
+					tube = self.world.tube_params
 					# Get tube parameters
 					entrance = tube['entrance']
 					exit = tube['exit']
@@ -850,22 +850,22 @@ class MultiAgentBaseEnv(gym.Env):
 							self.comm_geoms[e][ci].set_color(
 								color, color, color)
 
-			# render the graph connections
-			if hasattr(self.world, 'graph_mode'):
-				if self.world.graph_mode:
-					edge_list = self.world.edge_list.T
-					assert edge_list is not None, ("Edge list should not be None")
-					for entity1 in self.world.entities:
-						for entity2 in self.world.entities:
-							e1_id, e2_id = entity1.global_id, entity2.global_id
-							if e1_id == e2_id:
-								continue
-							# if edge exists draw a line
-							if [e1_id, e2_id] in edge_list.tolist():
-								src = entity1.state.p_pos
-								dest = entity2.state.p_pos
-								### commenting out edge line drawings
-								# self.viewers[i].draw_line(start=src, end=dest)
+			# # render the graph connections
+			# if hasattr(self.world, 'graph_mode'):
+			# 	if self.world.graph_mode:
+			# 		edge_list = self.world.edge_list.T
+			# 		assert edge_list is not None, ("Edge list should not be None")
+			# 		for entity1 in self.world.entities:
+			# 			for entity2 in self.world.entities:
+			# 				e1_id, e2_id = entity1.global_id, entity2.global_id
+			# 				if e1_id == e2_id:
+			# 					continue
+			# 				# if edge exists draw a line
+			# 				if [e1_id, e2_id] in edge_list.tolist():
+			# 					src = entity1.state.p_pos
+			# 					dest = entity2.state.p_pos
+			# 					### commenting out edge line drawings
+			# 					# self.viewers[i].draw_line(start=src, end=dest)
 
 			# render to display or array
 			results.append(self.viewers[i].render(
