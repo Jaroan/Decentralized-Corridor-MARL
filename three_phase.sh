@@ -84,8 +84,8 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
---experiment_name "${str_dynamics_type}_${datetime_str}_3_phase_with_coll20_spacing10_rot_eplen${episode_length}" \
---scenario_name "three_phase_graph" \
+--experiment_name "${str_dynamics_type}_${datetime_str}_updated_with_coll20_spacing10_rot_eplen${episode_length}" \
+--scenario_name "three_phase_graph_updated" \
 --dynamics_type ${chosen_dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
 --fair_rew ${args_fair_rew[$SLURM_ARRAY_TASK_ID]} \
@@ -111,4 +111,4 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --increase_fairness "False" \
 --auto_mini_batch_size --target_mini_batch_size 8192 \
 --formation_type ${formation_type} \
-&> $logs_folder/${str_dynamics_type}_${datetime_str}_3_phase_with_coll20_spacing10_rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
+&> $logs_folder/${str_dynamics_type}_${datetime_str}_updated_with_coll20_spacing10_rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}

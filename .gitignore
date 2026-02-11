@@ -47,6 +47,8 @@ LLSUB.*/
 fair_assign_LLsub.sh.log-*
 bluesky/
 mpe_to_bluesky_bridge.py
+data/
+hj_reachability_utils/
 
 # ignoring hanabi and starcraft related files after pushing them to the repo
 onpolicy/results
