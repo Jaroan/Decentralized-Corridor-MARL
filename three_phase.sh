@@ -80,7 +80,7 @@ echo "formation_type: ${formation_type}"
 # # execute the script with different params
 python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --project_name "air_corridor_unicycle_${n_agents}" \
---model_dir "model_weights/tube/rot_inv/airtaxi/try/three" \
+--model_dir "model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026" \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \

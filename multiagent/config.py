@@ -28,7 +28,7 @@ class AirTaxiConfig():
     COLLISION_DISTANCE = SEPARATION_DISTANCE
 
     # COORDINATION_RANGE = 5 # 3 miles to km
-    COORDINATION_RANGE = 3 * 1.60934 # 3 miles to km
+    COORDINATION_RANGE = 1 * 1.60934 # 3 miles to km
     VALUE_FUNCTION_FILE_NAME = 'data/airtaxi_value_function.pkl'
     TTR_FILE_NAME = 'data/airtaxi_ttr_function.pkl'
 
