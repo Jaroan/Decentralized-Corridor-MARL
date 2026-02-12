@@ -47,8 +47,8 @@ datetime_str=$(date '+%y%m%d_%H%M%S')
 
 if [ "$chosen_dynamics_type" == "air_taxi" ]; then
     str_dynamics_type="at"
-    world_size=4
-    episode_length=85
+    world_size=5
+    episode_length=120
     num_env_steps=5000000
 elif [ "$chosen_dynamics_type" == "unicycle_vehicle" ]; then
     str_dynamics_type="uv"

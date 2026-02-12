@@ -368,38 +368,54 @@ class Scenario(BaseScenario):
 		agents_added = []
 		boundary_thresh = 0.99
 
+		# Staggered queue behind entrance — agents line up along the
+		# corridor axis with guaranteed minimum longitudinal spacing.
+		# Multiple agents may share a longitudinal level if they are
+		# laterally separated beyond the warning zone.
+		min_sep = max(3.0 * self.separation_distance, 1.5*self.separation_distance)  # beyond warning zone
+		long_spacing = min_sep * 1.2   # 50% extra gap between rows * 1.5
+		lateral_spread = self.world_size * 0.3  # wider lateral spread
+
 		while True:
 			if num_agents_added == self.num_agents:
 				break
 
-			# Add random jitter in TUBE frame (along-tube and across-tube)
-			angle = world.tube_params['angle']
 			corridor_e = world.tube_params['e']   # unit vec: entrance → exit
 			corridor_n = world.tube_params['n']   # unit vec: left-hand normal
-			# Jitter: small lateral + moderate longitudinal scatter
-			jitter_along = np.random.uniform(-0.3, 0.3) * self.world_size  # spread behind entrance
-			jitter_lateral = np.random.uniform(-0.5, 0.5) * self.tube_width
-			jitter = jitter_along * corridor_e + jitter_lateral * corridor_n
-			# Place agents behind the entrance (opposite of corridor direction)
-			perp_dir = -corridor_e  # behind entrance
-			distance_from_entrance = (self.world_size + num_agents_added) / 3
-			random_pos = world.tube_params['entrance'] + distance_from_entrance * perp_dir + jitter
+			entrance = world.tube_params['entrance']
 
+			# Longitudinal offset: each successive agent is farther behind
+			along_offset = -(num_agents_added + 1) * long_spacing
+			# Wider lateral jitter — allows 2-3 agents at the same depth
+			lateral_jitter = np.random.uniform(-1.0, 1.0) * lateral_spread
+			# Small longitudinal jitter (won't collapse the ordering)
+			along_jitter = np.random.uniform(-0.2, 0.2) * long_spacing
+
+			random_pos = (entrance
+						  + (along_offset + along_jitter) * corridor_e
+						  + lateral_jitter * corridor_n)
+
+			# Placement is deterministic by index — longitudinal spacing
+			# already guarantees min_sep between successive slots.
+			# Only check obstacle collision (walls etc.), not agent-agent.
 			agent_size = world.agents[num_agents_added].size
 			obs_collision = self.is_obstacle_collision(random_pos, agent_size, world)
-			# goal_collision = self.is_goal_collision(uniform_pos, agent_size, world)
+			if obs_collision:
+				# Nudge laterally and retry
+				lateral_jitter = np.random.uniform(-1.0, 1.0) * self.tube_width * 0.4
+				random_pos = (entrance
+							  + (along_offset + along_jitter) * corridor_e
+							  + lateral_jitter * corridor_n)
 
-			agent_collision = self.check_agent_collision(random_pos, agent_size, agents_added)
-			if not obs_collision and not agent_collision:
-				world.agents[num_agents_added].state.p_pos = random_pos
-				# Initialize heading roughly toward the corridor entrance
-				corridor_heading = np.arctan2(corridor_e[1], corridor_e[0])
-				init_heading = corridor_heading + np.random.uniform(-np.pi/6, np.pi/6)
-				world.agents[num_agents_added].state.reset_velocity(theta=init_heading)
-				world.agents[num_agents_added].state.c = np.zeros(world.dim_c)
-				world.agents[num_agents_added].status = False
-				agents_added.append(world.agents[num_agents_added])
-				num_agents_added += 1
+			world.agents[num_agents_added].state.p_pos = random_pos
+			# Initialize heading roughly toward the corridor entrance
+			corridor_heading = np.arctan2(corridor_e[1], corridor_e[0])
+			init_heading = corridor_heading + np.random.uniform(-np.pi/6, np.pi/6)
+			world.agents[num_agents_added].state.reset_velocity(theta=init_heading)
+			world.agents[num_agents_added].state.c = np.zeros(world.dim_c)
+			world.agents[num_agents_added].status = False
+			agents_added.append(world.agents[num_agents_added])
+			num_agents_added += 1
 		# agent_pos = [agent.state.p_pos for agent in world.agents]
 		#####################################################
 
@@ -436,11 +452,11 @@ class Scenario(BaseScenario):
 		# Initialize tube list
 		# world.tube_params = []
 		# Calculate tube width based on number of agents
-		self.tube_width = max(
-			3 * world.agents[0].size * 2.5,  # Width based on agents # =3  TODO: harcoded
-			self.world_size * 0.15  # Minimum width
-		)
-
+		# self.tube_width = min(
+		# 	3 * world.agents[0].size * 2.5,  # Width based on agents # =3  TODO: harcoded
+		# 	self.world_size * 0.15  # Minimum width
+		# )
+		self.tube_width = 0.6
 		# Angle curriculum: start with small angles, widen as training progresses
 		max_angle = getattr(self, '_curriculum_max_angle', np.pi / 2)
 		random_angle = np.random.uniform(-max_angle, max_angle)
@@ -786,13 +802,17 @@ class Scenario(BaseScenario):
 	# check collision of entity with obstacles and walls
 
 	# check collision of agent with other agents
-	def check_agent_collision(self, pos, agent_size, agent_added) -> bool:
+	def check_agent_collision(self, pos, agent_size, agent_added,
+							  min_dist=None) -> bool:
 		collision = False
+		if min_dist is None:
+			# Default: beyond the proximity warning zone (2.5x sep_dist)
+			min_dist = 3.0 * self.separation_distance
 		if len(agent_added):
 			for agent in agent_added:
 				delta_pos = agent.state.p_pos - pos
 				dist = np.linalg.norm(delta_pos)
-				if dist < self.separation_distance:
+				if dist < min_dist:
 					collision = True
 					break
 		return collision
@@ -873,14 +893,22 @@ class Scenario(BaseScenario):
 				dist_aa = np.linalg.norm(agent.state.p_pos - a.state.p_pos)
 				# --- Hard collision penalty ---
 				if dist_aa < self.separation_distance:
+					# print("Agent", agent.id, "collided with Agent", a.id)
+					# input("Press Enter to continue...")
 					rew -= self.collision_rew
-				# --- Soft proximity penalty (smooth gradient for avoidance) ---
+				# --- Soft proximity penalty (only when closing in) ---
 				warning_zone = 2.5 * self.separation_distance
 				if dist_aa < warning_zone:
-					# Linear ramp: 0 at warning_zone, 1 at separation_distance
-					proximity_ratio = (warning_zone - dist_aa) / (warning_zone - self.separation_distance + 1e-9)
-					proximity_ratio = np.clip(proximity_ratio, 0.0, 1.0)
-					rew -= self.collision_rew * 0.25 * proximity_ratio
+					# print("Agent", agent.id, "is too close to Agent", a.id, "dist_aa", dist_aa)
+					# input("Press Enter to continue...")
+					# Only penalize if agents are approaching each other
+					rel_pos = a.state.p_pos - agent.state.p_pos
+					rel_vel = np.asarray(a.state.p_vel) - np.asarray(agent.state.p_vel)
+					closing = -float(np.dot(rel_pos, rel_vel)) / (dist_aa + 1e-9)
+					if closing > 0:  # only penalize when approaching
+						proximity_ratio = (warning_zone - dist_aa) / (warning_zone - self.separation_distance + 1e-9)
+						proximity_ratio = np.clip(proximity_ratio, 0.0, 1.0)
+						rew -= self.collision_rew * 0.25 * proximity_ratio
 			
 		# 	if self.is_obstacle_collision(pos=agent.state.p_pos,
 		# 								entity_size=agent.size, 
@@ -964,7 +992,12 @@ class Scenario(BaseScenario):
 			s, y, L, half_w = self._tube_coords(world, agent.state.p_pos)
 			# print("Agent", agent.id, " Phase 0 s,y,L,half_w:", s, y, L, half_w)
 			dist_to_entrance_edge = self._entrance_gate_distance(s, y, half_w)
-			rew -= dist_to_entrance_edge if s < 0 else dist_to_entrance_edge*2
+			# Normalize distance by world size so penalty stays bounded
+			norm_dist_entrance = dist_to_entrance_edge / (self.world_size * 0.5 + 1e-9)
+			if s < 0:
+				rew -= norm_dist_entrance * self.goal_rew * 0.3
+			else:
+				rew -= norm_dist_entrance * self.goal_rew * 0.6
 
 			# Encourage forward progress toward the entrance (discourage circling)
 			# print("Phase 0 dist_to_entrance_edge", dist_to_entrance_edge, "rew", rew, "s", s, "y", y)
@@ -1025,11 +1058,11 @@ class Scenario(BaseScenario):
 				diff = dist_front - desired_spacing
 				spacing_error += np.abs(diff) if diff < 0 else 0
 				max_spacing_error = max(max_spacing_error, np.abs(diff))
-				# Speed-matching: reward matching the front agent's corridor-speed
-				front_fwd_speed = float(np.dot(front_agent.state.p_vel, world.tube_params['e']))
-				my_fwd_speed = float(np.dot(agent.state.p_vel, world.tube_params['e']))
-				# Only match when too close (otherwise keep own pace)
-				if diff < 0:
+				# Speed-matching: only when Euclidean distance is actually
+				# below separation (not just longitudinal projection)
+				if diff < 0 and dist_front < desired_spacing * 1.5:
+					front_fwd_speed = float(np.dot(front_agent.state.p_vel, world.tube_params['e']))
+					my_fwd_speed = float(np.dot(agent.state.p_vel, world.tube_params['e']))
 					speed_diff = my_fwd_speed - front_fwd_speed
 					if speed_diff > 0:  # approaching faster than front agent
 						rew -= speed_diff * self.formation_rew * 0.1
@@ -1042,7 +1075,8 @@ class Scenario(BaseScenario):
 				self.spacing_violation[agent.id] += 1
 			rew -= spacing_error * self.formation_rew  # Maintain formation in tube
 			dist_to_exit_edge = self._exit_gate_distance(s, y, L, half_w)
-			rew -= dist_to_exit_edge
+			# Normalize by tube length so penalty stays bounded
+			rew -= (dist_to_exit_edge / (L + 1e-9)) * self.goal_rew * 0.3
 			# print("Phase 1 dist_to_exit_edge", dist_to_exit_edge)
 			self.steps_in_corridor[agent.id] += 1
 			self.delta_spacing.append(spacing_error)

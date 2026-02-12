@@ -573,6 +573,7 @@ class GMPERunner(Runner):
 			
 			for step in range(self.episode_length):
 				# print("\nstep",step)
+				# input("Press Enter to continue...")
 				calc_start = time.time()
 
 				zero_masks = masks[0] == 0
