@@ -48,13 +48,13 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/4ag' \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026' \
 --render_episodes=2 \
 --world_size=5 \
---num_agents=10 \
+--num_agents=5 \
 --num_obstacles=0 \
 --seed=0 \
---num_landmarks=10 \
+--num_landmarks=1 \
 --episode_length=150 \
 --use_dones=False \
 --collaborative=False --model_name='3' \
@@ -100,17 +100,43 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026' \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026' \
 --render_episodes=2 \
---world_size=4 \
---num_agents=2 \
+--world_size=5 \
+--num_agents=10 \
 --num_obstacles=0 \
 --seed=0 \
---num_landmarks=2 \
+--num_landmarks=10 \
 --episode_length=100 \
 --use_dones=False \
 --collaborative=False --model_name='Seq' \
 --scenario_name='three_phase_graph_sequential' \
+--dynamics_type='air_taxi' \
+--goal_rew=20 \
+--collision_rew=20 \
+--formation_rew 10 \
+--fair_rew=1 \
+--save_gifs \
+--use_render \
+--num_walls=0 \
+--zeroshift=5 \
+--min_obs_dist 0.5 \
+--total_actions 5 \
+--formation_type 'point'
+
+
+python onpolicy/scripts/eval_mpe.py \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026' \
+--render_episodes=2 \
+--world_size=5 \
+--num_agents=10 \
+--num_obstacles=0 \
+--seed=0 \
+--num_landmarks=1 \
+--episode_length=250 \
+--use_dones=False \
+--collaborative=False --model_name='Seq' \
+--scenario_name='three_phase_graph_multiple_sequential' \
 --dynamics_type='air_taxi' \
 --goal_rew=20 \
 --collision_rew=20 \
@@ -151,13 +177,13 @@ python onpolicy/scripts/eval_mpe.py \
 --formation_type 'point'
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026' \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026' \
 --render_episodes=2 \
---world_size=4 \
---num_agents=2 \
+--world_size=5 \
+--num_agents=10 \
 --num_obstacles=0 \
 --seed=0 \
---num_landmarks=2 \
+--num_landmarks=10 \
 --episode_length=100 \
 --use_dones=False \
 --collaborative=False --model_name='Mer' \

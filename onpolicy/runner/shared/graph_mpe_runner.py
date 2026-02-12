@@ -771,22 +771,22 @@ class GMPERunner(Runner):
 
 
 		# calculate statistics for time_mean_arr
-		time_mean_minimum = np.min(time_mean_arr)
-		time_mean_0_1_quantile = np.percentile(time_mean_arr, 10)
-		time_mean_median = np.median(time_mean_arr)
-		time_mean_0_9_quantile = np.percentile(time_mean_arr, 90)
-		time_mean_maximum = np.max(time_mean_arr)
-		time_mean_mean = np.mean(time_mean_arr)
+		# time_mean_minimum = np.min(time_mean_arr)
+		# time_mean_0_1_quantile = np.percentile(time_mean_arr, 10)
+		# time_mean_median = np.median(time_mean_arr)
+		# time_mean_0_9_quantile = np.percentile(time_mean_arr, 90)
+		# time_mean_maximum = np.max(time_mean_arr)
+		# time_mean_mean = np.mean(time_mean_arr)
 
 		# Convert boolean array to integers
 		# success_rates_arr = success_rates_arr.astype(int)
 		# success_rates_arr = [int(value) for value in success_rates_arr]
 		# calculate statistics for success rates
 		success_rates_minimum = np.min(success_rates_arr)
-		success_rates_0_1_quantile = np.percentile(success_rates_arr, 10)
+		# success_rates_0_1_quantile = np.percentile(success_rates_arr, 10)
 		success_rates_median = np.median(success_rates_arr)
-		success_rates_0_9_quantile = np.percentile(success_rates_arr, 90)
-		success_rates_maximum = np.max(success_rates_arr)
+		# success_rates_0_9_quantile = np.percentile(success_rates_arr, 90)
+		# success_rates_maximum = np.max(success_rates_arr)
 		success_rates_mean = np.mean(success_rates_arr)
 
 		total_dists_traveled_median = np.median(total_dists_traveled)
@@ -835,60 +835,60 @@ class GMPERunner(Runner):
 		# report the success rates statistics
 		print("Success rates mean", success_rates_mean)
 		print("Success rates median",success_rates_median)
-		print("Success rates minimum", success_rates_minimum)
-		print("Success rates 0.1 quantile", success_rates_0_1_quantile)
-		print("Success rates 0.9 quantile", success_rates_0_9_quantile)
-		print("Success rates maximum", success_rates_maximum)
+		# print("Success rates minimum", success_rates_minimum)
+		# print("Success rates 0.1 quantile", success_rates_0_1_quantile)
+		# print("Success rates 0.9 quantile", success_rates_0_9_quantile)
+		# print("Success rates maximum", success_rates_maximum)
 
-		print("Num collisions", np.mean(num_collisions_arr))
-		print("Fairness Median", fair_median)
-		print("Fairness Mean", fair_mean)
-		# Print the values
-		print("Fair Minimum:", fair_minimum)
-		print("Fair 0_1 Quantile:", fair_0_1_quantile)
-		print("Fair Median:", fair_median)
-		print("Fair 0.9 Quantile:", fair_0_9_quantile)
-		print("Fair Maximum:", fair_maximum)
+		# print("Num collisions", np.mean(num_collisions_arr))
+		# print("Fairness Median", fair_median)
+		# print("Fairness Mean", fair_mean)
+		# # Print the values
+		# print("Fair Minimum:", fair_minimum)
+		# print("Fair 0_1 Quantile:", fair_0_1_quantile)
+		# print("Fair Median:", fair_median)
+		# print("Fair 0.9 Quantile:", fair_0_9_quantile)
+		# print("Fair Maximum:", fair_maximum)
 
-		print("Stddev Minimum:", stddev_minimum)
-		print("Stddev 0_1 Quantile:", stddev_0_1_quantile)
-		print("Stddev Median:", stddev_median)
-		print("Stddev 0.9 Quantile:", stddev_0_9_quantile)
-		print("Stddev Maximum:", stddev_maximum)
-		print("Stddev Mean:", stddev_mean)
-		print("Dists traveled", dists_trav_list)
-		print("Time taken", time_taken_list)
+		# print("Stddev Minimum:", stddev_minimum)
+		# print("Stddev 0_1 Quantile:", stddev_0_1_quantile)
+		# print("Stddev Median:", stddev_median)
+		# print("Stddev 0.9 Quantile:", stddev_0_9_quantile)
+		# print("Stddev Maximum:", stddev_maximum)
+		# print("Stddev Mean:", stddev_mean)
+		# print("Dists traveled", dists_trav_list)
+		# print("Time taken", time_taken_list)
 
 
-		# print time fairness and time stddev
-		print("Time Fair Minimum:", time_fair_minimum)
-		print("Time Fair 0.1 Quantile:", time_fair_0_1_quantile)
-		print("Time Fair Median:", time_fair_median)
-		print("Time Fair 0.9 Quantile:", time_fair_0_9_quantile)
-		print("Time Fair Maximum:", time_fair_maximum)
-		print("Time Fair Mean:", time_fair_mean)
+		# # print time fairness and time stddev
+		# print("Time Fair Minimum:", time_fair_minimum)
+		# print("Time Fair 0.1 Quantile:", time_fair_0_1_quantile)
+		# print("Time Fair Median:", time_fair_median)
+		# print("Time Fair 0.9 Quantile:", time_fair_0_9_quantile)
+		# print("Time Fair Maximum:", time_fair_maximum)
+		# print("Time Fair Mean:", time_fair_mean)
 
-		print("Time Stddev Minimum:", time_stddev_minimum)
-		print("Time Stddev 0.1 Quartile:", time_stddev_0_1_quantile)
-		print("Time Stddev Median:", time_stddev_median)
-		print("Time Stddev 0.9 Quartile:", time_stddev_0_9_quantile)
-		print("Time Stddev Maximum:", time_stddev_maximum)
-		print("Time Stddev Mean:", time_stddev_mean)
+		# print("Time Stddev Minimum:", time_stddev_minimum)
+		# print("Time Stddev 0.1 Quartile:", time_stddev_0_1_quantile)
+		# print("Time Stddev Median:", time_stddev_median)
+		# print("Time Stddev 0.9 Quartile:", time_stddev_0_9_quantile)
+		# print("Time Stddev Maximum:", time_stddev_maximum)
+		# print("Time Stddev Mean:", time_stddev_mean)
 
-		# print dist mean and time mean
-		print("Dist Mean Minimum:", dist_mean_minimum)
-		print("Dist Mean 0.1 Quartile:", dist_mean_0_1_quantile)
-		print("Dist Mean Median:", dist_mean_median)
-		print("Dist Mean 0.9 Quartile:", dist_mean_0_9_quantile)
-		print("Dist Mean Maximum:", dist_mean_maximum)
-		print("Dist Mean Mean:", dist_mean_mean)
+		# # print dist mean and time mean
+		# print("Dist Mean Minimum:", dist_mean_minimum)
+		# print("Dist Mean 0.1 Quartile:", dist_mean_0_1_quantile)
+		# print("Dist Mean Median:", dist_mean_median)
+		# print("Dist Mean 0.9 Quartile:", dist_mean_0_9_quantile)
+		# print("Dist Mean Maximum:", dist_mean_maximum)
+		# print("Dist Mean Mean:", dist_mean_mean)
 
-		print("Time Mean Minimum:", time_mean_minimum)
-		print("Time Mean 0.1 Quartile:", time_mean_0_1_quantile)
-		print("Time Mean Median:", time_mean_median)
-		print("Time Mean 0.9 Quartile:", time_mean_0_9_quantile)
-		print("Time Mean Maximum:", time_mean_maximum)
-		print("Time Mean Mean:", time_mean_mean)
+		# print("Time Mean Minimum:", time_mean_minimum)
+		# print("Time Mean 0.1 Quartile:", time_mean_0_1_quantile)
+		# print("Time Mean Median:", time_mean_median)
+		# print("Time Mean 0.9 Quartile:", time_mean_0_9_quantile)
+		# print("Time Mean Maximum:", time_mean_maximum)
+		# print("Time Mean Mean:", time_mean_mean)
 
 		print("Total Dists Traveled Median:", total_dists_traveled_median)
 		print("Total Time Taken Median:", total_time_taken_median)
@@ -974,85 +974,85 @@ class GMPERunner(Runner):
 		# 	total_time_taken_max			
 		# ]
 
-		csv_data = [
-			self.num_obstacles, 
-			self.num_agents,
-			self.all_args.world_size,
-			self.episode_length,
-			self.all_args.render_episodes,
-			np.mean(frac_episode_arr),
-			success_rates_minimum,
-			success_rates_0_1_quantile,
-			success_rates_median ,
-			success_rates_0_9_quantile ,
-			success_rates_maximum,
-			success_rates_mean,
-			np.mean(num_collisions_arr),
-			rewards_mean,
-			rewards_mean / self.num_agents,
-			rewards_mean / (self.num_agents * self.episode_length),
-			dists_trav_list,
-			time_taken_list,
-			conformance_percentage_mean,
-			conformance_percentage_median,
-			conformance_percentage_std,
-			delta_space_mean,
-			delta_space_median,
-			delta_space_std,
-			time_fair_mean,  # Add mean value for time_fairness
-			time_fair_minimum,  # Add minimum value for time_fairness
-			time_fair_0_1_quantile,  # Add first quartile value for time_fairness
-			time_fair_median,  # Add median value for time_fairness
-			time_fair_0_9_quantile,  # Add third quartile value for time_fairness
-			time_fair_maximum,  # Add maximum value for time_fairness
-			time_stddev_mean,  # Add mean value for time_stddev_param
-			time_stddev_minimum,  # Add minimum value for time_stddev_param
-			time_stddev_0_1_quantile,  # Add first quartile value for time_stddev_param
-			time_stddev_median,  # Add median value for time_stddev_param
-			time_stddev_0_9_quantile,  # Add third quartile value for time_stddev_param
-			time_stddev_maximum,  # Add maximum value for time_stddev_param
-			dist_mean_mean,  # Add mean value for dist_mean_arr
-			dist_mean_minimum,  # Add minimum value for dist_mean_arr
-			dist_mean_0_1_quantile,  # Add first quartile value for dist_mean_arr
-			dist_mean_median,  # Add median value for dist_mean_arr
-			dist_mean_0_9_quantile,  # Add third quartile value for dist_mean_arr
-			dist_mean_maximum,  # Add maximum value for dist_mean_arr
-			time_mean_mean,  # Add mean value for time_mean_arr
-			time_mean_minimum,  # Add minimum value for time_mean_arr
-			time_mean_0_1_quantile,  # Add first quartile value for time_mean_arr
-			time_mean_median,  # Add median value for time_mean_arr
-			time_mean_0_9_quantile,  # Add third quartile value for time_mean_arr
-			time_mean_maximum,  # Add maximum value for time_mean_arr
-			total_dists_traveled_median,  # Add median value for total_dists_traveled
-			total_dists_traveled_mean,
-			total_dists_traveled_0_1_quantile,
-			total_dists_traveled_0_9_quantile,
-			total_dists_traveled_min,
-			total_dists_traveled_max,
-			total_time_taken_median,  # Add median value for total_time_taken
-			total_time_taken_mean,
-			total_time_taken_0_1_quantile,
-			total_time_taken_0_9_quantile,
-			total_time_taken_min,
-			total_time_taken_max,
-			fair_mean,  # Add mean value for fairness_param
-			fair_minimum,  # Add minimum value for fairness_param
-			fair_0_1_quantile,  # Add first quartile value for fairness_param
-			fair_median,  # Add median value for fairness_param
-			fair_0_9_quantile,  # Add third quartile value for fairness_param
-			fair_maximum,  # Add maximum value for fairness_param
-			spacing_violations_mean,
-			spacing_violations_median,
-			spacing_violations_std
-		]
+		# csv_data = [
+		# 	self.num_obstacles, 
+		# 	self.num_agents,
+		# 	self.all_args.world_size,
+		# 	self.episode_length,
+		# 	self.all_args.render_episodes,
+		# 	np.mean(frac_episode_arr),
+		# 	success_rates_minimum,
+		# 	success_rates_0_1_quantile,
+		# 	success_rates_median ,
+		# 	success_rates_0_9_quantile ,
+		# 	success_rates_maximum,
+		# 	success_rates_mean,
+		# 	np.mean(num_collisions_arr),
+		# 	rewards_mean,
+		# 	rewards_mean / self.num_agents,
+		# 	rewards_mean / (self.num_agents * self.episode_length),
+		# 	dists_trav_list,
+		# 	time_taken_list,
+		# 	conformance_percentage_mean,
+		# 	conformance_percentage_median,
+		# 	conformance_percentage_std,
+		# 	delta_space_mean,
+		# 	delta_space_median,
+		# 	delta_space_std,
+		# 	time_fair_mean,  # Add mean value for time_fairness
+		# 	time_fair_minimum,  # Add minimum value for time_fairness
+		# 	time_fair_0_1_quantile,  # Add first quartile value for time_fairness
+		# 	time_fair_median,  # Add median value for time_fairness
+		# 	time_fair_0_9_quantile,  # Add third quartile value for time_fairness
+		# 	time_fair_maximum,  # Add maximum value for time_fairness
+		# 	time_stddev_mean,  # Add mean value for time_stddev_param
+		# 	time_stddev_minimum,  # Add minimum value for time_stddev_param
+		# 	time_stddev_0_1_quantile,  # Add first quartile value for time_stddev_param
+		# 	time_stddev_median,  # Add median value for time_stddev_param
+		# 	time_stddev_0_9_quantile,  # Add third quartile value for time_stddev_param
+		# 	time_stddev_maximum,  # Add maximum value for time_stddev_param
+		# 	dist_mean_mean,  # Add mean value for dist_mean_arr
+		# 	dist_mean_minimum,  # Add minimum value for dist_mean_arr
+		# 	dist_mean_0_1_quantile,  # Add first quartile value for dist_mean_arr
+		# 	dist_mean_median,  # Add median value for dist_mean_arr
+		# 	dist_mean_0_9_quantile,  # Add third quartile value for dist_mean_arr
+		# 	dist_mean_maximum,  # Add maximum value for dist_mean_arr
+		# 	time_mean_mean,  # Add mean value for time_mean_arr
+		# 	time_mean_minimum,  # Add minimum value for time_mean_arr
+		# 	time_mean_0_1_quantile,  # Add first quartile value for time_mean_arr
+		# 	time_mean_median,  # Add median value for time_mean_arr
+		# 	time_mean_0_9_quantile,  # Add third quartile value for time_mean_arr
+		# 	time_mean_maximum,  # Add maximum value for time_mean_arr
+		# 	total_dists_traveled_median,  # Add median value for total_dists_traveled
+		# 	total_dists_traveled_mean,
+		# 	total_dists_traveled_0_1_quantile,
+		# 	total_dists_traveled_0_9_quantile,
+		# 	total_dists_traveled_min,
+		# 	total_dists_traveled_max,
+		# 	total_time_taken_median,  # Add median value for total_time_taken
+		# 	total_time_taken_mean,
+		# 	total_time_taken_0_1_quantile,
+		# 	total_time_taken_0_9_quantile,
+		# 	total_time_taken_min,
+		# 	total_time_taken_max,
+		# 	fair_mean,  # Add mean value for fairness_param
+		# 	fair_minimum,  # Add minimum value for fairness_param
+		# 	fair_0_1_quantile,  # Add first quartile value for fairness_param
+		# 	fair_median,  # Add median value for fairness_param
+		# 	fair_0_9_quantile,  # Add third quartile value for fairness_param
+		# 	fair_maximum,  # Add maximum value for fairness_param
+		# 	spacing_violations_mean,
+		# 	spacing_violations_median,
+		# 	spacing_violations_std
+		# ]
 
-		# open the file in the write mode
-		with open(str(self.all_args.model_dir)+'/'+str(self.all_args.model_name)+'_'+str(self.all_args.formation_type)+'_results_collect_final_split_oct.csv', 'a', newline="") as f:
-			# create the csv writer
-			writer = csv.writer(f)
+		# # open the file in the write mode
+		# with open(str(self.all_args.model_dir)+'/'+str(self.all_args.model_name)+'_'+str(self.all_args.formation_type)+'_results_collect_final_split_oct.csv', 'a', newline="") as f:
+		# 	# create the csv writer
+		# 	writer = csv.writer(f)
 
-			# write a row to the csv file
-			writer.writerow(csv_data)
+		# 	# write a row to the csv file
+		# 	writer.writerow(csv_data)
 
 		
 		if not get_metrics:
