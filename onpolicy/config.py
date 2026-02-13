@@ -398,6 +398,13 @@ def get_config():
     # pretrained parameters
     parser.add_argument("--model_dir", type=str, default=None, 
                         help="by default None. set the path to pretrained model.")
+    parser.add_argument("--model_dir_slow", type=str, default=None,
+                        help="Path to a second pretrained model for slow agents. "
+                        "If set, agents listed in --slow_agent_ids use this policy.")
+    parser.add_argument("--slow_agent_ids", type=str, default=None,
+                        help="Comma-separated agent indices that use the slow policy, "
+                        "e.g. '1,3,5'. If None and model_dir_slow is set, "
+                        "a random 20%% subset is chosen.")
     
     # misc parameters
     parser.add_argument("--verbose", action='store_false', default=True, 

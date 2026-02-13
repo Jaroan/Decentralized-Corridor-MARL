@@ -81,7 +81,8 @@ def parse_args(args, parser):
 
 def modify_args(model_dir:str, 
                 args:argparse.Namespace, 
-                exclude_args:list=['model_dir', 'num_agents', 'num_obstacles', 
+                exclude_args:list=['model_dir', 'model_dir_slow', 'slow_agent_ids',
+                                'num_agents', 'num_obstacles', 
                                 'num_landmarks', 'render_episodes', 'world_size',
                                 'seed', 'save_gifs', 'use_render', 'episode_length',
                                 'use_dones', 'goal_rew','collaborative', 

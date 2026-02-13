@@ -112,6 +112,42 @@ class Runner(object):
 
 		# algorithm
 		self.trainer = TrainAlgo(self.all_args, self.policy, device = self.device)
+
+		# --- Second policy for slow agents (eval/render only) ---
+		self.policy_slow = None
+		self.slow_agent_ids = set()
+		model_dir_slow = getattr(self.all_args, 'model_dir_slow', None)
+		if model_dir_slow is not None and self.all_args.use_render:
+			print(f'Loading slow-agent policy from {model_dir_slow}')
+			if self.all_args.env_name == 'GraphMPE':
+				self.policy_slow = Policy(self.all_args,
+									self.envs.observation_space[0],
+									share_observation_space,
+									self.envs.node_observation_space[0],
+									self.envs.edge_observation_space[0],
+									self.envs.action_space[0],
+									device=self.device)
+			else:
+				self.policy_slow = Policy(self.all_args,
+									self.envs.observation_space[0],
+									share_observation_space,
+									self.envs.action_space[0],
+									device=self.device)
+			# load weights
+			slow_actor_sd = torch.load(str(model_dir_slow) + '/actor.pt',
+										map_location=torch.device('cpu'))
+			self.policy_slow.actor.load_state_dict(slow_actor_sd)
+			self.policy_slow.actor.eval()
+			# parse slow agent ids
+			slow_ids_str = getattr(self.all_args, 'slow_agent_ids', None)
+			if slow_ids_str is not None:
+				self.slow_agent_ids = set(int(x) for x in slow_ids_str.split(','))
+			else:
+				# default: random 20% of agents
+				num_slow = max(1, self.num_agents // 5)
+				self.slow_agent_ids = set(np.random.choice(
+					self.num_agents, size=num_slow, replace=False).tolist())
+			print(f'Slow agent IDs: {sorted(self.slow_agent_ids)}')
 		
 		# buffer
 		if self.all_args.env_name == "GraphMPE":

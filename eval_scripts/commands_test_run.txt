@@ -47,15 +47,18 @@ python onpolicy/scripts/eval_mpe.py \
 --formation_type 'point'
 
 
+--model_dir_slow='model_weights/tube/rot_inv/airtaxi/try/three/test2026/110kts' \
+--slow_agent_ids='1' \
+
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/feb13' \
---render_episodes=2 \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026' \
+--render_episodes=6 \
 --world_size=5 \
---num_agents=40 \
+--num_agents=5 \
 --num_obstacles=0 \
 --seed=0 \
 --num_landmarks=1 \
---episode_length=150 \
+--episode_length=120 \
 --use_dones=False \
 --collaborative=False --model_name='3' \
 --scenario_name='three_phase_graph_updated' \
@@ -126,7 +129,7 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/feb13' \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026' \
 --render_episodes=2 \
 --world_size=5 \
 --num_agents=10 \
@@ -180,10 +183,10 @@ python onpolicy/scripts/eval_mpe.py \
 --model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026' \
 --render_episodes=1 \
 --world_size=5 \
---num_agents=30 \
+--num_agents=4 \
 --num_obstacles=0 \
 --seed=0 \
---num_landmarks=30 \
+--num_landmarks=4 \
 --episode_length=200 \
 --use_dones=False \
 --collaborative=False --model_name='Mer' \

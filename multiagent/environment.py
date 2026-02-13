@@ -787,6 +787,45 @@ class MultiAgentBaseEnv(gym.Env):
 					tube_outline = rendering.make_polygon(tube_corners, filled=False)
 					tube_outline.set_color(0.6, 0.6, 0.6, alpha=0.5)  # Darker gray
 					self.render_geoms.append(tube_outline)
+
+					# # --- Entrance marker (GREEN dot) ---
+					# marker_radius = width * 0.15
+					# entrance_marker = rendering.make_circle(marker_radius)
+					# entrance_marker.set_color(0.0, 0.9, 0.0, alpha=0.8)
+					# entrance_xform = rendering.Transform(translation=tuple(entrance))
+					# entrance_marker.add_attr(entrance_xform)
+					# self.render_geoms.append(entrance_marker)
+
+					# # --- Exit marker (RED dot) ---
+					# exit_marker = rendering.make_circle(marker_radius)
+					# exit_marker.set_color(0.9, 0.0, 0.0, alpha=0.8)
+					# exit_xform = rendering.Transform(translation=tuple(exit))
+					# exit_marker.add_attr(exit_xform)
+					# self.render_geoms.append(exit_marker)
+
+					# # --- Direction arrow (entrance → exit, BLUE) ---
+					# e_vec = (np.array(exit) - np.array(entrance))
+					# e_len = np.linalg.norm(e_vec)
+					# if e_len > 1e-6:
+					# 	e_hat = e_vec / e_len
+					# 	arrow_start = np.array(entrance) + e_hat * e_len * 0.25
+					# 	arrow_end   = np.array(entrance) + e_hat * e_len * 0.75
+					# 	arrow_line = rendering.make_line(tuple(arrow_start), tuple(arrow_end))
+					# 	arrow_line.set_color(0.0, 0.0, 0.9, alpha=0.9)
+					# 	arrow_line.linewidth.stroke = 3
+					# 	self.render_geoms.append(arrow_line)
+					# 	# Arrowhead
+					# 	perp = np.array([-e_hat[1], e_hat[0]])
+					# 	tip = arrow_end
+					# 	head_size = marker_radius * 1.2
+					# 	head_pts = [
+					# 		tuple(tip),
+					# 		tuple(tip - head_size * e_hat + head_size * 0.5 * perp),
+					# 		tuple(tip - head_size * e_hat - head_size * 0.5 * perp),
+					# 	]
+					# 	arrowhead = rendering.make_polygon(head_pts)
+					# 	arrowhead.set_color(0.0, 0.0, 0.9, alpha=0.9)
+					# 	self.render_geoms.append(arrowhead)
 			# add geoms to viewer
 			# for viewer in self.viewers:
 			#     viewer.geoms = []

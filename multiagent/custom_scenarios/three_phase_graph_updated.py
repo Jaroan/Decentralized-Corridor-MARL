@@ -285,6 +285,8 @@ class Scenario(BaseScenario):
 		self.prev_proj = np.zeros(self.num_agents, dtype=np.float32)
 		# Store previous goal distance for progress reward in Phase 2
 		self.prev_goal_dist = np.full(self.num_agents, np.inf, dtype=np.float32)
+		# Recovery tracking: True when agent fell out of corridor and needs to return to entrance
+		self.recovering = np.zeros(self.num_agents, dtype=bool)
 
 		#################### set colours ####################
 		# set colours for agents
@@ -373,8 +375,8 @@ class Scenario(BaseScenario):
 		# Multiple agents may share a longitudinal level if they are
 		# laterally separated beyond the warning zone.
 		min_sep = max(4.0 * self.separation_distance, 2*self.separation_distance)  # beyond warning zone
-		long_spacing = min_sep * 1.4   # 50% extra gap between rows * 1.5
-		lateral_spread = self.world_size * 0.3  # wider lateral spread
+		long_spacing = min_sep * 0.6   # 50% extra gap between rows * 1.5
+		lateral_spread = self.world_size * 0.6  # wider lateral spread
 
 		while True:
 			if num_agents_added == self.num_agents:
@@ -440,6 +442,18 @@ class Scenario(BaseScenario):
 		#####################################################
 
 		############ find minimum times to goals ############
+		# --- Per-agent speed override for slow agents (dual-policy eval) ---
+		slow_ids_str = getattr(self.args, 'slow_agent_ids', None)
+		if slow_ids_str is not None:
+			slow_ids = set(int(x) for x in slow_ids_str.split(','))
+			# Slow V_MAX: 140 kts in km/s (same units as AirTaxiConfig)
+			slow_v_max = 140 * 0.514444 * 0.001   # ≈ 0.0720 km/s
+			for agent in world.agents:
+				if agent.id in slow_ids:
+					agent.state.max_speed = slow_v_max
+					agent.max_speed = slow_v_max
+					agent.color = np.array([0.2, 0.6, 0.9])  # blue tint for slow agents
+
 		if self.max_speed is not None:
 			for agent in world.agents:
 				self.min_time(agent, world)
@@ -628,6 +642,8 @@ class Scenario(BaseScenario):
 				agent.previous_phase = 0
 				# self.phase_reached[agent.id] = 0
 				self.entry_reward_cooldown[agent.id] = 0
+				# Mark agent as recovering — it needs to go back to the entrance
+				self.recovering[agent.id] = True
 			# print("Agent {} is in pre-tube phase 000".format(agent.id))
 			return 0  # Pre-tube phase
 		elif in_tube:
@@ -977,6 +993,8 @@ class Scenario(BaseScenario):
 				rew += self.goal_rew  # *3  # Positive reward for proper transition
 				self.entry_reward_cooldown[agent.id] = self.phase_reward_cooldown_steps  # Cooldown period to prevent repeated rewards
 				self.phase_reached[agent.id] = 1  # Mark Phase 1 completed
+				# Clear recovery state — agent successfully re-entered
+				self.recovering[agent.id] = False
 				# print(f"Agent {agent.id} properly progressed from phase {agent.previous_phase} to {current_phase} rew", rew)
 			elif current_phase == 2:
 				# Rewards if agent moves out of tube
@@ -998,35 +1016,61 @@ class Scenario(BaseScenario):
 			# --- Bypass detection: agent is alongside corridor but laterally outside ---
 			bypassing = (s > 0) and (abs(y) > half_w)
 
-			# Normalize distance by world size so penalty stays bounded
-			norm_dist_entrance = dist_to_entrance_edge / (self.world_size * 0.5 + 1e-9)
-			if s < 0:
-				rew -= norm_dist_entrance * self.goal_rew * 0.3
+			# --- Recovery mode: agent missed entrance or left midway, must return ---
+			is_recovering = self.recovering[agent.id]
+			if is_recovering:
+				# Strong pull toward entrance center (overrides normal forward progress)
+				entrance_center = np.asarray(world.tube_params['entrance'], dtype=np.float32)
+				vec_to_entrance = entrance_center - agent.state.p_pos
+				dist_to_entrance_center = np.linalg.norm(vec_to_entrance) + 1e-9
+
+				# Distance penalty — strongly pull back toward entrance
+				norm_dist = dist_to_entrance_center / (self.world_size * 0.5 + 1e-9)
+				rew -= norm_dist * self.goal_rew * 0.8
+
+				# Reward velocity toward entrance center
+				approach_dir = vec_to_entrance / dist_to_entrance_center
+				approach_speed = float(np.dot(agent.state.p_vel, approach_dir))
+				rew += self.progress_gain * 2.0 * max(approach_speed, 0.0)
+
+				# Heading alignment toward entrance
+				desired_heading = np.arctan2(vec_to_entrance[1], vec_to_entrance[0])
+				agent_heading_r = agent.state.theta
+				heading_err = abs((agent_heading_r - desired_heading + np.pi) % (2*np.pi) - np.pi)
+				rew -= heading_err * self.formation_rew * 0.5
+
+				# Penalize forward motion along corridor when recovering (should go back)
+				if s > 0:
+					rew -= (s / (L + 1e-9)) * self.goal_rew * 0.4
+
+				self.prev_proj[agent.id] = s
 			else:
-				rew -= norm_dist_entrance * self.goal_rew * 0.6
+				# Normal Phase 0 behavior (not recovering)
+				# Normalize distance by world size so penalty stays bounded
+				norm_dist_entrance = dist_to_entrance_edge / (self.world_size * 0.5 + 1e-9)
+				if s < 0:
+					rew -= norm_dist_entrance * self.goal_rew * 0.3
+				else:
+					rew -= norm_dist_entrance * self.goal_rew * 0.6
 
-			# Encourage forward progress toward the entrance (discourage circling)
-			# print("Phase 0 dist_to_entrance_edge", dist_to_entrance_edge, "rew", rew, "s", s, "y", y)
-			# print("progress gain dist rew", self.progress_gain * max(delta_proj, -0.05),  " delta_proj", delta_proj)
-			# BUT suppress progress reward when bypassing the corridor laterally
-			if not bypassing:
-				rew += self.progress_gain * max(delta_proj, -0.05)
-			self.prev_proj[agent.id] = s
-			# Reward forward velocity along corridor direction (suppressed when bypassing)
-			corridor_vec = world.tube_params['e']
-			forward_speed = float(np.dot(agent.state.p_vel, corridor_vec))
-			# print("Phase 0 forward speed", forward_speed, "rew", self.progress_gain * 0.5 * max(forward_speed, 0.0))
-			if not bypassing:
-				rew += self.progress_gain * 0.5 * max(forward_speed, 0.0)
+				# Encourage forward progress toward the entrance (discourage circling)
+				# BUT suppress progress reward when bypassing the corridor laterally
+				if not bypassing:
+					rew += self.progress_gain * max(delta_proj, -0.05)
+				self.prev_proj[agent.id] = s
+				# Reward forward velocity along corridor direction (suppressed when bypassing)
+				corridor_vec = world.tube_params['e']
+				forward_speed = float(np.dot(agent.state.p_vel, corridor_vec))
+				if not bypassing:
+					rew += self.progress_gain * 0.5 * max(forward_speed, 0.0)
 
-			# --- Strong penalty for flying parallel outside the corridor ---
-			if bypassing:
-				lateral_overshoot = (abs(y) - half_w) / (half_w + 1e-9)
-				rew -= lateral_overshoot * self.collision_rew * 0.5
-				# Additional penalty proportional to how far along the corridor they've gone
-				along_frac = np.clip(s / (L + 1e-9), 0.0, 1.0)
-				rew -= along_frac * self.goal_rew * 0.3
-				# print(f"Agent {agent.id} is bypassing the corridor! Lateral overshoot: {lateral_overshoot:.2f}, along_frac: {along_frac:.2f}, rew: {rew:.2f}")
+				# --- Strong penalty for flying parallel outside the corridor ---
+				if bypassing:
+					lateral_overshoot = (abs(y) - half_w) / (half_w + 1e-9)
+					rew -= lateral_overshoot * self.collision_rew * 0.5
+					# Additional penalty proportional to how far along the corridor they've gone
+					along_frac = np.clip(s / (L + 1e-9), 0.0, 1.0)
+					rew -= along_frac * self.goal_rew * 0.3
 
 			# === NEW: Heading alignment reward ===
 			# Desired heading: align with corridor direction
@@ -1195,12 +1239,14 @@ class Scenario(BaseScenario):
 			# print(f"Agent {agent.id} reached phase {current_phase}")
 			self.phase_reached[agent.id] = current_phase  # Update max phase reached globally
 		## penalize for moving from higher phase to lower phase
+		## But suppress the penalty when agent is in recovery mode (intentionally going back to entrance)
 		if current_phase < agent.previous_phase:
-			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {agent.previous_phase}")
-			rew -= self.collision_rew  #*4
+			if not self.recovering[agent.id]:
+				rew -= self.collision_rew  #*4
 			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {agent.previous_phase} rew", rew)
 		if current_phase < self.phase_reached[agent.id]:
-			rew -= self.collision_rew
+			if not self.recovering[agent.id]:
+				rew -= self.collision_rew
 			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {self.phase_reached[agent.id]} rew", rew)
 		# Store current phase for next step
 		agent.previous_phase = current_phase

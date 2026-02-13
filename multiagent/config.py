@@ -3,7 +3,7 @@ import numpy as np
 
 class AirTaxiConfig():
     V_MIN = 60 * 0.514444 * 0.001 # knots to km/s
-    V_MAX = 140 * 0.514444  * 0.001 # knots to km/s
+    V_MAX = 175 * 0.514444  * 0.001 # knots to km/s
     V_NOMINAL = 110 * 0.514444  * 0.001 # knots to km/s
     ACCEL_MIN = -0.001 # km/s^2
     ACCEL_MAX = 0.002 # km/s^2
@@ -24,7 +24,7 @@ class AirTaxiConfig():
     
     # Ref: Preliminary Analysis of Separation Standards for Urban Air Mobility Using Unmitigated Fast-Time
     # Test params: 1500, 1800, 2200, 5000 ft
-    SEPARATION_DISTANCE = 500 * 0.0003048 # (first parameter in ft, converted to km)
+    SEPARATION_DISTANCE = 1000 * 0.0003048 # (first parameter in ft, converted to km)
     COLLISION_DISTANCE = SEPARATION_DISTANCE
 
     # COORDINATION_RANGE = 5 # 3 miles to km

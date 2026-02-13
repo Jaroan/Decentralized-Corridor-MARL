@@ -1,6 +1,6 @@
 #!/bin/bash
 # Slurm sbatch options
-#SBATCH --job-name 3rot_col20
+#SBATCH --job-name 5rot_col20
 #SBATCH -a 0-1
 #SBATCH --gres=gpu:volta:1
 ##SBATCH --cpus-per-task=8
@@ -20,7 +20,7 @@ logs_folder="out_fair_informarl3"
 mkdir -p $logs_folder
 # Run the script
 seed_max=2
-n_agents=3
+n_agents=5
 
 # "double_integrator" or "unicycle_vehicle or air_taxi"
 chosen_dynamics_type="air_taxi"

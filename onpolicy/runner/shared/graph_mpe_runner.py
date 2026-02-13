@@ -564,6 +564,13 @@ class GMPERunner(Runner):
 									self.recurrent_N, 
 									self.hidden_size), 
 									dtype=np.float32)
+			# Separate RNN states for slow policy (if dual-policy mode)
+			if self.policy_slow is not None:
+				rnn_states_slow = np.zeros((self.n_rollout_threads,
+											self.num_agents,
+											self.recurrent_N,
+											self.hidden_size),
+											dtype=np.float32)
 			masks = np.ones((self.n_rollout_threads, 
 							self.num_agents, 1), 
 							dtype=np.float32)
@@ -586,19 +593,86 @@ class GMPERunner(Runner):
 				stop_mask = np.zeros(self.envs.action_space[0].n)
 				stop_mask[int(self.envs.action_space[0].n/2)] = 1
 				available_actions[zero_masks[:,0]] = stop_mask
-				self.trainer.prep_rollout()
-				action, rnn_states = self.trainer.policy.act(
-													np.concatenate(obs),
-													np.concatenate(node_obs),
-													np.concatenate(adj),
-													np.concatenate(agent_id),
-													np.concatenate(rnn_states),
-													np.concatenate(masks),
-													available_actions = available_actions,
-													deterministic=True)
-				actions = np.array(np.split(_t2n(action), self.n_rollout_threads))
-				rnn_states = np.array(np.split(_t2n(rnn_states), 
-									self.n_rollout_threads))
+
+				# --- Dual-policy action selection ---
+				if self.policy_slow is not None and len(self.slow_agent_ids) > 0:
+					# Build index masks for fast vs slow agents
+					fast_ids = sorted(set(range(self.num_agents)) - self.slow_agent_ids)
+					slow_ids = sorted(self.slow_agent_ids)
+
+					# Flatten obs for all agents: (n_rollout_threads, n_agents, ...) -> (n_agents, ...)
+					all_obs = np.concatenate(obs)           # (n_agents, obs_dim)
+					all_node_obs = np.concatenate(node_obs) # (n_agents, n_nodes, node_feat)
+					all_adj = np.concatenate(adj)           # (n_agents, n_nodes, n_nodes)
+					all_agent_id = np.concatenate(agent_id) # (n_agents, 1)
+					all_rnn = np.concatenate(rnn_states)    # (n_agents, recN, hid)
+					all_rnn_slow = np.concatenate(rnn_states_slow)
+					all_masks = np.concatenate(masks)       # (n_agents, 1)
+
+					# Pre-allocate merged outputs
+					n_act = self.envs.action_space[0].n
+					merged_actions = np.zeros((self.num_agents, 1), dtype=np.int64)
+					merged_rnn = np.zeros_like(all_rnn)
+					merged_rnn_slow = np.zeros_like(all_rnn_slow)
+
+					# --- Fast agents through primary policy ---
+					if len(fast_ids) > 0:
+						self.trainer.prep_rollout()
+						fast_action, fast_rnn_out = self.trainer.policy.act(
+							all_obs[fast_ids],
+							all_node_obs[fast_ids],
+							all_adj[fast_ids],
+							all_agent_id[fast_ids],
+							all_rnn[fast_ids],
+							all_masks[fast_ids],
+							available_actions=available_actions[fast_ids],
+							deterministic=True)
+						fast_action_np = _t2n(fast_action)
+						fast_rnn_np = _t2n(fast_rnn_out)
+						for i, aid in enumerate(fast_ids):
+							merged_actions[aid] = fast_action_np[i]
+							merged_rnn[aid] = fast_rnn_np[i]
+
+					# --- Slow agents through slow policy ---
+					if len(slow_ids) > 0:
+						self.policy_slow.actor.eval()
+						with torch.no_grad():
+							slow_action, slow_rnn_out = self.policy_slow.act(
+								all_obs[slow_ids],
+								all_node_obs[slow_ids],
+								all_adj[slow_ids],
+								all_agent_id[slow_ids],
+								all_rnn_slow[slow_ids],
+								all_masks[slow_ids],
+								available_actions=available_actions[slow_ids],
+								deterministic=True)
+						slow_action_np = _t2n(slow_action)
+						slow_rnn_np = _t2n(slow_rnn_out)
+						for i, aid in enumerate(slow_ids):
+							merged_actions[aid] = slow_action_np[i]
+							merged_rnn_slow[aid] = slow_rnn_np[i]
+
+					# Reshape back to (n_rollout_threads, n_agents, ...)
+					actions = merged_actions.reshape(self.n_rollout_threads, self.num_agents, -1)
+					rnn_states = merged_rnn.reshape(self.n_rollout_threads, self.num_agents,
+													self.recurrent_N, self.hidden_size)
+					rnn_states_slow = merged_rnn_slow.reshape(self.n_rollout_threads, self.num_agents,
+															self.recurrent_N, self.hidden_size)
+				else:
+					# --- Single-policy (original path) ---
+					self.trainer.prep_rollout()
+					action, rnn_states = self.trainer.policy.act(
+														np.concatenate(obs),
+														np.concatenate(node_obs),
+														np.concatenate(adj),
+														np.concatenate(agent_id),
+														np.concatenate(rnn_states),
+														np.concatenate(masks),
+														available_actions = available_actions,
+														deterministic=True)
+					actions = np.array(np.split(_t2n(action), self.n_rollout_threads))
+					rnn_states = np.array(np.split(_t2n(rnn_states), 
+										self.n_rollout_threads))
 
 				if envs.action_space[0].__class__.__name__ == 'MultiDiscrete':
 					for i in range(envs.action_space[0].shape):
@@ -630,6 +704,11 @@ class GMPERunner(Runner):
 													self.recurrent_N, 
 													self.hidden_size), 
 													dtype=np.float32)
+				if self.policy_slow is not None:
+					rnn_states_slow[dones == True] = np.zeros(((dones == True).sum(),
+															self.recurrent_N,
+															self.hidden_size),
+															dtype=np.float32)
 				masks = np.ones((self.n_rollout_threads, 
 								self.num_agents, 1), 
 								dtype=np.float32)

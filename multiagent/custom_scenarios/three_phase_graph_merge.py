@@ -451,11 +451,13 @@ class Scenario(BaseScenario):
 				self.min_time(agent, world)
 		#####################################################
 
-	# setup two tubes with L shaped orientation using setup_tube_params by providing input position, length and angle
+	# setup two branch tubes and a stem tube in Y-shaped orientation
 	def setup_two_tube_params(self, world):
 		"""
-		Set up two perpendicular tubes in an L-shaped configuration.
-		First tube is vertical, second tube is horizontal (perpendicular to first).
+		Set up two branch tubes and a stem tube in a Y-shaped configuration.
+		Two branches converge from upper-left and upper-right into a
+		downward stem corridor — like a Y instead of a T.
+		branch_half_angle controls how wide the fork is (π/2 = T-shape, 0 = straight).
 		"""
 		# Initialize tube list
 		world.tube_params = []
@@ -467,13 +469,22 @@ class Scenario(BaseScenario):
 		)
 
 		merge_point = np.array([0.0, 0.0])
-		tube_h_length = self.world_size * 0.3
-		tube_v_length = self.world_size * 0.4
+		branch_length = self.world_size * 0.3
+		stem_length = self.world_size * 0.4
+		gap = self.world_size / 30
 
-		# === TUBE 0: Left horizontal -> merge ===
-		tube0_angle = -np.pi/2
-		entrance0 = merge_point + np.array([-tube_h_length - self.world_size/6, 0.0])
-		exit0 = merge_point - np.array([self.world_size/6, 0.0])
+		# Half-angle of the Y fork measured from the stem (downward) axis.
+		# π/2 = old T-shape (perpendicular), π/4 = 45° Y, π/6 = 30° narrow Y
+		branch_half_angle = np.pi / 4  # 45° Y-shape
+
+		# Outward direction vectors from merge along each branch
+		left_outward  = np.array([-np.sin(branch_half_angle),  np.cos(branch_half_angle)])
+		right_outward = np.array([ np.sin(branch_half_angle),  np.cos(branch_half_angle)])
+
+		# === TUBE 0: Upper-left branch → merge ===
+		tube0_angle = -branch_half_angle
+		entrance0 = merge_point + left_outward * (branch_length + gap)
+		exit0     = merge_point + left_outward * gap
 		rotation_matrix0 = np.array([
 			[np.cos(tube0_angle), np.sin(tube0_angle)],
 			[-np.sin(tube0_angle), np.cos(tube0_angle)]
@@ -484,10 +495,10 @@ class Scenario(BaseScenario):
 		)
 		world.tube_params.append(tube0)
 
-		# === TUBE 1: Right horizontal -> merge ===
-		tube1_angle = np.pi/2
-		entrance1 = merge_point + np.array([tube_h_length + self.world_size/6, 0.0])
-		exit1 = merge_point + np.array([self.world_size/6, 0.0])
+		# === TUBE 1: Upper-right branch → merge ===
+		tube1_angle = branch_half_angle
+		entrance1 = merge_point + right_outward * (branch_length + gap)
+		exit1     = merge_point + right_outward * gap
 		rotation_matrix1 = np.array([
 			[np.cos(tube1_angle), np.sin(tube1_angle)],
 			[-np.sin(tube1_angle), np.cos(tube1_angle)]
@@ -498,10 +509,10 @@ class Scenario(BaseScenario):
 		)
 		world.tube_params.append(tube1)
 
-		# === TUBE 2: Vertical tube in the middle ===
+		# === TUBE 2: Stem going straight down from merge ===
 		tube2_angle = 0.0
-		entrance2 = merge_point + np.array([0.0, -self.world_size/6])
-		exit2 = merge_point + np.array([0.0, -tube_v_length - self.world_size/6])
+		entrance2 = merge_point + np.array([0.0, -gap])
+		exit2     = merge_point + np.array([0.0, -(stem_length + gap)])
 		rotation_matrix2 = np.array([
 			[np.cos(tube2_angle), np.sin(tube2_angle)],
 			[-np.sin(tube2_angle), np.cos(tube2_angle)]
@@ -511,14 +522,20 @@ class Scenario(BaseScenario):
 			np.linalg.norm(exit2 - entrance2), rotation_matrix2
 		)
 		world.tube_params.append(tube2)
+
 		# Set progress gain based on average tube length
 		avg_length = (np.linalg.norm(exit0 - entrance0) + np.linalg.norm(exit1 - entrance1) + np.linalg.norm(exit2 - entrance2)) / 3.0
 		self.progress_gain = self.goal_rew / (avg_length * 10)
 
+		# # --- Debug: print tube geometry ---
+		# for i, t in enumerate(world.tube_params):
+		# 	print(f"Tube {i}: entrance={t['entrance']}, exit={t['exit']}, "
+		# 		  f"e={t['e']}, n={t['n']}, L={t['L']:.3f}, angle={t['angle']:.3f}")
+
 	def _goal_pos_for_tube(self, tube):
 		"""Compute the landmark/goal position for a given tube (placed past its exit along corridor axis)."""
 		# Place goal beyond exit along the corridor direction
-		offset = self.world_size / 4
+		offset = self.world_size / 8
 		return np.array(tube['exit']) + offset * np.array(tube['e'])
 
 	def _build_tube_params(self, entrance, exit, width, angle, length, rotation_matrix):
@@ -1094,6 +1111,7 @@ class Scenario(BaseScenario):
 			rew -= heading_error * self.formation_rew * 0.1
 		elif current_phase == 2 and self.current_tube[agent.id] in (0, 1):  # Exited tube 0/1 → seamlessly switch to tube 2
 			# Reset phase tracking so the agent sees a fresh Phase 0 for tube 2
+			# print(f"Agent {agent.id} transitioned to tube 2, resetting phase tracking.")
 			self.current_tube[agent.id] = 2
 			self.phase_reached[agent.id] = 0
 			agent.previous_phase = 0
@@ -1172,7 +1190,7 @@ class Scenario(BaseScenario):
 		
 		# if current_phase == 2:
 		# print(f"Agent {agent.id} total reward: ", rew)
-		# input("Reward calculation complete for agent {}".format(agent.id))
+		# # input("Reward calculation complete for agent {}".format(agent.id))
 		# input("Press Enter to continue...")
 
 		return np.clip(rew, -4*self.collision_rew, self.goal_rew*5)
