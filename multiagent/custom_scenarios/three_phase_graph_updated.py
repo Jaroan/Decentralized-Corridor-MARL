@@ -896,19 +896,19 @@ class Scenario(BaseScenario):
 					# print("Agent", agent.id, "collided with Agent", a.id)
 					# input("Press Enter to continue...")
 					rew -= self.collision_rew
-				# --- Soft proximity penalty (only when closing in) ---
-				warning_zone = 2.5 * self.separation_distance
+				# --- Soft proximity penalty ---
+				warning_zone = 3.5 * self.separation_distance
 				if dist_aa < warning_zone:
-					# print("Agent", agent.id, "is too close to Agent", a.id, "dist_aa", dist_aa)
-					# input("Press Enter to continue...")
-					# Only penalize if agents are approaching each other
+					proximity_ratio = (warning_zone - dist_aa) / (warning_zone - self.separation_distance + 1e-9)
+					proximity_ratio = np.clip(proximity_ratio, 0.0, 1.0)
+					# Static proximity penalty — always active when too close
+					rew -= self.collision_rew * 0.15 * proximity_ratio
+					# Additional closing-speed penalty — stronger when approaching
 					rel_pos = a.state.p_pos - agent.state.p_pos
 					rel_vel = np.asarray(a.state.p_vel) - np.asarray(agent.state.p_vel)
 					closing = -float(np.dot(rel_pos, rel_vel)) / (dist_aa + 1e-9)
-					if closing > 0:  # only penalize when approaching
-						proximity_ratio = (warning_zone - dist_aa) / (warning_zone - self.separation_distance + 1e-9)
-						proximity_ratio = np.clip(proximity_ratio, 0.0, 1.0)
-						rew -= self.collision_rew * 0.25 * proximity_ratio
+					if closing > 0:  # penalize harder when approaching
+						rew -= self.collision_rew * 0.35 * proximity_ratio * np.clip(closing / 0.05, 0.0, 1.0)
 			
 		# 	if self.is_obstacle_collision(pos=agent.state.p_pos,
 		# 								entity_size=agent.size, 
@@ -1059,6 +1059,23 @@ class Scenario(BaseScenario):
 				dist_to_ent = np.linalg.norm(vec_to_entrance) + 1e-9
 				approach_speed = float(np.dot(agent.state.p_vel, vec_to_entrance / dist_to_ent))
 				rew += prox_factor * self.progress_gain * max(approach_speed, 0.0)
+
+			# === Phase 0 separation maintenance ===
+			# Encourage agents in approach queue to maintain min separation
+			# from their nearest front/back neighbors along the corridor axis
+			if front_agent is not None:
+				dist_front = np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos)
+				if dist_front < self.separation_distance * 2.0:
+					sep_deficit = (self.separation_distance - dist_front) / (self.separation_distance + 1e-9)
+					sep_deficit = np.clip(sep_deficit, 0.0, 1.0)
+					rew -= sep_deficit * self.formation_rew * 0.5
+			if back_agent is not None:
+				dist_back = np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos)
+				if dist_back < self.separation_distance * 2.0:
+					sep_deficit = (self.separation_distance - dist_back) / (self.separation_distance + 1e-9)
+					sep_deficit = np.clip(sep_deficit, 0.0, 1.0)
+					rew -= sep_deficit * self.formation_rew * 0.5
+
 		elif current_phase == 1:  # In-tube phase
 
 			# Calculate desired spacing based on tube length and number of agents
