@@ -126,7 +126,7 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026' \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag' \
 --render_episodes=2 \
 --world_size=5 \
 --num_agents=10 \

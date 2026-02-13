@@ -899,6 +899,8 @@ class Scenario(BaseScenario):
 				# --- Soft proximity penalty (only when closing in) ---
 				warning_zone = 2.5 * self.separation_distance
 				if dist_aa < warning_zone:
+					# print("Agent", agent.id, "is too close to Agent", a.id, "dist_aa", dist_aa)
+					# input("Press Enter to continue...")
 					# Only penalize if agents are approaching each other
 					rel_pos = a.state.p_pos - agent.state.p_pos
 					rel_vel = np.asarray(a.state.p_vel) - np.asarray(agent.state.p_vel)
@@ -907,7 +909,6 @@ class Scenario(BaseScenario):
 						proximity_ratio = (warning_zone - dist_aa) / (warning_zone - self.separation_distance + 1e-9)
 						proximity_ratio = np.clip(proximity_ratio, 0.0, 1.0)
 						rew -= self.collision_rew * 0.25 * proximity_ratio
-						# print(f"Agent {agent.id} is within warning zone of Agent {a.id}. Proximity ratio: {proximity_ratio:.2f}, Penalty: {self.collision_rew * 0.25 * proximity_ratio:.2f}")
 			
 		# 	if self.is_obstacle_collision(pos=agent.state.p_pos,
 		# 								entity_size=agent.size, 
@@ -1058,7 +1059,6 @@ class Scenario(BaseScenario):
 				dist_to_ent = np.linalg.norm(vec_to_entrance) + 1e-9
 				approach_speed = float(np.dot(agent.state.p_vel, vec_to_entrance / dist_to_ent))
 				rew += prox_factor * self.progress_gain * max(approach_speed, 0.0)
-
 		elif current_phase == 1:  # In-tube phase
 
 			# Calculate desired spacing based on tube length and number of agents
@@ -1097,7 +1097,7 @@ class Scenario(BaseScenario):
 					if speed_diff > 0:  # ego is pulling away — good
 						rew += speed_diff * self.formation_rew * 0.1
 					else:  # ego is slower or same speed — penalize
-						rew -= abs(speed_diff) * self.formation_rew * 0.1
+						rew -= abs(speed_diff) * self.formation_rew * 0.05
 
 			# --- Nearest-neighbor separation (catches side-by-side agents) ---
 			# Front/back only finds longitudinal neighbors; two agents entering
