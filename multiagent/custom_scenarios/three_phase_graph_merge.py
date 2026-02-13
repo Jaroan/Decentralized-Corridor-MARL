@@ -380,8 +380,8 @@ class Scenario(BaseScenario):
 		# corridor axis with guaranteed minimum longitudinal spacing.
 		# Multiple agents may share a longitudinal level if they are
 		# laterally separated beyond the warning zone.
-		min_sep = max(3.0 * self.separation_distance, 1.5*self.separation_distance)  # beyond warning zone
-		long_spacing = min_sep * 1.2   # 50% extra gap between rows * 1.5
+		min_sep = max(4.0 * self.separation_distance, 2*self.separation_distance)  # beyond warning zone
+		long_spacing = min_sep * 1.4   # 50% extra gap between rows * 1.5
 		lateral_spread = self.world_size * 0.3  # wider lateral spread
 
 		while True:
@@ -397,9 +397,11 @@ class Scenario(BaseScenario):
 			corridor_n = current_tube['n']  # unit vec: left-hand normal
 			entrance = current_tube['entrance']
 
-			# Stagger behind entrance along corridor axis
-			along_offset = -(num_agents_added // 2 + 1) * long_spacing
+			# Longitudinal offset: each successive agent is farther behind
+			along_offset = -(num_agents_added + 1) * long_spacing
+			# Wider lateral jitter — allows 2-3 agents at the same depth
 			lateral_jitter = np.random.uniform(-1.0, 1.0) * lateral_spread
+			# Small longitudinal jitter (won't collapse the ordering)
 			along_jitter = np.random.uniform(-0.2, 0.2) * long_spacing
 
 			random_pos = (entrance

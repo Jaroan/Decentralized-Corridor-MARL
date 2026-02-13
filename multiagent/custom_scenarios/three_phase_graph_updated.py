@@ -372,7 +372,7 @@ class Scenario(BaseScenario):
 		# corridor axis with guaranteed minimum longitudinal spacing.
 		# Multiple agents may share a longitudinal level if they are
 		# laterally separated beyond the warning zone.
-		min_sep = max(3.0 * self.separation_distance, 1.5*self.separation_distance)  # beyond warning zone
+		min_sep = max(4.0 * self.separation_distance, 2*self.separation_distance)  # beyond warning zone
 		long_spacing = min_sep * 1.4   # 50% extra gap between rows * 1.5
 		lateral_spread = self.world_size * 0.3  # wider lateral spread
 
@@ -896,19 +896,18 @@ class Scenario(BaseScenario):
 					# print("Agent", agent.id, "collided with Agent", a.id)
 					# input("Press Enter to continue...")
 					rew -= self.collision_rew
-				# --- Soft proximity penalty ---
-				warning_zone = 3.5 * self.separation_distance
+				# --- Soft proximity penalty (only when closing in) ---
+				warning_zone = 2.5 * self.separation_distance
 				if dist_aa < warning_zone:
-					proximity_ratio = (warning_zone - dist_aa) / (warning_zone - self.separation_distance + 1e-9)
-					proximity_ratio = np.clip(proximity_ratio, 0.0, 1.0)
-					# Static proximity penalty — always active when too close
-					rew -= self.collision_rew * 0.15 * proximity_ratio
-					# Additional closing-speed penalty — stronger when approaching
+					# Only penalize if agents are approaching each other
 					rel_pos = a.state.p_pos - agent.state.p_pos
 					rel_vel = np.asarray(a.state.p_vel) - np.asarray(agent.state.p_vel)
 					closing = -float(np.dot(rel_pos, rel_vel)) / (dist_aa + 1e-9)
-					if closing > 0:  # penalize harder when approaching
-						rew -= self.collision_rew * 0.35 * proximity_ratio * np.clip(closing / 0.05, 0.0, 1.0)
+					if closing > 0:  # only penalize when approaching
+						proximity_ratio = (warning_zone - dist_aa) / (warning_zone - self.separation_distance + 1e-9)
+						proximity_ratio = np.clip(proximity_ratio, 0.0, 1.0)
+						rew -= self.collision_rew * 0.25 * proximity_ratio
+						# print(f"Agent {agent.id} is within warning zone of Agent {a.id}. Proximity ratio: {proximity_ratio:.2f}, Penalty: {self.collision_rew * 0.25 * proximity_ratio:.2f}")
 			
 		# 	if self.is_obstacle_collision(pos=agent.state.p_pos,
 		# 								entity_size=agent.size, 
@@ -1060,22 +1059,6 @@ class Scenario(BaseScenario):
 				approach_speed = float(np.dot(agent.state.p_vel, vec_to_entrance / dist_to_ent))
 				rew += prox_factor * self.progress_gain * max(approach_speed, 0.0)
 
-			# === Phase 0 separation maintenance ===
-			# Encourage agents in approach queue to maintain min separation
-			# from their nearest front/back neighbors along the corridor axis
-			if front_agent is not None:
-				dist_front = np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos)
-				if dist_front < self.separation_distance * 2.0:
-					sep_deficit = (self.separation_distance - dist_front) / (self.separation_distance + 1e-9)
-					sep_deficit = np.clip(sep_deficit, 0.0, 1.0)
-					rew -= sep_deficit * self.formation_rew * 0.5
-			if back_agent is not None:
-				dist_back = np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos)
-				if dist_back < self.separation_distance * 2.0:
-					sep_deficit = (self.separation_distance - dist_back) / (self.separation_distance + 1e-9)
-					sep_deficit = np.clip(sep_deficit, 0.0, 1.0)
-					rew -= sep_deficit * self.formation_rew * 0.5
-
 		elif current_phase == 1:  # In-tube phase
 
 			# Calculate desired spacing based on tube length and number of agents
@@ -1106,9 +1089,34 @@ class Scenario(BaseScenario):
 				diff = dist_back - desired_spacing
 				max_spacing_error = max(max_spacing_error, np.abs(diff))
 				spacing_error += np.abs(diff) if diff < 0 else 0
+				# Speed-up incentive: if back agent is too close, reward going faster
+				if diff < 0 and dist_back < desired_spacing * 1.5:
+					back_fwd_speed = float(np.dot(back_agent.state.p_vel, world.tube_params['e']))
+					my_fwd_speed = float(np.dot(agent.state.p_vel, world.tube_params['e']))
+					speed_diff = my_fwd_speed - back_fwd_speed
+					if speed_diff > 0:  # ego is pulling away — good
+						rew += speed_diff * self.formation_rew * 0.1
+					else:  # ego is slower or same speed — penalize
+						rew -= abs(speed_diff) * self.formation_rew * 0.1
+
+			# --- Nearest-neighbor separation (catches side-by-side agents) ---
+			# Front/back only finds longitudinal neighbors; two agents entering
+			# abreast share the same s-coordinate, so neither is "front" or "back".
+			# Check the closest agent overall to catch lateral violations.
+			nearest_dist = float('inf')
+			for other in world.agents:
+				if other is agent or other.status:
+					continue
+				d = np.linalg.norm(other.state.p_pos - agent.state.p_pos)
+				if d < nearest_dist:
+					nearest_dist = d
+			if nearest_dist < desired_spacing:
+				nn_deficit = desired_spacing - nearest_dist
+				spacing_error = max(spacing_error, nn_deficit)  # don't double-count, take worst
+
 			if spacing_error > 0:
 				self.spacing_violation[agent.id] += 1
-			rew -= spacing_error * self.formation_rew  # Maintain formation in tube
+			rew -= spacing_error * self.formation_rew * 1.5  # Stronger spacing enforcement in tube
 			dist_to_exit_edge = self._exit_gate_distance(s, y, L, half_w)
 			# Normalize by tube length so penalty stays bounded
 			rew -= (dist_to_exit_edge / (L + 1e-9)) * self.goal_rew * 0.3
