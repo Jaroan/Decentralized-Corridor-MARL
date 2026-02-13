@@ -1090,7 +1090,7 @@ class Scenario(BaseScenario):
 				max_spacing_error = max(max_spacing_error, np.abs(diff))
 				spacing_error += np.abs(diff) if diff < 0 else 0
 				# Speed-up incentive: if back agent is too close, reward going faster
-				if diff < 0 and dist_back < desired_spacing * 1.5:
+				if diff < 0 and dist_back < desired_spacing:
 					back_fwd_speed = float(np.dot(back_agent.state.p_vel, world.tube_params['e']))
 					my_fwd_speed = float(np.dot(agent.state.p_vel, world.tube_params['e']))
 					speed_diff = my_fwd_speed - back_fwd_speed
@@ -1116,7 +1116,7 @@ class Scenario(BaseScenario):
 
 			if spacing_error > 0:
 				self.spacing_violation[agent.id] += 1
-			rew -= spacing_error * self.formation_rew * 1.5  # Stronger spacing enforcement in tube
+			rew -= spacing_error * self.formation_rew  # Maintain formation in tube
 			dist_to_exit_edge = self._exit_gate_distance(s, y, L, half_w)
 			# Normalize by tube length so penalty stays bounded
 			rew -= (dist_to_exit_edge / (L + 1e-9)) * self.goal_rew * 0.3
