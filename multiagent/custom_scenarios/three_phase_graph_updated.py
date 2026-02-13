@@ -1078,26 +1078,32 @@ class Scenario(BaseScenario):
 				max_spacing_error = max(max_spacing_error, np.abs(diff))
 				# Speed-matching: only when Euclidean distance is actually
 				# below separation (not just longitudinal projection)
-				if diff < 0 and dist_front < desired_spacing * 1.5:
+				if diff < 0 or dist_front < desired_spacing * 1.5:
+					# print(f"Agent {agent.id} front agent {front_agent.id} dist_front: {dist_front:.2f}, desired_spacing: {desired_spacing:.2f}, diff: {diff:.2f}, spacing_error: {spacing_error:.2f}")
 					front_fwd_speed = float(np.dot(front_agent.state.p_vel, world.tube_params['e']))
 					my_fwd_speed = float(np.dot(agent.state.p_vel, world.tube_params['e']))
 					speed_diff = my_fwd_speed - front_fwd_speed
 					if speed_diff > 0:  # approaching faster than front agent
 						rew -= speed_diff * self.formation_rew * 0.1
+						# print(f"Agent {agent.id} is penalized for approaching front agent {front_agent.id} too quickly. Speed diff: {speed_diff:.2f}, rew: {rew:.2f}", speed_diff * self.formation_rew * 0.1)
 			if back_agent:
 				dist_back = np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos)
 				diff = dist_back - desired_spacing
+				# print(f"Agent {agent.id} back agent {back_agent.id} dist_back: {dist_back:.2f}, desired_spacing: {desired_spacing:.2f}, diff: {diff:.2f}", rew)
 				max_spacing_error = max(max_spacing_error, np.abs(diff))
 				spacing_error += np.abs(diff) if diff < 0 else 0
 				# Speed-up incentive: if back agent is too close, reward going faster
-				if diff < 0 and dist_back < desired_spacing:
+				if diff < 0 or dist_back < desired_spacing * 1.5:
+					# print(f"Agent {agent.id} back agent {back_agent.id} dist_back: {dist_back:.2f}, desired_spacing: {desired_spacing:.2f}, diff: {diff:.2f}, spacing_error: {spacing_error:.2f}")
 					back_fwd_speed = float(np.dot(back_agent.state.p_vel, world.tube_params['e']))
 					my_fwd_speed = float(np.dot(agent.state.p_vel, world.tube_params['e']))
 					speed_diff = my_fwd_speed - back_fwd_speed
 					if speed_diff > 0:  # ego is pulling away — good
 						rew += speed_diff * self.formation_rew * 0.1
+						# print(f"Agent {agent.id} is incentivized to speed up to maintain spacing with back agent {back_agent.id}. Speed diff: {speed_diff:.2f}, rew: {rew:.2f}", speed_diff * self.formation_rew * 0.1)
 					else:  # ego is slower or same speed — penalize
 						rew -= abs(speed_diff) * self.formation_rew * 0.05
+						# print(f"Agent {agent.id} is penalized for not maintaining spacing with back agent {back_agent.id}. Speed diff: {speed_diff:.2f}, rew: {rew:.2f}", abs(speed_diff) * self.formation_rew * 0.05)
 
 			# --- Nearest-neighbor separation (catches side-by-side agents) ---
 			# Front/back only finds longitudinal neighbors; two agents entering

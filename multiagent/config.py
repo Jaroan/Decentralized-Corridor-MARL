@@ -3,7 +3,7 @@ import numpy as np
 
 class AirTaxiConfig():
     V_MIN = 60 * 0.514444 * 0.001 # knots to km/s
-    V_MAX = 175 * 0.514444  * 0.001 # knots to km/s
+    V_MAX = 140 * 0.514444  * 0.001 # knots to km/s
     V_NOMINAL = 110 * 0.514444  * 0.001 # knots to km/s
     ACCEL_MIN = -0.001 # km/s^2
     ACCEL_MAX = 0.002 # km/s^2
