@@ -752,17 +752,25 @@ class MultiAgentBaseEnv(gym.Env):
 					center_x = (entrance[0] + exit[0]) / 2
 					center_y = (entrance[1] + exit[1]) / 2
 					center = np.array([center_x, center_y])
-					# print("center: ", center)
-					# Define unrotated tube corners relative to center
+					# Define tube corners as a parallelogram (angled entrance/exit edges)
 					half_length = np.linalg.norm(entrance - exit) / 2  # Half the tube length
 					half_width = width / 2
+					# Per-end half-widths for tapered corridors
+					hw_ent = tube.get('half_w_entrance', half_width)
+					hw_exit = tube.get('half_w_exit', half_width)
+					sk_ent = tube.get('skew_entrance', 0.0)
+					sk_exit = tube.get('skew_exit', 0.0)
 
 					# Corner points before rotation (relative to center)
+					# In tube-local coords: y-axis is along tube, x-axis is lateral
+					# Entrance end is at +half_length, exit at -half_length
+					# Skew shifts the entrance/exit edges: s = skew * y in tube frame
+					# Per-end widths allow tapered (trapezoidal) corridors
 					unrotated_corners = np.array([
-						[-half_width, half_length],   # Top-left
-						[half_width, half_length],    # Top-right
-						[half_width, -half_length],   # Bottom-right
-						[-half_width, -half_length]   # Bottom-left
+						[-hw_ent,  half_length + sk_ent * (-hw_ent)],    # Entrance left
+						[hw_ent,   half_length + sk_ent * hw_ent],       # Entrance right
+						[hw_exit,  -half_length + sk_exit * hw_exit],    # Exit right
+						[-hw_exit, -half_length + sk_exit * (-hw_exit)]  # Exit left
 					])
 
 					# print("unrotated_corners: ", unrotated_corners)

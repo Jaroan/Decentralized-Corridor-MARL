@@ -80,7 +80,7 @@ echo "formation_type: ${formation_type}"
 # # execute the script with different params
 python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --project_name "air_corridor_unicycle_${n_agents}" \
---model_dir "model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026" \
+--model_dir "model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width" \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
@@ -109,6 +109,6 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --world_size=${world_size} \
 --graph_feat_type "relative" \
 --increase_fairness "False" \
---auto_mini_batch_size --target_mini_batch_size 8192 \
+--auto_mini_batch_size --target_mini_batch_size 16384 \
 --formation_type ${formation_type} \
 &> $logs_folder/${str_dynamics_type}_${datetime_str}_updated_with_coll20_spacing10_rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}

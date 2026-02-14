@@ -3,13 +3,13 @@ wandb_version: 1
 _wandb:
   desc: null
   value:
-    code_path: source-air_corridor_unicycle_5-onpolicy_scripts_train_mpe.py
+    code_path: source-air_corridor_unicycle_10-onpolicy_scripts_train_mpe.py
     python_version: 3.12.11
     cli_version: 0.22.2
     framework: torch
     is_jupyter_run: false
     is_kaggle_kernel: false
-    start_time: 1771024181
+    start_time: 1771040630
     t:
       1:
       - 1
@@ -33,17 +33,17 @@ _wandb:
       - 20
       13: linux-x86_64
     e:
-      sl050cphz400dgfwmbnlqtba5w81kf1f:
+      rp6abgds68aveqlku6jcp3mngtojxjwb:
         os: Linux-6.1.161-llgrid-x86_64-with-glibc2.39
         python: CPython 3.12.11
-        started_at: '2026-02-13T23:09:41.122768Z'
+        started_at: '2026-02-14T03:43:50.367429Z'
         args:
         - --use_valuenorm
         - --use_popart
         - --project_name
-        - air_corridor_unicycle_5
+        - air_corridor_unicycle_10
         - --model_dir
-        - model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026
+        - onpolicy/results/GraphMPE/three_phase_graph_updated/rmappo/at_260213_180919_updated_with_coll20_spacing10_rot_eplen120/wandb/latest-run/files
         - --env_name
         - GraphMPE
         - --algorithm_name
@@ -51,7 +51,7 @@ _wandb:
         - --seed
         - '1'
         - --experiment_name
-        - at_260213_180918_updated_with_coll20_spacing10_rot_eplen120
+        - at_260213_224338_newTransferlowwidthwith_coll20_spacing10_rot_eplen150
         - --scenario_name
         - three_phase_graph_updated
         - --dynamics_type
@@ -60,8 +60,8 @@ _wandb:
         - '1'
         - --fair_rew
         - '10'
-        - --num_agents=5
-        - --num_landmarks=5
+        - --num_agents=10
+        - --num_landmarks=10
         - --collision_rew
         - '20'
         - --formation_rew
@@ -73,11 +73,11 @@ _wandb:
         - --num_mini_batch
         - '1'
         - --episode_length
-        - '120'
+        - '150'
         - --total_actions
         - '9'
         - --num_env_steps
-        - '5000000'
+        - '8000000'
         - --ppo_epoch
         - '10'
         - --use_ReLU
@@ -119,8 +119,8 @@ _wandb:
         git:
           remote_url: https://github.com/Jaroan/AAM-Corridor-MARL.git
           commit: 8b74987c89bb7a77204301e1118d464a2b4da9c7
-        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/three_phase_graph_updated/rmappo/at_260213_180918_updated_with_coll20_spacing10_rot_eplen120
-        host: d-12-4-1
+        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/three_phase_graph_updated/rmappo/at_260213_224338_newTransferlowwidthwith_coll20_spacing10_rot_eplen150
+        host: d-10-2-1
         executable: /state/partition1/llgrid/pkg/conda/python-ML-2025b-pytorch/bin/python
         cpu_count: 40
         cpu_count_logical: 80
@@ -129,7 +129,7 @@ _wandb:
         disk:
           /:
             total: '471413596160'
-            used: '18261098496'
+            used: '18282733568'
         memory:
           total: '405413994496'
         gpu_nvidia:
@@ -137,60 +137,60 @@ _wandb:
           memory_total: '34359738368'
           cuda_cores: 5120
           architecture: Volta
-          uuid: GPU-a66f6095-5e45-0fe6-405e-97b1861b4190
+          uuid: GPU-a15c92af-b942-6540-1a2c-4509456ac8f1
         - name: Tesla V100-PCIE-32GB
           memory_total: '34359738368'
           cuda_cores: 5120
           architecture: Volta
-          uuid: GPU-ed2e6bd1-a0fb-a4b9-c85f-7f1eaec7bcb8
+          uuid: GPU-467ce830-4e54-8879-f953-bd45ea7a54dd
         cuda_version: '13.0'
         slurm:
           tasks_per_node: '1'
-          topology_addr: d-12-4-1
+          topology_addr: d-10-2-1
           job_qos: normal
-          job_name: 5rot_col20
+          job_name: 10Transrot_col20
           conf: /etc/slurm/slurm.conf
           gtids: '0'
-          cpus_on_node: '20'
           mem_per_cpu: '8500'
+          cpus_on_node: '20'
           script_context: prolog_task
-          task_pid: '220396'
+          task_pid: '191969'
           job_user: jaloor
           nnodes: '1'
           nodeid: '0'
           job_partition: xeon-g6-volta
           cluster_name: txe1
           gpupower: '150'
-          array_task_min: '0'
           job_cpus_per_node: '20'
+          array_task_min: '0'
           spank_gpupower: WHAT
-          job_end_time: '1771384157'
-          nodelist: d-12-4-1
+          job_end_time: '1771400617'
+          nodelist: d-10-2-1
           node_aliases: (null)
-          job_start_time: '1771024157'
+          array_job_id: '4148607'
           array_task_step: '1'
-          array_job_id: '4147709'
+          job_start_time: '1771040617'
           job_num_nodes: '1'
           gpus_on_node: '1'
           procid: '0'
-          jobid: '4147709'
+          jobid: '4148607'
           array_task_count: '2'
-          job_uid: '62375'
+          job_id: '4148607'
           job_account: default_group
-          job_id: '4147709'
-          submit_host: login-4
+          job_uid: '62375'
+          submit_host: login-3
           submit_dir: /home/gridsan/jaloor/AAM-Corridor-MARL
           topology_addr_pattern: node
           job_gid: '62375'
           working_cluster: txe1:scheduler-0:6817:9984:109
           array_task_id: '1'
-          job_nodelist: d-12-4-1
+          job_nodelist: d-10-2-1
           job_gpus: '1'
           localid: '0'
           cpus_per_task: '20'
-          array_task_max: '1'
           prio_process: '0'
-        writer_id: sl050cphz400dgfwmbnlqtba5w81kf1f
+          array_task_max: '1'
+        writer_id: rp6abgds68aveqlku6jcp3mngtojxjwb
 total_actions:
   desc: null
   value: 9
@@ -238,10 +238,10 @@ algorithm_name:
   value: rmappo
 project_name:
   desc: null
-  value: air_corridor_unicycle_5
+  value: air_corridor_unicycle_10
 experiment_name:
   desc: null
-  value: at_260213_180918_updated_with_coll20_spacing10_rot_eplen120
+  value: at_260213_224338_newTransferlowwidthwith_coll20_spacing10_rot_eplen150
 seed:
   desc: null
   value: 1
@@ -265,7 +265,7 @@ n_render_rollout_threads:
   value: 1
 num_env_steps:
   desc: null
-  value: 5000000
+  value: 8000000
 user_name:
   desc: null
   value: marl
@@ -301,7 +301,7 @@ num_walls:
   value: 0
 episode_length:
   desc: null
-  value: 120
+  value: 150
 share_policy:
   desc: null
   value: true
@@ -379,7 +379,7 @@ clip_param:
   value: 0.2
 num_mini_batch:
   desc: null
-  value: 2
+  value: 5
 entropy_coef:
   desc: null
   value: 0.02
@@ -454,7 +454,7 @@ render_eval:
   value: false
 model_dir:
   desc: null
-  value: model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026
+  value: onpolicy/results/GraphMPE/three_phase_graph_updated/rmappo/at_260213_180919_updated_with_coll20_spacing10_rot_eplen120/wandb/latest-run/files
 model_dir_slow:
   desc: null
   value: null
@@ -469,10 +469,10 @@ scenario_name:
   value: three_phase_graph_updated
 num_landmarks:
   desc: null
-  value: 5
+  value: 10
 num_agents:
   desc: null
-  value: 5
+  value: 10
 num_obstacles:
   desc: null
   value: 0

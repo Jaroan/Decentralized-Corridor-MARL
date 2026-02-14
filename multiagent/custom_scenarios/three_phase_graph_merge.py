@@ -206,16 +206,10 @@ class Scenario(BaseScenario):
 			# TODO have to change this later
 			# agent.size = 0.15
 			agent.max_speed = self.max_speed
-		# add landmarks (goals)
-		world.landmarks = [Landmark() for i in range(self.num_landmarks)]
+		# Merge scenario: no physical landmark entities (they bloat the graph).
+		# Virtual goal positions are maintained in self.landmark_poses instead.
+		world.landmarks = []
 		world.scripted_agents_goals = [Landmark() for i in range(num_scripted_agents_goals)]
-		for i, landmark in enumerate(world.landmarks):
-			landmark.id = i
-			landmark.name = f'landmark {i}'
-			landmark.collide = False
-			landmark.movable = False
-			landmark.global_id = global_id
-			global_id += 1
 		# add obstacles
 		world.obstacles = [Landmark() for i in range(self.num_obstacles)]
 		for i, obstacle in enumerate(world.obstacles):
@@ -312,18 +306,7 @@ class Scenario(BaseScenario):
 		# set colours for scripted agents
 		for i, agent in enumerate(world.scripted_agents):
 			agent.color = np.array([0.15, 0.15, 0.15])
-		# set colours for landmarks
-		for i, landmark in enumerate(world.landmarks):
-			if i%4 == 0:
-				landmark.color = np.array([0.85, 0.35, 0.35])
-			elif i%4 == 1:
-				landmark.color = np.array([0.35, 0.85, 0.35])
-			elif i%4 == 2:
-				landmark.color =  np.array([0.35, 0.35, 0.85])
-			else:
-				landmark.color = np.array([0.85, 0.85, 0.25])
-			# if i == 0:
-			# 	landmark.color = np.array([0.15, 0.75, 0.65])
+		# (No landmark colours — landmarks removed from merge scenario)
 		# set colours for scripted agents goals
 		for i, landmark in enumerate(world.scripted_agents_goals):
 			landmark.color = np.array([0.15, 0.95, 0.15])
@@ -380,8 +363,8 @@ class Scenario(BaseScenario):
 		# corridor axis with guaranteed minimum longitudinal spacing.
 		# Multiple agents may share a longitudinal level if they are
 		# laterally separated beyond the warning zone.
-		min_sep = max(4.0 * self.separation_distance, 2*self.separation_distance)  # beyond warning zone
-		long_spacing = min_sep * 1.4   # 50% extra gap between rows * 1.5
+		min_sep = max(2.0 * self.separation_distance, 1*self.separation_distance)  # beyond warning zone
+		long_spacing = min_sep * 1.0   # 50% extra gap between rows * 1.5
 		lateral_spread = self.world_size * 0.3  # wider lateral spread
 
 		while True:
@@ -429,19 +412,14 @@ class Scenario(BaseScenario):
 		#####################################################
 
 		self.agent_id_updated = np.arange(self.num_agents)
-		# Place each agent's landmark at the exit of its own assigned tube
+		# Compute virtual goal positions (no physical landmark entities)
+		self.landmark_poses = np.zeros((self.num_agents, 2), dtype=np.float32)
 		for agent in world.agents:
 			agent_tube = world.tube_params[self.current_tube[agent.id]]
-			landmark_pos = self._goal_pos_for_tube(agent_tube)
-			landmark_idx = self.goal_match_index[agent.id]
-			world.landmarks[landmark_idx].state.p_pos = landmark_pos
-			world.landmarks[landmark_idx].state.reset_velocity()
+			self.landmark_poses[self.goal_match_index[agent.id]] = self._goal_pos_for_tube(agent_tube)
 
-		# Update landmark poses arrays
-		self.landmark_poses = np.array([landmark.state.p_pos for landmark in world.landmarks])
-		# print("landmark pose",self.landmark_poses)
 		self.landmark_poses_occupied = np.zeros(self.num_agents)
-		self.landmark_poses_updated = np.array([landmark.state.p_pos for landmark in world.landmarks])
+		self.landmark_poses_updated = self.landmark_poses.copy()
 		self.agent_id_updated = np.arange(self.num_agents)
 		#####################################################
 
@@ -463,10 +441,11 @@ class Scenario(BaseScenario):
 		world.tube_params = []
 		
 		# Calculate tube width based on agents
-		tube_width = max(
-			3 * world.agents[0].size * 2.5,
-			self.world_size * 0.15
-		)
+		# tube_width = max(
+		# 	3 * world.agents[0].size * 2.5,
+		# 	self.world_size * 0.15
+		# )
+		tube_width = 0.3
 
 		merge_point = np.array([0.0, 0.0])
 		branch_length = self.world_size * 0.3
@@ -535,7 +514,7 @@ class Scenario(BaseScenario):
 	def _goal_pos_for_tube(self, tube):
 		"""Compute the landmark/goal position for a given tube (placed past its exit along corridor axis)."""
 		# Place goal beyond exit along the corridor direction
-		offset = self.world_size / 8
+		offset = self.world_size / 12
 		return np.array(tube['exit']) + offset * np.array(tube['e'])
 
 	def _build_tube_params(self, entrance, exit, width, angle, length, rotation_matrix):
@@ -737,7 +716,8 @@ class Scenario(BaseScenario):
 	def info_callback(self, agent:Agent, world:World) -> Tuple:
 		# TODO modify this 
 
-		world.dists = np.array([np.linalg.norm(agent.state.p_pos - l.state.p_pos) for l in world.landmarks])
+		# Use virtual landmark_poses (no physical landmark entities in merge scenario)
+		world.dists = np.array([np.linalg.norm(agent.state.p_pos - lp) for lp in self.landmark_poses])
 		
 		nearest_landmark = np.argmin(world.dists)
 		dist_to_goal = world.dists[nearest_landmark]
@@ -894,9 +874,8 @@ class Scenario(BaseScenario):
 		assert agent.max_speed > 0, "Agent max_speed should be positive."
 		agent_id = agent.id
 		# get the goal associated to this agent
-		landmark = world.get_entity(entity_type='landmark', id=self.goal_match_index[agent.id])
-		dist = np.sqrt(np.sum(np.square(agent.state.p_pos - 
-										landmark.state.p_pos)))
+		goal_pos = self.landmark_poses[self.goal_match_index[agent.id]]
+		dist = np.sqrt(np.sum(np.square(agent.state.p_pos - goal_pos)))
 		min_time = dist / agent.max_speed
 		agent.goal_min_time = min_time
 		return min_time
@@ -908,9 +887,8 @@ class Scenario(BaseScenario):
 			if world.current_time_step >= world.world_length:
 				return True
 			else:
-				landmark = world.get_entity('landmark',self.goal_match_index[agent.id])
-				dist = np.sqrt(np.sum(np.square(agent.state.p_pos - 
-												landmark.state.p_pos)))
+				goal_pos = self.landmark_poses[self.goal_match_index[agent.id]]
+				dist = np.sqrt(np.sum(np.square(agent.state.p_pos - goal_pos)))
 				if dist < self.min_dist_thresh:
 					return True
 				else:
@@ -1119,11 +1097,9 @@ class Scenario(BaseScenario):
 			# Re-initialize progress baseline for the new tube
 			s2, _, _, _ = self._tube_coords(world, agent.state.p_pos, 2)
 			self.prev_proj[agent.id] = s2
-			# Move only THIS agent's landmark to tube 2 exit
+			# Move only THIS agent's virtual goal to tube 2 exit
 			landmark_idx = self.goal_match_index[agent.id]
-			world.landmarks[landmark_idx].state.p_pos = self._goal_pos_for_tube(world.tube_params[2])
-			world.landmarks[landmark_idx].state.reset_velocity()
-			self.landmark_poses[landmark_idx] = world.landmarks[landmark_idx].state.p_pos
+			self.landmark_poses[landmark_idx] = self._goal_pos_for_tube(world.tube_params[2])
 			# Give a small bonus for completing the first corridor
 			rew += self.goal_rew * 0.5
 			# Reset prev_goal_dist so Phase 2 progress reward starts fresh
@@ -1322,12 +1298,8 @@ class Scenario(BaseScenario):
 		return 1 / (1 + np.exp(-x))
 	
 	def collect_goal_info(self, world):
-		goal_pos =  np.zeros((self.num_agents, 2)) # create a zero vector with the size of the number of goal and positions of dim 2
-		count = 0
-		for goal in world.landmarks:
-			goal_pos[count]= goal.state.p_pos
-			count +=1
-		return goal_pos
+		# Use virtual landmark_poses (no physical landmark entities)
+		return self.landmark_poses.copy()
 
 	def graph_observation(self, agent:Agent, world:World) -> Tuple[arr, arr]:
 		"""
@@ -1380,17 +1352,7 @@ class Scenario(BaseScenario):
 			# 	print("agent_done", entity.id, disconnected)
 			disconnected_mask.append(disconnected)
 
-		# for landmark agent, disconnect if it is reached by the agent.
-		for (i_landmark, landmark) in enumerate(world.landmarks):
-			# landmark_agent_id = i_landmark % self.num_agents
-			# landmark_order = i_landmark // self.num_agents
-			# landmark_done = self.reached_goal[landmark_agent_id] > landmark_order
-			## use goal_tracker to remove landmarks that are reached
-			landmark_done = np.any(self.goal_tracker == landmark.id)
-			# if landmark_done:
-				# print("landmark_done",landmark.id)
-			disconnected_mask.append(landmark_done)
-			# print("landmark_done",landmark.id)
+		# No physical landmarks in merge scenario — skip landmark disconnection
 		# print("disconnected_mask",disconnected_mask)
 		adj[disconnected_mask, :] = 0   # Mask rows for done agents
 		adj[:, disconnected_mask] = 0   # Mask columns for done agents
@@ -1425,7 +1387,7 @@ class Scenario(BaseScenario):
 		pos = entity.state.p_pos
 		vel = entity.state.p_vel
 		if 'agent' in entity.name:
-			goal_pos = world.get_entity('landmark', self.goal_match_index[entity.id]).state.p_pos
+			goal_pos = self.landmark_poses[self.goal_match_index[entity.id]]
 			entity_type = entity_mapping['agent']
 		elif 'landmark' in entity.name:
 			goal_pos = pos
