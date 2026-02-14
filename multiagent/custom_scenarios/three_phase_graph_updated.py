@@ -342,6 +342,16 @@ class Scenario(BaseScenario):
 	def update_curriculum(self, world:World, num_current_episode:int) -> None:
 
 		""" Update the curriculum learning parameters if necessary."""
+		# If --no_curriculum is set, lock everything at full strength from the start
+		if getattr(self.args, 'no_curriculum', False):
+			# print("Curriculum learning disabled: using full reward weights and angle range from episode 0")
+			self.curriculum_ratio = 1.0
+			self.collision_rew = self.args.collision_rew
+			self.formation_rew = self.args.formation_rew
+			self.fair_rew = self.args.fair_rew
+			self._curriculum_max_angle = np.pi / 2
+			return
+
 		# print(f"Current Episode: {num_current_episode}")
 		# print(f"Total Episodes: {self.num_total_episode}")
 		self.curriculum_ratio = np.clip(num_current_episode / self.num_total_episode, 0.1, 1.0)
@@ -475,9 +485,9 @@ class Scenario(BaseScenario):
 		max_angle = getattr(self, '_curriculum_max_angle', np.pi / 2)
 		random_angle = np.random.uniform(-max_angle, max_angle)
 		# print(f"Random Angle: {random_angle*180/np.pi} degrees  (max={max_angle*180/np.pi:.0f})")
-		# Calculate tube length
-		tube_length = self.world_size * 0.8  # Use 80% of world size for tube length
-		tube_length += np.random.uniform(-self.world_size*0.3, self.world_size*0.1)  # Add some randomness
+		# Calculate tube length — shorter corridor so agents that leave can return
+		tube_length = self.world_size * 0.4  # Use 40% of world size (was 80%)
+		tube_length += np.random.uniform(-self.world_size*0.05, self.world_size*0.1)  # Small randomness
 		
 		# Scales: make 1 full tube traversal worth ~goal_rew
 		self.progress_gain = self.goal_rew / (tube_length*10)
@@ -1288,7 +1298,7 @@ class Scenario(BaseScenario):
 			if not self.recovering[agent.id]:
 				rew -= self.collision_rew  #*4
 		if current_phase < self.phase_reached[agent.id]:
-			print(f"Agent {agent.id} tried to move back to phase {current_phase} from {agent.previous_phase} rew", rew)
+			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {agent.previous_phase} rew", rew)
 			if not self.recovering[agent.id]:
 				rew -= self.collision_rew
 			# print(f"Agent {agent.id} tried to move back to phase {current_phase} from {self.phase_reached[agent.id]} rew", rew)

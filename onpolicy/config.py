@@ -204,6 +204,8 @@ def get_config():
                         help="increase fairness reward mid training")
     parser.add_argument("--min_obs_dist", type=float, default=0.5, 
                         help="The minimum distance observation threshold used for goal occupied")
+    parser.add_argument("--no_curriculum", type=lambda x:bool(strtobool(x)), default=False,
+                        help="Disable curriculum: use full reward weights and angle range from episode 0")
     
     parser.add_argument('--model_name', type=str,
                         default='FA_FR', help="Which model to run on")

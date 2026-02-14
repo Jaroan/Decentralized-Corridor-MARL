@@ -377,7 +377,7 @@ class Scenario(BaseScenario):
 		# corridor axis with guaranteed minimum longitudinal spacing.
 		# Multiple agents may share a longitudinal level if they are
 		# laterally separated beyond the warning zone.
-		min_sep = max(3.0 * self.separation_distance, 2*self.separation_distance)  # beyond warning zone
+		min_sep = max(2.0 * self.separation_distance, 1*self.separation_distance)  # beyond warning zone
 		long_spacing = min_sep * 1.5  # 50% extra gap between rows * 1.5
 		lateral_spread = self.world_size * 0.3  # wider lateral spread
 
@@ -468,9 +468,9 @@ class Scenario(BaseScenario):
 		  Agents starting on tube 3: [3, 4]
 		"""
 		world.tube_params = []
-		tube_width = 1.0
+		tube_width = 0.2
 		ws = self.world_size
-		gap = ws / 20   # small gap so tube ends nearly touch at merge points
+		gap = ws / 30   # small gap so tube ends nearly touch at merge points
 
 		branch_length  = ws * 0.3   # length of each Y branch
 		connect_length = ws * 0.25   # tube 2 (connecting the two merges)
@@ -638,10 +638,10 @@ class Scenario(BaseScenario):
 		y = float(np.dot(r, n))  # y is the signed lateral offset from the tube centerline (y=0 on centerline, |y| increases outward).
 		return s, y, L, half_w
 
-	def _in_tube_rect(self, s: float, y: float, L: float, half_w: float, eps: float = 0.05) -> bool:
+	def _in_tube_rect(self, s: float, y: float, L: float, half_w: float, eps: float = 0.15) -> bool:
 		return (-eps <= s <= L + eps) and (abs(y) <= half_w + eps)
 	
-	def _in_entrance_gate(self, s: float, y: float, L: float, half_w: float, eps: float = 0.05) -> bool:
+	def _in_entrance_gate(self, s: float, y: float, L: float, half_w: float, eps: float = 0.15) -> bool:
 		"""Full-width gate spanning the entrance edge: s in [-gate_back, +gate_front], |y|<=half_w."""
 		gate_front = float(self.gate_front_ratio) * L
 		gate_back = float(self.gate_back_ratio) * L
@@ -656,7 +656,7 @@ class Scenario(BaseScenario):
 		return float(np.hypot(ds, dy))
 	
 	# Full-width exit gate: s in [L - exit_back, L + exit_front], |y| <= half_w
-	def _in_exit_gate(self, s: float, y: float, L: float, half_w: float, eps: float = 0.05) -> bool:
+	def _in_exit_gate(self, s: float, y: float, L: float, half_w: float, eps: float = 0.15) -> bool:
 		exit_back = float(self.exit_back_ratio) * L
 		exit_front = float(self.exit_front_ratio) * L
 		return (L - exit_back - eps <= s <= L + exit_front + eps) and (abs(y) <= half_w + eps)
@@ -950,7 +950,7 @@ class Scenario(BaseScenario):
 		rew = 0.0
 		current_phase = self.get_agent_phase(agent, world)
 		# if current_phase == 2:
-		print("Agent", agent.id, "phase", current_phase, "previous_phase", agent.previous_phase, "phase_reached", self.phase_reached[agent.id])
+		# print("Agent", agent.id, "phase", current_phase, "previous_phase", agent.previous_phase, "phase_reached", self.phase_reached[agent.id])
 		# print("Goalrew",self.goal_rew, "Collisionrew",self.collision_rew)
 		# Common rewards across all phases
 		# Collision penalties (matching trained scenario)
@@ -1059,16 +1059,16 @@ class Scenario(BaseScenario):
 				rew -= norm_dist_entrance * self.goal_rew * 0.3
 			else:
 				rew -= norm_dist_entrance * self.goal_rew * 0.6
-			print("Agent", agent.id, "distance to entrance edge", dist_to_entrance_edge, "normalized", norm_dist_entrance, "reward", rew)
+			# print("Agent", agent.id, "distance to entrance edge", dist_to_entrance_edge, "normalized", norm_dist_entrance, "reward", rew)
 			# Progress reward toward entrance
 			rew += self.progress_gain * max(delta_proj, -0.05)
-			print("Agent", agent.id, "delta_proj", delta_proj, "reward after progress", rew)
+			# print("Agent", agent.id, "delta_proj", delta_proj, "reward after progress", rew)
 			self.prev_proj[agent.id] = s
 			# Reward forward velocity along corridor direction
 			corridor_vec = current_tube['e']
 			forward_speed = float(np.dot(agent.state.p_vel, corridor_vec))
 			rew += self.progress_gain * 0.5 * max(forward_speed, 0.0)
-			print("Agent", agent.id, "forward_speed", forward_speed, "reward after forward speed", rew)
+			# print("Agent", agent.id, "forward_speed", forward_speed, "reward after forward speed", rew)
 
 			# === Heading alignment reward ===
 			corridor_vec = current_tube['e']
@@ -1079,12 +1079,12 @@ class Scenario(BaseScenario):
 			# Penalize lateral approach
 			lateral_norm = abs(y) / (half_w + 1e-9)
 			rew -= lateral_norm * self.formation_rew * 0.1
-			print("Agent", agent.id, "lateral offset y", y, "normalized", lateral_norm, "reward after lateral penalty", rew)
+			# print("Agent", agent.id, "lateral offset y", y, "normalized", lateral_norm, "reward after lateral penalty", rew)
 
 			# Only enforce alignment when close to entrance
 			if dist_to_entrance_edge < self.world_size * 0.2 and abs(y) < half_w * 1.5:
 				rew -= heading_error * self.formation_rew * 0.5
-				print("Agent", agent.id, "heading error (radians)", heading_error, "reward after heading penalty", rew)
+				# print("Agent", agent.id, "heading error (radians)", heading_error, "reward after heading penalty", rew)
 			# === Penalize lateral approach (agents must approach along corridor axis) ===
 			# If agent is laterally offset from entrance but trying to enter: penalize
 			# if abs(y) > half_w * 0.8 and s < 0 and s > -self.world_size * 0.1:
@@ -1209,9 +1209,9 @@ class Scenario(BaseScenario):
 			# print(f"Agent {agent.id} skipped corridor (s={s:.2f} > L={L:.2f}): penalty {self.goal_rew}")
 		
 		# if current_phase == 2:
-		print(f"Agent {agent.id} total reward: ", rew)
-		# # input("Reward calculation complete for agent {}".format(agent.id))
-		input("Press Enter to continue...")
+		# print(f"Agent {agent.id} total reward: ", rew)
+		# # # input("Reward calculation complete for agent {}".format(agent.id))
+		# input("Press Enter to continue...")
 
 		return np.clip(rew, -4*self.collision_rew, self.goal_rew*5)
 

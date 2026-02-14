@@ -9,6 +9,7 @@
 
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+export OPENBLAS_NUM_THREADS=1  # Add to script to prevent OpenBLAS from using multiple threads
 # module unload anaconda/2022a
 # Loading the required module
 source /etc/profile
@@ -93,7 +94,7 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --num_landmarks=${n_agents} \
 --collision_rew 20 \
 --formation_rew 10 \
---n_training_threads 1 --n_rollout_threads 64 \
+--n_training_threads 1 --n_rollout_threads 256 \
 --num_mini_batch 1 \
 --episode_length ${episode_length} \
 --total_actions 9 \
@@ -109,6 +110,6 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --world_size=${world_size} \
 --graph_feat_type "relative" \
 --increase_fairness "False" \
---auto_mini_batch_size --target_mini_batch_size 16384 \
+--auto_mini_batch_size --target_mini_batch_size 32768 \
 --formation_type ${formation_type} \
 &> $logs_folder/${str_dynamics_type}_${datetime_str}_updated_with_coll20_spacing10_rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
