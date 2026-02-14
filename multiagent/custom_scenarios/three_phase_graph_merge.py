@@ -364,7 +364,7 @@ class Scenario(BaseScenario):
 		# Multiple agents may share a longitudinal level if they are
 		# laterally separated beyond the warning zone.
 		min_sep = max(2.0 * self.separation_distance, 1*self.separation_distance)  # beyond warning zone
-		long_spacing = min_sep * 1.0   # 50% extra gap between rows * 1.5
+		long_spacing = min_sep * 1.5   # 50% extra gap between rows * 1.5
 		lateral_spread = self.world_size * 0.3  # wider lateral spread
 
 		while True:

@@ -385,7 +385,7 @@ class Scenario(BaseScenario):
 		# Multiple agents may share a longitudinal level if they are
 		# laterally separated beyond the warning zone.
 		min_sep = max(2.0 * self.separation_distance,1*self.separation_distance)  # beyond warning zone
-		long_spacing = min_sep * 1.3  # 50% extra gap between rows * 1.5
+		long_spacing = min_sep * 1.0  # 50% extra gap between rows * 1.5
 		lateral_spread = self.world_size * 0.6  # wider lateral spread
 
 		while True:
@@ -1358,9 +1358,11 @@ class Scenario(BaseScenario):
 			neighbor_dists.append((dist, rel_pos_world, rel_vel_world))
 
 		neighbor_dists.sort(key=lambda x: x[0])
-		nearest = [n[1] for n in neighbor_dists[:2]]
-		while len(nearest) < 2:
-			nearest.append(np.zeros(world.dim_p, dtype=np.float32))
+		nearest_pos = [n[1] for n in neighbor_dists[:2]]
+		nearest_vel = [n[2] for n in neighbor_dists[:2]]
+		while len(nearest_pos) < 2:
+			nearest_pos.append(np.zeros(world.dim_p, dtype=np.float32))
+			nearest_vel.append(np.zeros(world.dim_p, dtype=np.float32))
 
 		# Closing rate to nearest neighbor (positive = approaching)
 		if neighbor_dists:
@@ -1377,13 +1379,33 @@ class Scenario(BaseScenario):
 			closing_rate_norm = 0.0
 			nn_dist_norm = 2.0  # no neighbor → "far away"
 
-		# Rotate each neighbor vector into ego frame, then flatten to 4 slots
-		rotated_neighbors = [
+		# Closing rate to 2nd nearest neighbor
+		if len(neighbor_dists) >= 2:
+			nn2_dist, nn2_rel_pos, nn2_rel_vel = neighbor_dists[1]
+			if nn2_dist > 1e-6:
+				closing_rate_2 = -float(np.dot(nn2_rel_pos, nn2_rel_vel)) / nn2_dist
+			else:
+				closing_rate_2 = 0.0
+			closing_rate_2_norm = np.clip(closing_rate_2 / (2.0 * self.config_class.V_MAX + 1e-9), -1.0, 1.0)
+			nn2_dist_norm = np.clip(nn2_dist / (3.0 * self.separation_distance + 1e-9), 0.0, 2.0)
+		else:
+			closing_rate_2_norm = 0.0
+			nn2_dist_norm = 2.0
+
+		# Rotate each neighbor position AND velocity into ego frame
+		rotated_neighbors_pos = [
 			get_rotated_position_from_relative(np.asarray(vec, dtype=np.float32), agent_heading).astype(np.float32)
-			for vec in nearest
+			for vec in nearest_pos
+		]
+		rotated_neighbors_vel = [
+			get_rotated_position_from_relative(np.asarray(vec, dtype=np.float32), agent_heading).astype(np.float32)
+			for vec in nearest_vel
 		]
 
-		nearest_neighbors = np.concatenate(rotated_neighbors, axis=0)
+		# Flatten: [pos1(2), vel1(2), pos2(2), vel2(2)] = 8 dims for neighbors
+		nearest_neighbors = np.concatenate(
+			[rotated_neighbors_pos[0], rotated_neighbors_vel[0],
+			 rotated_neighbors_pos[1], rotated_neighbors_vel[1]], axis=0)
 
 
 		# --- Tube params (rotated entrance/exit vectors + width + phase) ---
@@ -1411,16 +1433,19 @@ class Scenario(BaseScenario):
 		tube_params = np.concatenate([
 			np.array([s_norm, y_norm]),                                       # tube-frame position
 			np.array([dist_in, dist_out], dtype=np.float32),                  # distance to entrance & exit
-			np.array([closing_rate_norm, nn_dist_norm, phase], dtype=np.float32)  # NN closing rate, NN dist, phase
+			np.array([closing_rate_norm, nn_dist_norm,
+			          closing_rate_2_norm, nn2_dist_norm, phase], dtype=np.float32)  # NN1 & NN2 closing rate + dist, phase
 		], axis=0)
 		# print("Agent", agent.id, "tube_params", tube_params, "np.array([agent.state.speed,agent_speed])", np.array([agent.state.speed, agent_speed]))
 		# print("Agent", agent.id, "tube coords s,y,L,half_w:", s, y, L, half_w)
 		# --- Assemble final obs (all rotation-invariant) ---
-		# [heading_rel(2), speed(1), goal_pos(2), neighbors(4), tube_params(7)] = 16 dims
+		# [heading_rel(2), speed(1), goal_pos(2),
+		#  nn1_pos(2), nn1_vel(2), nn2_pos(2), nn2_vel(2),
+		#  tube_params(9)] = 22 dims
 		return np.concatenate([
 			np.array([np.cos(heading_error), np.sin(heading_error), agent.state.speed]),  # corridor-relative heading + speed
 			goal_pos,                           # rotated goal vector (ego frame)
-			nearest_neighbors,                  # two rotated neighbor vectors (ego frame)
+			nearest_neighbors,                  # two neighbor pos+vel vectors (ego frame)
 			tube_params                         # tube-frame features
 		], axis=0).astype(np.float32)
 

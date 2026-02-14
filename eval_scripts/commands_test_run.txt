@@ -51,14 +51,14 @@ python onpolicy/scripts/eval_mpe.py \
 --slow_agent_ids='1' \
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width' \
---render_episodes=1 \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width/test' \
+--render_episodes=2 \
 --world_size=5 \
 --num_agents=10 \
 --num_obstacles=0 \
 --seed=0 \
 --num_landmarks=1 \
---episode_length=120 \
+--episode_length=150 \
 --use_dones=False \
 --collaborative=False --model_name='3' \
 --scenario_name='three_phase_graph_updated' \

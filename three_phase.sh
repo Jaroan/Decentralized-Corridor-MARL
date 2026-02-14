@@ -73,6 +73,7 @@ echo "dynamics_type: ${chosen_dynamics_type}"
 echo "formation_type: ${formation_type}"
 
 
+# --model_dir "model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width" \
 
 # for seed in `seq ${seed_max}`;
 # do
@@ -81,12 +82,11 @@ echo "formation_type: ${formation_type}"
 # # execute the script with different params
 python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --project_name "air_corridor_unicycle_${n_agents}" \
---model_dir "model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width" \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
---experiment_name "${str_dynamics_type}_${datetime_str}_updated_with_coll20_spacing10_rot_eplen${episode_length}" \
---scenario_name "three_phase_graph_updated" \
+--experiment_name "${str_dynamics_type}_${datetime_str}_nnvel_with_coll20_spacing10_rot_eplen${episode_length}" \
+--scenario_name "three_phase_graph_updated_feb14" \
 --dynamics_type ${chosen_dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
 --fair_rew ${args_fair_rew[$SLURM_ARRAY_TASK_ID]} \
@@ -112,4 +112,4 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --increase_fairness "False" \
 --auto_mini_batch_size --target_mini_batch_size 32768 \
 --formation_type ${formation_type} \
-&> $logs_folder/${str_dynamics_type}_${datetime_str}_updated_with_coll20_spacing10_rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
+&> $logs_folder/${str_dynamics_type}_${datetime_str}_nnvel_with_coll20_spacing10_rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
