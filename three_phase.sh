@@ -112,4 +112,5 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --increase_fairness "False" \
 --auto_mini_batch_size --target_mini_batch_size 32768 \
 --formation_type ${formation_type} \
+
 &> $logs_folder/${str_dynamics_type}_${datetime_str}_nnvel_with_coll20_spacing10_rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
