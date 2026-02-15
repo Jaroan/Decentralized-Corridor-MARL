@@ -1360,12 +1360,14 @@ class Scenario(BaseScenario):
 			neighbor_dists.append((dist, rel_pos_world, rel_vel_world))
 
 		neighbor_dists.sort(key=lambda x: x[0])
-		nearest_pos = [n[1] for n in neighbor_dists[:2]]
-		nearest_vel = [n[2] for n in neighbor_dists[:2]]
-		while len(nearest_pos) < 2:
-			nearest_pos.append(np.zeros(world.dim_p, dtype=np.float32))
-			nearest_vel.append(np.zeros(world.dim_p, dtype=np.float32))
-
+		# nearest_pos = [n[1] for n in neighbor_dists[:2]]
+		# nearest_vel = [n[2] for n in neighbor_dists[:2]]
+		# while len(nearest_pos) < 2:
+		# 	nearest_pos.append(np.zeros(world.dim_p, dtype=np.float32))
+		# 	nearest_vel.append(np.zeros(world.dim_p, dtype=np.float32))
+		nearest = [n[1] for n in neighbor_dists[:2]]
+		while len(nearest) < 2:
+			nearest.append(np.zeros(world.dim_p, dtype=np.float32))
 		# Closing rate to nearest neighbor (positive = approaching)
 		if neighbor_dists:
 			nn_dist, nn_rel_pos, nn_rel_vel = neighbor_dists[0]
@@ -1381,35 +1383,41 @@ class Scenario(BaseScenario):
 			closing_rate_norm = 0.0
 			nn_dist_norm = 2.0  # no neighbor → "far away"
 
-		# Closing rate to 2nd nearest neighbor
-		if len(neighbor_dists) >= 2:
-			nn2_dist, nn2_rel_pos, nn2_rel_vel = neighbor_dists[1]
-			if nn2_dist > 1e-6:
-				closing_rate_2 = -float(np.dot(nn2_rel_pos, nn2_rel_vel)) / nn2_dist
-			else:
-				closing_rate_2 = 0.0
-			closing_rate_2_norm = np.clip(closing_rate_2 / (2.0 * self.config_class.V_MAX + 1e-9), -1.0, 1.0)
-			nn2_dist_norm = np.clip(nn2_dist / (3.0 * self.separation_distance + 1e-9), 0.0, 2.0)
-		else:
-			closing_rate_2_norm = 0.0
-			nn2_dist_norm = 2.0
+		# # Closing rate to 2nd nearest neighbor
+		# if len(neighbor_dists) >= 2:
+		# 	nn2_dist, nn2_rel_pos, nn2_rel_vel = neighbor_dists[1]
+		# 	if nn2_dist > 1e-6:
+		# 		closing_rate_2 = -float(np.dot(nn2_rel_pos, nn2_rel_vel)) / nn2_dist
+		# 	else:
+		# 		closing_rate_2 = 0.0
+		# 	closing_rate_2_norm = np.clip(closing_rate_2 / (2.0 * self.config_class.V_MAX + 1e-9), -1.0, 1.0)
+		# 	nn2_dist_norm = np.clip(nn2_dist / (3.0 * self.separation_distance + 1e-9), 0.0, 2.0)
+		# else:
+		# 	closing_rate_2_norm = 0.0
+		# 	nn2_dist_norm = 2.0
 
-		# Rotate each neighbor position AND velocity into ego frame
-		rotated_neighbors_pos = [
+		# # Rotate each neighbor position AND velocity into ego frame
+		# rotated_neighbors_pos = [
+		# 	get_rotated_position_from_relative(np.asarray(vec, dtype=np.float32), agent_heading).astype(np.float32)
+		# 	for vec in nearest_pos
+		# ]
+		# rotated_neighbors_vel = [
+		# 	get_rotated_position_from_relative(np.asarray(vec, dtype=np.float32), agent_heading).astype(np.float32)
+		# 	for vec in nearest_vel
+		# ]
+
+		# # Flatten: [pos1(2), vel1(2), pos2(2), vel2(2)] = 8 dims for neighbors
+		# nearest_neighbors = np.concatenate(
+		# 	[rotated_neighbors_pos[0], rotated_neighbors_vel[0],
+		# 	 rotated_neighbors_pos[1], rotated_neighbors_vel[1]], axis=0)
+
+		# Rotate each neighbor vector into ego frame, then flatten to 4 slots
+		rotated_neighbors = [
 			get_rotated_position_from_relative(np.asarray(vec, dtype=np.float32), agent_heading).astype(np.float32)
-			for vec in nearest_pos
-		]
-		rotated_neighbors_vel = [
-			get_rotated_position_from_relative(np.asarray(vec, dtype=np.float32), agent_heading).astype(np.float32)
-			for vec in nearest_vel
+			for vec in nearest
 		]
 
-		# Flatten: [pos1(2), vel1(2), pos2(2), vel2(2)] = 8 dims for neighbors
-		nearest_neighbors = np.concatenate(
-			[rotated_neighbors_pos[0], rotated_neighbors_vel[0],
-			 rotated_neighbors_pos[1], rotated_neighbors_vel[1]], axis=0)
-
-
+		nearest_neighbors = np.concatenate(rotated_neighbors, axis=0)
 		# --- Tube params (rotated entrance/exit vectors + width + phase) ---
 		# tube_entrance = np.asarray(world.tube_params['entrance'], dtype=np.float32)
 		# tube_exit = np.asarray(world.tube_params['exit'], dtype=np.float32)
@@ -1435,8 +1443,9 @@ class Scenario(BaseScenario):
 		tube_params = np.concatenate([
 			np.array([s_norm, y_norm]),                                       # tube-frame position
 			np.array([dist_in, dist_out], dtype=np.float32),                  # distance to entrance & exit
-			np.array([closing_rate_norm, nn_dist_norm,
-			          closing_rate_2_norm, nn2_dist_norm, phase], dtype=np.float32)  # NN1 & NN2 closing rate + dist, phase
+			np.array([closing_rate_norm, nn_dist_norm, phase], dtype=np.float32)
+			        #   closing_rate_2_norm, nn2_dist_norm,
+					  # NN1 & NN2 closing rate + dist, phase
 		], axis=0)
 		# print("Agent", agent.id, "tube_params", tube_params, "np.array([agent.state.speed,agent_speed])", np.array([agent.state.speed, agent_speed]))
 		# print("Agent", agent.id, "tube coords s,y,L,half_w:", s, y, L, half_w)

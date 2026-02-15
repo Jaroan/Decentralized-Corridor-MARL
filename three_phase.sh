@@ -1,6 +1,6 @@
 #!/bin/bash
 # Slurm sbatch options
-#SBATCH --job-name 5rot_col20
+#SBATCH --job-name 3rot_col20
 #SBATCH -a 0-1
 #SBATCH --gres=gpu:volta:1
 ##SBATCH --cpus-per-task=8
@@ -21,7 +21,7 @@ logs_folder="out_fair_informarl3"
 mkdir -p $logs_folder
 # Run the script
 seed_max=2
-n_agents=5
+n_agents=3
 
 # "double_integrator" or "unicycle_vehicle or air_taxi"
 chosen_dynamics_type="air_taxi"
@@ -81,11 +81,12 @@ echo "formation_type: ${formation_type}"
 # echo "seed: ${seed}"
 # # execute the script with different params
 python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
+--model_dir "model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width" \
 --project_name "air_corridor_unicycle_${n_agents}" \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
---experiment_name "${str_dynamics_type}_${datetime_str}_nnvel_with_coll20_spacing10_rot_eplen${episode_length}" \
+--experiment_name "${str_dynamics_type}_${datetime_str}_strongcollision_nocurr_with_coll20_spacing10_rot_eplen${episode_length}" \
 --scenario_name "three_phase_graph_updated_feb14" \
 --dynamics_type ${chosen_dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
@@ -112,5 +113,5 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --increase_fairness "False" \
 --auto_mini_batch_size --target_mini_batch_size 32768 \
 --formation_type ${formation_type} \
-
-&> $logs_folder/${str_dynamics_type}_${datetime_str}_nnvel_with_coll20_spacing10_rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
+--no_curriculum True \
+&> $logs_folder/${str_dynamics_type}_${datetime_str}_strongcollision_nocurr_with_coll20_spacing10_rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
