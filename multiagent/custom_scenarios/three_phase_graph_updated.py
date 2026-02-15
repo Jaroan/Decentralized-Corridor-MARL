@@ -909,77 +909,30 @@ class Scenario(BaseScenario):
 		# print("Agent", agent.id, "phase", current_phase, "previous_phase", agent.previous_phase, "phase_reached", self.phase_reached[agent.id])
 		# print("Goalrew",self.goal_rew, "Collisionrew",self.collision_rew)
 		# ============================================================
-		# SAFETY-CRITICAL collision avoidance (always active, all phases)
+		# COLLISION AVOIDANCE — speed adjustment only
 		# ============================================================
-		# Track the worst (closest) proximity ratio across all neighbors
-		# so downstream heading-alignment penalties can be suppressed
-		# when the agent needs freedom to perform evasive turns.
+		# When agents get close: back agent slows down, front agent speeds up.
+		# No turning/evasion — the pretrained model already follows corridors well.
 		worst_proximity_ratio = 0.0
 		if agent.collide:
-			agent_heading_vec = np.array([np.cos(agent.state.theta), np.sin(agent.state.theta)])
 			for a in world.agents:
-				if a.id == agent.id:
-					continue
-				if a.status:
+				if a.id == agent.id or a.status:
 					continue
 				rel_pos = a.state.p_pos - agent.state.p_pos
 				dist_aa = np.linalg.norm(rel_pos)
 
 				# --- Hard collision penalty (separation violated) ---
 				if dist_aa < self.separation_distance:
-					rew -= self.collision_rew * 2.0  # catastrophic — doubled
+					rew -= self.collision_rew
 
-				# --- Proximity warning zone (widened to give more reaction time) ---
-				warning_zone = 3.0 * self.separation_distance
+				# --- Proximity warning zone ---
+				warning_zone = 2.0 * self.separation_distance
 				if dist_aa < warning_zone:
-					proximity_ratio = (warning_zone - dist_aa) / (warning_zone - self.separation_distance + 1e-9)
-					proximity_ratio = np.clip(proximity_ratio, 0.0, 1.0)
+					proximity_ratio = np.clip(
+						(warning_zone - dist_aa) / (warning_zone - self.separation_distance + 1e-9),
+						0.0, 1.0)
 					worst_proximity_ratio = max(worst_proximity_ratio, proximity_ratio)
-
-					# 1) Always-on proximity penalty (being close is unsafe regardless of velocity)
-					rew -= self.collision_rew * 0.3 * proximity_ratio
-
-					# 2) Extra closing-speed penalty (approaching makes it worse)
-					rel_vel = np.asarray(a.state.p_vel) - np.asarray(agent.state.p_vel)
-					closing = -float(np.dot(rel_pos, rel_vel)) / (dist_aa + 1e-9)
-					if closing > 0:
-						closing_norm = np.clip(closing / (2.0 * self.config_class.V_MAX + 1e-9), 0.0, 1.0)
-						rew -= self.collision_rew * 0.5 * proximity_ratio * closing_norm
-
-					# 3) Lateral evasion reward: reward turning AWAY from the threat.
-					#    Compute the bearing to the threat, then reward heading
-					#    perpendicular or away from it (dot product < 0 means
-					#    heading away).  This incentivizes go-around / turning
-					#    maneuvers instead of just slowing down.
-					threat_dir = rel_pos / (dist_aa + 1e-9)  # unit vec toward threat
-					heading_toward_threat = float(np.dot(agent_heading_vec, threat_dir))
-					# heading_toward_threat in [-1, 1]: +1 = aimed straight at threat
-					# Reward being perpendicular or facing away (negative dot)
-					if heading_toward_threat > 0:
-						# Penalize: heading toward threat, scaled by proximity
-						rew -= self.collision_rew * 0.4 * proximity_ratio * heading_toward_threat
-					else:
-						# Reward: heading away from threat (evasion)
-						rew += self.collision_rew * 0.2 * proximity_ratio * abs(heading_toward_threat)
-
-					# 4) Lateral velocity reward: reward velocity component
-					#    perpendicular to the threat bearing (actual lateral motion)
-					threat_perp = np.array([-threat_dir[1], threat_dir[0]])  # perpendicular to threat
-					lateral_speed = abs(float(np.dot(agent.state.p_vel, threat_perp)))
-					rew += self.collision_rew * 0.15 * proximity_ratio * np.clip(
-						lateral_speed / (self.config_class.V_MAX + 1e-9), 0.0, 1.0)
-
-					# 5) Speed-throttle incentive: reward decelerating when close
-					my_speed = float(np.linalg.norm(agent.state.p_vel))
-					if my_speed > self.config_class.V_MIN:
-						speed_frac = (my_speed - self.config_class.V_MIN) / (self.config_class.V_MAX - self.config_class.V_MIN + 1e-9)
-						rew -= self.collision_rew * 0.15 * proximity_ratio * speed_frac
-			
-		# 	if self.is_obstacle_collision(pos=agent.state.p_pos,
-		# 								entity_size=agent.size, 
-		# 								world=world):
-		# 		rew -= self.collision_rew
-		# 		# print(f"Agent {agent.id} collided with obstacle")
+					rew -= self.collision_rew * 0.2 * proximity_ratio
 
 		# Calculate tube length
 		tube_direction = world.tube_params['exit'] - world.tube_params['entrance']
@@ -994,14 +947,12 @@ class Scenario(BaseScenario):
 
 		front_agents = []
 		back_agents = []
-		# print("self._in_entrance_gate(s, y, L, half_w)",self._in_entrance_gate(s, y, L, half_w))
+		corridor_e = world.tube_params['e']
 		for other in world.agents:
-			if other is agent:
-				continue
-			if other.status:
+			if other is agent or other.status:
 				continue
 			rel_vec = other.state.p_pos - agent_pos
-			proj = np.dot(rel_vec, world.tube_params['e']) # Longitudinal projection along corridor direction
+			proj = np.dot(rel_vec, corridor_e)
 			if proj > 0:
 				front_agents.append((proj, other))
 			else:
@@ -1011,8 +962,38 @@ class Scenario(BaseScenario):
 		front_agent = min(front_agents, key=lambda x: x[0])[1] if front_agents else None
 		back_agent = max(back_agents, key=lambda x: x[0])[1] if back_agents else None
 
-		# print("front_agent", front_agent.id if front_agent else "None")
-		# print("back_agent", back_agent.id if back_agent else "None")
+		# === Speed adjustment when agents are close ===
+		speed_zone = 2.5 * self.separation_distance
+		my_speed = float(np.linalg.norm(agent.state.p_vel))
+		my_fwd = float(np.dot(agent.state.p_vel, corridor_e))
+		speed_range = self.config_class.V_MAX - self.config_class.V_MIN + 1e-9
+
+		# Back agent: slow down when close behind front agent
+		if front_agent is not None:
+			dist_front = np.linalg.norm(front_agent.state.p_pos - agent_pos)
+			if dist_front < speed_zone:
+				urgency = np.clip(
+					(speed_zone - dist_front) / (speed_zone - self.separation_distance + 1e-9),
+					0.0, 1.0)
+				# Penalize being fast (reward being at V_MIN)
+				speed_frac = np.clip((my_speed - self.config_class.V_MIN) / speed_range, 0.0, 1.0)
+				rew -= self.collision_rew * 0.5 * urgency * speed_frac
+				# Extra penalty for going faster than the front agent
+				front_fwd = float(np.dot(front_agent.state.p_vel, corridor_e))
+				if my_fwd > front_fwd:
+					excess = np.clip((my_fwd - front_fwd) / (self.config_class.V_MAX + 1e-9), 0.0, 1.0)
+					rew -= self.collision_rew * 0.3 * urgency * excess
+
+		# Front agent: speed up when closely tailed
+		if back_agent is not None:
+			dist_back = np.linalg.norm(back_agent.state.p_pos - agent_pos)
+			if dist_back < speed_zone:
+				urgency = np.clip(
+					(speed_zone - dist_back) / (speed_zone - self.separation_distance + 1e-9),
+					0.0, 1.0)
+				# Reward being fast (reward being at V_MAX)
+				speed_frac = np.clip((my_speed - self.config_class.V_MIN) / speed_range, 0.0, 1.0)
+				rew += self.collision_rew * 0.3 * urgency * speed_frac
 		
 
 		

@@ -48,7 +48,7 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/feb14_3ag/' \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width/' \
 --render_episodes=5 \
 --world_size=5 \
 --num_agents=5 \
@@ -58,7 +58,7 @@ python onpolicy/scripts/eval_mpe.py \
 --episode_length=120 \
 --use_dones=False \
 --collaborative=False --model_name='3' \
---scenario_name='three_phase_graph_updated_feb14' \
+--scenario_name='three_phase_graph_updated' \
 --dynamics_type='air_taxi' \
 --goal_rew=20 \
 --collision_rew=20 \

@@ -50,7 +50,7 @@ if [ "$chosen_dynamics_type" == "air_taxi" ]; then
     str_dynamics_type="at"
     world_size=5
     episode_length=120
-    num_env_steps=8000000
+    num_env_steps=5000000
 elif [ "$chosen_dynamics_type" == "unicycle_vehicle" ]; then
     str_dynamics_type="uv"
     world_size=4
@@ -86,8 +86,8 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --env_name "GraphMPE" \
 --algorithm_name "rmappo" \
 --seed ${seeds[$SLURM_ARRAY_TASK_ID]} \
---experiment_name "${str_dynamics_type}_${datetime_str}_strongcollision_nocurr_with_coll20_spacing10_rot_eplen${episode_length}" \
---scenario_name "three_phase_graph_updated_feb14" \
+--experiment_name "${str_dynamics_type}_${datetime_str}_revert_nocurr_with_coll20_spacing10_rot_eplen${episode_length}" \
+--scenario_name "three_phase_graph_updated" \
 --dynamics_type ${chosen_dynamics_type} \
 --fair_wt ${args_fair_wt[$SLURM_ARRAY_TASK_ID]} \
 --fair_rew ${args_fair_rew[$SLURM_ARRAY_TASK_ID]} \
@@ -114,4 +114,4 @@ python -u onpolicy/scripts/train_mpe.py --use_valuenorm --use_popart \
 --auto_mini_batch_size --target_mini_batch_size 32768 \
 --formation_type ${formation_type} \
 --no_curriculum True \
-&> $logs_folder/${str_dynamics_type}_${datetime_str}_strongcollision_nocurr_with_coll20_spacing10_rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
+&> $logs_folder/${str_dynamics_type}_${datetime_str}_revert_nocurr_with_coll20_spacing10_rot_eplen${episode_length}_${seeds[$SLURM_ARRAY_TASK_ID]}
