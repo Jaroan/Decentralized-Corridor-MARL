@@ -48,7 +48,7 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/feb14_3ag/newobs' \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/feb14_3ag/' \
 --render_episodes=5 \
 --world_size=5 \
 --num_agents=5 \

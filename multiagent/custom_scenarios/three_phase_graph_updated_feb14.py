@@ -1015,9 +1015,91 @@ class Scenario(BaseScenario):
 
 		# print("front_agent", front_agent.id if front_agent else "None")
 		# print("back_agent", back_agent.id if back_agent else "None")
-		
 
-		
+		# === Follow-the-leader: decelerate when close behind a front agent ===
+		# Phase-agnostic — applies in Phase 0 (approach) and Phase 1 (corridor).
+		# front_throttle_factor: 1.0 = no suppression (no front agent nearby),
+		#   ramps toward 0.0 as we get critically close to the front agent.
+		#   Used later to suppress progress/speed rewards so they don't fight
+		#   the slow-down penalties.
+		front_throttle_factor = 1.0
+		if front_agent is not None:
+			dist_front_ftl = np.linalg.norm(front_agent.state.p_pos - agent.state.p_pos)
+			follow_zone = 2.5 * self.separation_distance   # ~0.76 km
+			if dist_front_ftl < follow_zone:
+				# Urgency ramps 0→1 as gap shrinks from follow_zone to separation_distance
+				follow_urgency = np.clip(
+					(follow_zone - dist_front_ftl) / (follow_zone - self.separation_distance + 1e-9),
+					0.0, 1.0)
+
+				corridor_e = world.tube_params['e']
+				my_fwd   = float(np.dot(agent.state.p_vel, corridor_e))
+				front_fwd = float(np.dot(front_agent.state.p_vel, corridor_e))
+
+				# 1) Penalise going faster than the leader
+				speed_excess = my_fwd - front_fwd
+				if speed_excess > 0:
+					excess_norm = np.clip(
+						speed_excess / (self.config_class.V_MAX + 1e-9), 0.0, 1.0)
+					rew -= self.collision_rew * 0.4 * follow_urgency * excess_norm
+
+				# Suppress progress rewards proportionally so they don't fight
+				# the slow-down signal.  At full urgency, progress is halved.
+				front_throttle_factor = max(0.3, 1.0 - 0.7 * follow_urgency)
+
+				# 2) When VERY close (< 1.5× separation), also reward low absolute
+				#    speed — even matching the leader may not be enough to open the gap.
+				if dist_front_ftl < 1.5 * self.separation_distance:
+					critical_urgency = np.clip(
+						(1.5 * self.separation_distance - dist_front_ftl)
+						/ (0.5 * self.separation_distance + 1e-9),
+						0.0, 1.0)
+					my_speed = float(np.linalg.norm(agent.state.p_vel))
+					speed_frac = np.clip(
+						(my_speed - self.config_class.V_MIN)
+						/ (self.config_class.V_MAX - self.config_class.V_MIN + 1e-9),
+						0.0, 1.0)
+					rew -= self.collision_rew * 0.3 * critical_urgency * speed_frac
+					# At critical proximity, suppress progress even more (down to 30%)
+					front_throttle_factor = max(0.3, front_throttle_factor - 0.4 * critical_urgency)
+
+		# === Don't-brake-when-tailed: speed up if a back agent is dangerously close ===
+		# Symmetric to the follow-the-leader block above.  If an agent behind
+		# is very close, this agent should NOT decelerate (or should accelerate)
+		# to open the gap from the front side.
+		if back_agent is not None:
+			dist_back_tail = np.linalg.norm(back_agent.state.p_pos - agent.state.p_pos)
+			tail_zone = 2.0 * self.separation_distance   # ~0.61 km
+			if dist_back_tail < tail_zone:
+				tail_urgency = np.clip(
+					(tail_zone - dist_back_tail) / (tail_zone - self.separation_distance + 1e-9),
+					0.0, 1.0)
+
+				corridor_e = world.tube_params['e']
+				my_fwd   = float(np.dot(agent.state.p_vel, corridor_e))
+				back_fwd = float(np.dot(back_agent.state.p_vel, corridor_e))
+
+				# 1) Penalise going slower than the follower (keeps gap from closing)
+				speed_deficit = back_fwd - my_fwd
+				if speed_deficit > 0:
+					deficit_norm = np.clip(
+						speed_deficit / (self.config_class.V_MAX + 1e-9), 0.0, 1.0)
+					rew -= self.collision_rew * 0.3 * tail_urgency * deficit_norm
+
+				# 2) Reward high forward speed when tailed closely
+				#    (incentivize accelerating to open the gap)
+				if dist_back_tail < 1.5 * self.separation_distance:
+					critical_tail = np.clip(
+						(1.5 * self.separation_distance - dist_back_tail)
+						/ (0.5 * self.separation_distance + 1e-9),
+						0.0, 1.0)
+					my_speed = float(np.linalg.norm(agent.state.p_vel))
+					speed_frac = np.clip(
+						(my_speed - self.config_class.V_MIN)
+						/ (self.config_class.V_MAX - self.config_class.V_MIN + 1e-9),
+						0.0, 1.0)
+					rew += self.collision_rew * 0.2 * critical_tail * speed_frac
+
 		# Track agent's previous phase if not already stored
 		if not hasattr(agent, 'previous_phase'):
 			agent.previous_phase = 0
@@ -1106,14 +1188,15 @@ class Scenario(BaseScenario):
 
 				# Encourage forward progress toward the entrance (discourage circling)
 				# BUT suppress progress reward when bypassing the corridor laterally
+				# AND throttle when close behind a front agent so slow-down signal is clear
 				if not bypassing:
-					rew += self.progress_gain * max(delta_proj, -0.05)
+					rew += self.progress_gain * front_throttle_factor * max(delta_proj, -0.05)
 				self.prev_proj[agent.id] = s
 				# Reward forward velocity along corridor direction (suppressed when bypassing)
 				corridor_vec = world.tube_params['e']
 				forward_speed = float(np.dot(agent.state.p_vel, corridor_vec))
 				if not bypassing:
-					rew += self.progress_gain * 0.5 * max(forward_speed, 0.0)
+					rew += self.progress_gain * 0.5 * front_throttle_factor * max(forward_speed, 0.0)
 
 				# --- Strong penalty for flying parallel outside the corridor ---
 				if bypassing:
@@ -1227,13 +1310,14 @@ class Scenario(BaseScenario):
 			self.steps_in_corridor[agent.id] += 1
 			self.delta_spacing.append(spacing_error)
 			# Reward forward progress through the tube (discourage oscillations)
-			rew += self.progress_gain * max(delta_proj, -0.05)
+			# Throttle progress reward when close behind a front agent
+			rew += self.progress_gain * front_throttle_factor * max(delta_proj, -0.05)
 			# print("  Reward forward progress through the tube", self.progress_gain * max(delta_proj, -0.05))
 			self.prev_proj[agent.id] = s
 			# Reward forward velocity along corridor direction
 			corridor_vec = world.tube_params['e']
 			forward_speed = float(np.dot(agent.state.p_vel, corridor_vec))
-			rew += self.progress_gain * max(forward_speed, 0.0)
+			rew += self.progress_gain * front_throttle_factor * max(forward_speed, 0.0)
 			# print("Phase 1 forward speed reward", self.progress_gain * max(forward_speed, 0.0))
 
 			corridor_vec = world.tube_params['e']  # unit vector along corridor
