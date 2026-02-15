@@ -48,14 +48,14 @@ python onpolicy/scripts/eval_mpe.py \
 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width/' \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/feb14_3ag/' \
 --render_episodes=5 \
 --world_size=5 \
---num_agents=5 \
+--num_agents=40 \
 --num_obstacles=0 \
 --seed=0 \
 --num_landmarks=1 \
---episode_length=120 \
+--episode_length=220 \
 --use_dones=False \
 --collaborative=False --model_name='3' \
 --scenario_name='three_phase_graph_updated' \
@@ -299,6 +299,33 @@ python onpolicy/scripts/eval_mpe.py \
 --formation_rew 10 \
 --fair_rew=1 \
 --save_gifs \
+--use_render \
+--num_walls=0 \
+--zeroshift=5 \
+--min_obs_dist 0.5 \
+--total_actions 5 \
+--formation_type 'point'
+
+
+
+python onpolicy/scripts/eval_mpe.py \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width/' \
+--render_episodes=5 \
+--world_size=16 \
+--num_agents=5 \
+--num_obstacles=0 \
+--seed=0 \
+--num_landmarks=1 \
+--episode_length=120 \
+--use_dones=False \
+--collaborative=False --model_name='3' \
+--scenario_name='three_phase_graph_combined_splits_and_merges_and sequential' \
+--dynamics_type='air_taxi' \
+--goal_rew=20 \
+--collision_rew=20 \
+--fair_rew=1 \
+--save_gifs \
+--formation_rew 10 \
 --use_render \
 --num_walls=0 \
 --zeroshift=5 \

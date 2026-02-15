@@ -9,7 +9,7 @@ _wandb:
     framework: torch
     is_jupyter_run: false
     is_kaggle_kernel: false
-    start_time: 1771127156
+    start_time: 1771166470
     t:
       1:
       - 1
@@ -33,10 +33,10 @@ _wandb:
       - 20
       13: linux-x86_64
     e:
-      tx6p5td7nj6lt1t3er55wtuat1n3e0cc:
+      3ce2b8lvfqgewzvo8834b2xsawserd87:
         os: Linux-6.1.161-llgrid-x86_64-with-glibc2.39
         python: CPython 3.12.11
-        started_at: '2026-02-15T03:45:56.155316Z'
+        started_at: '2026-02-15T14:41:09.897359Z'
         args:
         - --use_valuenorm
         - --use_popart
@@ -49,11 +49,11 @@ _wandb:
         - --algorithm_name
         - rmappo
         - --seed
-        - '0'
+        - '1'
         - --experiment_name
-        - at_260214_224548_strongcollision_nocurr_with_coll20_spacing10_rot_eplen120
+        - at_260215_094056_revert_nocurr_with_coll20_spacing10_rot_eplen120
         - --scenario_name
-        - three_phase_graph_updated_feb14
+        - three_phase_graph_updated
         - --dynamics_type
         - air_taxi
         - --fair_wt
@@ -77,7 +77,7 @@ _wandb:
         - --total_actions
         - '9'
         - --num_env_steps
-        - '8000000'
+        - '5000000'
         - --ppo_epoch
         - '10'
         - --use_ReLU
@@ -120,9 +120,9 @@ _wandb:
         code_path_local: onpolicy/scripts/train_mpe.py
         git:
           remote_url: https://github.com/Jaroan/AAM-Corridor-MARL.git
-          commit: 39b6ac3852f9602693138e6c2fb9248e6e8719e1
-        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/three_phase_graph_updated_feb14/rmappo/at_260214_224548_strongcollision_nocurr_with_coll20_spacing10_rot_eplen120
-        host: d-9-8-1
+          commit: fe4b73e93f0a6a1ee127549e648e51e3e3ec7ae5
+        root: /home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/three_phase_graph_updated/rmappo/at_260215_094056_revert_nocurr_with_coll20_spacing10_rot_eplen120
+        host: d-9-15-2
         executable: /state/partition1/llgrid/pkg/conda/python-ML-2025b-pytorch/bin/python
         cpu_count: 40
         cpu_count_logical: 80
@@ -131,33 +131,33 @@ _wandb:
         disk:
           /:
             total: '471413596160'
-            used: '18295832576'
+            used: '18309484544'
         memory:
-          total: '405405605888'
+          total: '405413994496'
         gpu_nvidia:
         - name: Tesla V100-PCIE-32GB
           memory_total: '34359738368'
           cuda_cores: 5120
           architecture: Volta
-          uuid: GPU-7d66715e-08fe-c848-126b-773d26150600
+          uuid: GPU-d144d2ee-0978-062e-cfe3-4750c4a82541
         - name: Tesla V100-PCIE-32GB
           memory_total: '34359738368'
           cuda_cores: 5120
           architecture: Volta
-          uuid: GPU-d0705b08-b1c5-0c26-ed6c-77f447b13efa
+          uuid: GPU-72583fbd-5c43-4205-6a22-b7aeb6a93409
         cuda_version: '13.0'
         slurm:
           tasks_per_node: '1'
-          topology_addr: d-9-8-1
-          job_qos: normal
           job_name: 3rot_col20
+          job_qos: normal
+          topology_addr: d-9-15-2
           conf: /etc/slurm/slurm.conf
           gtids: '0'
           mem_per_cpu: '8500'
           cpus_on_node: '20'
           script_context: prolog_task
           job_user: jaloor
-          task_pid: '2488891'
+          task_pid: '457392'
           nnodes: '1'
           nodeid: '0'
           gpupower: '150'
@@ -167,32 +167,32 @@ _wandb:
           job_cpus_per_node: '20'
           spank_gpupower: WHAT
           node_aliases: (null)
-          nodelist: d-9-8-1
-          job_end_time: '1771487147'
-          job_start_time: '1771127147'
+          nodelist: d-9-15-2
+          job_end_time: '1771526456'
+          array_job_id: '4154877'
           array_task_step: '1'
-          array_job_id: '4153321'
-          array_task_count: '2'
+          job_start_time: '1771166456'
+          job_num_nodes: '1'
           gpus_on_node: '1'
           procid: '0'
-          job_num_nodes: '1'
-          jobid: '4153322'
-          job_uid: '62375'
+          jobid: '4154877'
+          array_task_count: '2'
+          job_id: '4154877'
           job_account: default_group
-          job_id: '4153322'
-          submit_host: login-2
+          job_uid: '62375'
+          submit_host: login-3
           topology_addr_pattern: node
           submit_dir: /home/gridsan/jaloor/AAM-Corridor-MARL
           job_gid: '62375'
           working_cluster: txe1:scheduler-0:6817:9984:109
-          array_task_id: '0'
-          job_nodelist: d-9-8-1
-          job_gpus: '0'
+          array_task_id: '1'
+          job_nodelist: d-9-15-2
+          job_gpus: '1'
           localid: '0'
           cpus_per_task: '20'
-          prio_process: '0'
           array_task_max: '1'
-        writer_id: tx6p5td7nj6lt1t3er55wtuat1n3e0cc
+          prio_process: '0'
+        writer_id: 3ce2b8lvfqgewzvo8834b2xsawserd87
 total_actions:
   desc: null
   value: 9
@@ -246,10 +246,10 @@ project_name:
   value: air_corridor_unicycle_3
 experiment_name:
   desc: null
-  value: at_260214_224548_strongcollision_nocurr_with_coll20_spacing10_rot_eplen120
+  value: at_260215_094056_revert_nocurr_with_coll20_spacing10_rot_eplen120
 seed:
   desc: null
-  value: 0
+  value: 1
 cuda:
   desc: null
   value: true
@@ -270,7 +270,7 @@ n_render_rollout_threads:
   value: 1
 num_env_steps:
   desc: null
-  value: 8000000
+  value: 5000000
 user_name:
   desc: null
   value: marl
@@ -471,7 +471,7 @@ verbose:
   value: true
 scenario_name:
   desc: null
-  value: three_phase_graph_updated_feb14
+  value: three_phase_graph_updated
 num_landmarks:
   desc: null
   value: 3
