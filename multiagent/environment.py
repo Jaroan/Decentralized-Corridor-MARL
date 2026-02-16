@@ -10,7 +10,7 @@ from multiagent.config import DoubleIntegratorConfig, UnicycleVehicleConfig, Air
 from pyglet import image
 
 # update bounds to center around agent
-cam_range = 2
+cam_range = 1
 
 # environment for all agents in the multiagent world
 # currently code assumes that no agents will be created/destroyed at runtime!
@@ -859,10 +859,23 @@ class MultiAgentBaseEnv(gym.Env):
 				pos = np.zeros(self.world.dim_p)
 			else:
 				pos = self.agents[i].state.p_pos
-			self.viewers[i].set_bounds(pos[0]- cam_range_width,
-										pos[0]+ cam_range_width,
-										pos[1]-cam_range_height,
-										pos[1]+cam_range_height)
+			# Calculate bounds as usual
+			left = pos[0] - cam_range_width
+			right = pos[0] + cam_range_width
+			bottom = pos[1] - cam_range_height
+			top = pos[1] + cam_range_height
+
+			# Clamp bounds to not exceed exit points
+			right = min(right, 6.0)      # T17 exit x
+			left = left       # T16 exit x
+			bottom = max(bottom, -6.0)   # T16 exit y
+			top = top         # (or whatever your topmost point is)
+
+			self.viewers[i].set_bounds(left, right, bottom, top)
+			# self.viewers[i].set_bounds(pos[0]- cam_range_width,
+			# 							pos[0]+ cam_range_width,
+			# 							pos[1]-cam_range_height,
+			# 							pos[1]+cam_range_height)
 			# update geometry positions
 			for e, entity in enumerate(self.world.entities):
 				self.render_geoms_xform[e].set_translation(*entity.state.p_pos)

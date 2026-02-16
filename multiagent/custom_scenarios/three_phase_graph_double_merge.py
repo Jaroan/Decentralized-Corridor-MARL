@@ -377,7 +377,7 @@ class Scenario(BaseScenario):
 		# corridor axis with guaranteed minimum longitudinal spacing.
 		# Multiple agents may share a longitudinal level if they are
 		# laterally separated beyond the warning zone.
-		min_sep = max(3.0 * self.separation_distance, 2*self.separation_distance)  # beyond warning zone
+		min_sep = max(4.0 * self.separation_distance, 3*self.separation_distance)  # beyond warning zone
 		long_spacing = min_sep * 1.5  # 50% extra gap between rows * 1.5
 		lateral_spread = self.world_size * 0.3  # wider lateral spread
 

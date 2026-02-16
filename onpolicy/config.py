@@ -407,9 +407,17 @@ def get_config():
                         help="Comma-separated agent indices that use the slow policy, "
                         "e.g. '1,3,5'. If None and model_dir_slow is set, "
                         "a random 20%% subset is chosen.")
-    
+
+    # evaluation parameters
+    parser.add_argument("--eval_mode", action='store_true', default=False,
+                        help="Enable evaluation metrics logging. "
+                        "When set, saves metrics to eval_summary.csv. "
+                        "Use this for formal evaluations, not debugging.")
+    parser.add_argument("--eval_output_dir", type=str, default="eval_results",
+                        help="Directory to save evaluation metrics when --eval_mode is enabled.")
+
     # misc parameters
-    parser.add_argument("--verbose", action='store_false', default=True, 
+    parser.add_argument("--verbose", action='store_false', default=True,
                         help="by default, print args and network at the begining.")
 
     return parser

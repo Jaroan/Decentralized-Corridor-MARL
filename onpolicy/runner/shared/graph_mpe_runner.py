@@ -6,6 +6,7 @@ from numpy import ndarray as arr
 from typing import Tuple
 import torch
 from onpolicy.runner.shared.base_runner import Runner
+from onpolicy.runner.shared.eval_metrics_logger import create_logger
 import wandb
 import imageio
 import csv
@@ -537,6 +538,10 @@ class GMPERunner(Runner):
 		delta_space_list = []
 		spacing_violations_list = []
 		print("num_episodes: ", self.all_args.render_episodes)
+
+		# Initialize evaluation metrics logger (only active if --eval_mode flag is set)
+		metrics_logger = create_logger(self.all_args)
+		metrics_logger.set_config(self.num_agents, self.all_args.world_size, self.episode_length)
 		# num_total_episode = int(self.all_args.num_env_steps) // self.all_args.episode_length // self.all_args.n_rollout_threads
 
 		obs, agent_id, node_obs, adj = envs.reset(self.all_args.render_episodes)
@@ -551,6 +556,8 @@ class GMPERunner(Runner):
 		# tube_params = envs.envs[0].world.tube_params
 		# bluesky.draw_corridor(tube_params)
 		for episode in range(self.all_args.render_episodes):
+			# Track exit times for throughput calculation
+			agent_exit_times = [-1.0] * self.num_agents  # -1 = not exited yet
 
 			if not get_metrics:
 				if self.all_args.save_gifs:
@@ -698,6 +705,11 @@ class GMPERunner(Runner):
 				# bluesky.update(agent_states)
 				episode_rewards.append(rewards)
 
+				# Track exit times for agents that just completed (for throughput)
+				current_time = step * self.dt  # dt = 0.1 seconds per step
+				for agent_idx in range(self.num_agents):
+					if dones[0][agent_idx] and agent_exit_times[agent_idx] < 0:
+						agent_exit_times[agent_idx] = current_time
 
 				dones_env = np.all(dones)
 				rnn_states[dones == True] = np.zeros(((dones == True).sum(), 
@@ -777,9 +789,9 @@ class GMPERunner(Runner):
 
 
 			conformance_percentage = self.get_conformation_percentages(env_infos)
-			# print("conformance_percentage", conformance_percentage)
+			print("conformance_percentage", conformance_percentage)
 			conformance_percentage_list.append(np.mean(conformance_percentage))
-			# print("conformance_percentage_list", conformance_percentage_list)
+			print("conformance_percentage_list", conformance_percentage_list)
 
 			delta_space = self.get_delta_spacing(env_infos)
 			# print("delta_space", delta_space)
@@ -787,6 +799,24 @@ class GMPERunner(Runner):
 
 			spacing_violations = self.get_spacing_violations(env_infos)
 			spacing_violations_list.append(np.mean(spacing_violations))
+
+			# Compute throughput (agents per minute)
+			episode_time = total_time_taken[-1] if len(total_time_taken) > 0 else self.episode_length * self.dt
+			successful_exits = [t for t in agent_exit_times if t >= 0]
+			print(f"Successful exits: {len(successful_exits)}/{self.num_agents} in {episode_time:.2f} seconds")	
+			throughput = len(successful_exits) / (episode_time / 60.0) if episode_time > 0 else 0.0
+			print(f"Episode {episode+1}/{self.all_args.render_episodes} - Throughput: {throughput:.2f} agents/minute")
+
+			# Log episode metrics (only active if --eval_mode flag is set)
+			metrics_logger.log_episode(
+				conformance_pct=np.mean(conformance_percentage) if len(conformance_percentage) > 0 else 0.0,
+				success_rate=np.mean(success) * 100.0,
+				completion_time=episode_time,
+				delta_d=np.mean(delta_space) if len(delta_space) > 0 else 0.0,
+				spacing_violations=np.mean(spacing_violations) * 100.0 if len(spacing_violations) > 0 else 0.0,
+				throughput=throughput
+			)
+
 			# write a row to the csv file
 			csv_data1 = [self.num_obstacles, 
 						self.num_agents,
@@ -919,7 +949,7 @@ class GMPERunner(Runner):
 		# print("Success rates 0.9 quantile", success_rates_0_9_quantile)
 		# print("Success rates maximum", success_rates_maximum)
 
-		# print("Num collisions", np.mean(num_collisions_arr))
+		print("Num collisions", np.mean(num_collisions_arr))
 		# print("Fairness Median", fair_median)
 		# print("Fairness Mean", fair_mean)
 		# # Print the values
@@ -1134,7 +1164,10 @@ class GMPERunner(Runner):
 		# 	writer.writerow(csv_data)
 
 		
+		# Save evaluation metrics summary (only active if --eval_mode flag is set)
+		metrics_logger.save_summary()
+
 		if not get_metrics:
 			if self.all_args.save_gifs:
-				imageio.mimsave(str(self.gif_dir) + '/'+str(self.all_args.model_name)+'_testingrandom_'+str(self.all_args.num_agents)+'.gif', 
+				imageio.mimsave(str(self.gif_dir) + '/'+str(self.all_args.model_name)+'_testingrandom_'+str(self.all_args.num_agents)+'.gif',
 								all_frames, duration=self.all_args.ifi, loop=0)
