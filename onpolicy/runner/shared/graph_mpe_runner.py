@@ -10,6 +10,7 @@ from onpolicy.runner.shared.eval_metrics_logger import create_logger
 import wandb
 import imageio
 import csv
+import os
 
 # from multiagent.custom_scenarios.mpe_to_bluesky_bridge import BlueSkyBridge
 # import matplotlib.pyplot as plt
@@ -21,7 +22,7 @@ class GMPERunner(Runner):
 		Runner class to perform training, evaluation and data 
 		collection for the MPEs. See parent class for details
 	"""
-	dt = 0.1
+	dt = 1.0
 	def __init__(self, config):
 		super(GMPERunner, self).__init__(config)
 		self.num_total_episode = int(self.num_env_steps) // self.episode_length // self.n_rollout_threads
@@ -537,6 +538,7 @@ class GMPERunner(Runner):
 		conformance_percentage_list = []
 		delta_space_list = []
 		spacing_violations_list = []
+		throughput_list = []
 		print("num_episodes: ", self.all_args.render_episodes)
 
 		# Initialize evaluation metrics logger (only active if --eval_mode flag is set)
@@ -556,15 +558,24 @@ class GMPERunner(Runner):
 		# tube_params = envs.envs[0].world.tube_params
 		# bluesky.draw_corridor(tube_params)
 		for episode in range(self.all_args.render_episodes):
+			print(f"Episode {episode+1}/{self.all_args.render_episodes}")
 			# Track exit times for throughput calculation
 			agent_exit_times = [-1.0] * self.num_agents  # -1 = not exited yet
 
-			if not get_metrics:
-				if self.all_args.save_gifs:
-					image = envs.render('rgb_array')[0][0]
-					all_frames.append(image)
-				else:
-					envs.render('human')
+			# Trajectory logging (if enabled)
+			if self.all_args.save_trajectories:
+				episode_positions = []  # List of (num_agents, 2) arrays per timestep
+				episode_velocities = []  # List of (num_agents,) arrays per timestep
+				episode_headings = []  # List of (num_agents,) arrays per timestep
+				episode_phases = []  # List of (num_agents,) arrays per timestep
+				episode_tubes = []  # List of (num_agents,) arrays per timestep
+
+			# if not get_metrics:
+			# 	if self.all_args.save_gifs:
+			# 		image = envs.render('rgb_array')[0][0]
+			# 		all_frames.append(image)
+			# 	else:
+			# 		envs.render('human')
 
 			rnn_states = np.zeros((self.n_rollout_threads, 
 									self.num_agents, 
@@ -711,6 +722,38 @@ class GMPERunner(Runner):
 					if dones[0][agent_idx] and agent_exit_times[agent_idx] < 0:
 						agent_exit_times[agent_idx] = current_time
 
+				# Collect trajectory data (if enabled)
+				if self.all_args.save_trajectories:
+					world = envs.envs[0].world
+
+					# Collect positions (x, y)
+					positions = np.array([agent.state.p_pos for agent in world.agents])
+					episode_positions.append(positions)
+
+					# Collect velocities (speed magnitude)
+					velocities = np.array([agent.state.speed for agent in world.agents])
+					# print("velocities", velocities, "in knots", velocities /(0.514444  * 0.001 ))
+					episode_velocities.append(velocities)
+
+					# Collect headings (theta)
+					headings = np.array([agent.state.theta for agent in world.agents])
+					episode_headings.append(headings)
+
+					# Collect phases from env_infos (Phase_reached is in info_callback)
+					# Get processed env_infos
+					env_infos = self.process_infos(infos)
+					phases = []
+					for agent_idx in range(self.num_agents):
+						phase_key = f'agent{agent_idx}/Phase_reached'
+						if phase_key in env_infos:
+							phases.append(env_infos[phase_key][0])
+						else:
+							phases.append(0)
+					episode_phases.append(np.array(phases))
+
+					# Current tube index - not readily available, so skip
+					episode_tubes.append(np.zeros(self.num_agents))
+
 				dones_env = np.all(dones)
 				rnn_states[dones == True] = np.zeros(((dones == True).sum(), 
 													self.recurrent_N, 
@@ -777,10 +820,10 @@ class GMPERunner(Runner):
 			dists_traveled = self.get_dists_traveled(env_infos)
 			dists_trav_list +=dists_traveled
 
-			time_taken_list +=time_taken
+			time_taken_list +=time_taken[-1]
 
 			total_dists_traveled.append(np.sum(dists_traveled))
-			total_time_taken.append(np.sum(time_taken))
+			total_time_taken.append((time_taken[-1]))
 
 			time_fairness_metric = self.get_time_fairness(env_infos)
 			time_stddev_metric = self.get_time_std(env_infos)
@@ -789,33 +832,77 @@ class GMPERunner(Runner):
 
 
 			conformance_percentage = self.get_conformation_percentages(env_infos)
-			print("conformance_percentage", conformance_percentage)
+			# print("conformance_percentage", conformance_percentage)
 			conformance_percentage_list.append(np.mean(conformance_percentage))
-			print("conformance_percentage_list", conformance_percentage_list)
+			# print("conformance_percentage_list", conformance_percentage_list)
 
 			delta_space = self.get_delta_spacing(env_infos)
 			# print("delta_space", delta_space)
 			delta_space_list.append(np.mean(delta_space))
 
 			spacing_violations = self.get_spacing_violations(env_infos)
+			# print("spacing_violations", spacing_violations)
 			spacing_violations_list.append(np.mean(spacing_violations))
 
 			# Compute throughput (agents per minute)
-			episode_time = total_time_taken[-1] if len(total_time_taken) > 0 else self.episode_length * self.dt
+			episode_time = total_time_taken[-1] if len(total_time_taken) > 0 else self.episode_length
+			print(f" total_time_taken[-1]: { total_time_taken[-1]:.2f} seconds")
 			successful_exits = [t for t in agent_exit_times if t >= 0]
 			print(f"Successful exits: {len(successful_exits)}/{self.num_agents} in {episode_time:.2f} seconds")	
 			throughput = len(successful_exits) / (episode_time / 60.0) if episode_time > 0 else 0.0
 			print(f"Episode {episode+1}/{self.all_args.render_episodes} - Throughput: {throughput:.2f} agents/minute")
-
+			throughput_list.append(throughput)
 			# Log episode metrics (only active if --eval_mode flag is set)
+			# Note: conformance_percentage from env tracks violations, so invert to get actual conformance
+			violation_pct = np.mean(conformance_percentage) if len(conformance_percentage) > 0 else 0.0
+			actual_conformance_pct = 100.0 - (violation_pct * 100.0)  # Now higher % = better
+
 			metrics_logger.log_episode(
-				conformance_pct=np.mean(conformance_percentage) if len(conformance_percentage) > 0 else 0.0,
+				conformance_pct=actual_conformance_pct,
 				success_rate=np.mean(success) * 100.0,
 				completion_time=episode_time,
 				delta_d=np.mean(delta_space) if len(delta_space) > 0 else 0.0,
 				spacing_violations=np.mean(spacing_violations) * 100.0 if len(spacing_violations) > 0 else 0.0,
 				throughput=throughput
 			)
+
+			# Save trajectory data (if enabled)
+			if self.all_args.save_trajectories:
+				run_type = 'heterogeneous' if getattr(self.all_args, 'heterogeneous_speeds', False) else 'homogeneous'
+				trajectory_filename = f'trajectory_{self.num_agents}agents_{run_type}_episode_{episode}.npz'
+				trajectory_file = os.path.join(self.all_args.eval_output_dir, trajectory_filename)
+
+				# Extract corridor geometries from world
+				world = envs.envs[0].world
+				num_corridors = len(world.tube_params)
+				corridor_data = []
+				for tube_params in world.tube_params:
+					corridor_data.append({
+						'entrance': tube_params['entrance'],
+						'exit': tube_params['exit'],
+						'width': tube_params['width'],
+						'half_width': tube_params['half_width'],
+						'n_vec': tube_params['n']  # perpendicular direction
+					})
+
+				np.savez_compressed(
+					trajectory_file,
+					positions=np.array(episode_positions),  # (num_steps, num_agents, 2)
+					velocities=np.array(episode_velocities),  # (num_steps, num_agents)
+					headings=np.array(episode_headings),  # (num_steps, num_agents)
+					phases=np.array(episode_phases),  # (num_steps, num_agents)
+					tubes=np.array(episode_tubes),  # (num_steps, num_agents)
+					dt=self.dt,  # timestep duration
+					num_agents=self.num_agents,
+					episode_length=step+1,  # actual steps taken
+					agent_exit_times=agent_exit_times,  # when each agent exited
+					num_corridors=num_corridors,
+					corridor_entrances=np.array([c['entrance'] for c in corridor_data]),
+					corridor_exits=np.array([c['exit'] for c in corridor_data]),
+					corridor_widths=np.array([c['width'] for c in corridor_data]),
+					corridor_n_vecs=np.array([c['n_vec'] for c in corridor_data])
+				)
+				print(f"Saved trajectory data to {trajectory_file}")
 
 			# write a row to the csv file
 			csv_data1 = [self.num_obstacles, 
@@ -894,8 +981,8 @@ class GMPERunner(Runner):
 		success_rates_minimum = np.min(success_rates_arr)
 		# success_rates_0_1_quantile = np.percentile(success_rates_arr, 10)
 		success_rates_median = np.median(success_rates_arr)
-		# success_rates_0_9_quantile = np.percentile(success_rates_arr, 90)
-		# success_rates_maximum = np.max(success_rates_arr)
+		success_rates_0_9_quantile = np.percentile(success_rates_arr, 90)
+		success_rates_maximum = np.max(success_rates_arr)
 		success_rates_mean = np.mean(success_rates_arr)
 
 		total_dists_traveled_median = np.median(total_dists_traveled)
@@ -936,6 +1023,13 @@ class GMPERunner(Runner):
 		spacing_violations_maximum = np.max(spacing_violations_list)
 		spacing_violations_mean = np.mean(spacing_violations_list)
 		spacing_violations_std = np.std(spacing_violations_list)
+
+
+		throughput_min = np.min(throughput_list)
+		throughput_max = np.max(throughput_list)
+		throughput_mean = np.mean(throughput_list)
+		throughput_median = np.median(throughput_list)
+		throughput_std = np.std(throughput_list),
 
 		np.set_printoptions(linewidth=400)
 		print("Rewards", np.mean(rewards_arr))
@@ -1155,19 +1249,49 @@ class GMPERunner(Runner):
 		# 	spacing_violations_std
 		# ]
 
-		# # open the file in the write mode
-		# with open(str(self.all_args.model_dir)+'/'+str(self.all_args.model_name)+'_'+str(self.all_args.formation_type)+'_results_collect_final_split_oct.csv', 'a', newline="") as f:
-		# 	# create the csv writer
-		# 	writer = csv.writer(f)
 
-		# 	# write a row to the csv file
-		# 	writer.writerow(csv_data)
+		csv_data = [self.num_agents,
+					self.all_args.world_size,
+					self.episode_length,
+					self.all_args.render_episodes,
+					conformance_percentage_mean,
+					conformance_percentage_std,
+					conformance_percentage_median,
+					conformance_percentage_minimum,
+					conformance_percentage_maximum,
+					success_rates_mean,
+					success_rates_0_9_quantile,
+					success_rates_median,
+					success_rates_minimum,
+					success_rates_maximum,
+					total_time_taken_mean,
+					total_dists_traveled_0_9_quantile,
+					total_time_taken_median,
+					total_time_taken_min,
+					total_time_taken_max,
+					delta_space_mean,
+					delta_space_std,
+					delta_space_median,
+					delta_space_minimum,
+					delta_space_maximum,
+					spacing_violations_mean,
+					spacing_violations_std,
+					spacing_violations_median, spacing_violations_minimum, spacing_violations_maximum, throughput_mean, throughput_std, throughput_median,
+					throughput_min,
+					throughput_max]
+		# open the file in the write mode
+		with open(str(self.all_args.model_dir)+'/'+str(self.all_args.model_name)+'_'+str(self.all_args.formation_type)+'_results_collect_final_merge_feb'+str(self.all_args.num_agents)+'.csv', 'a', newline="") as f:
+			# create the csv writer
+			writer = csv.writer(f)
+
+			# write a row to the csv file
+			writer.writerow(csv_data)
 
 		
 		# Save evaluation metrics summary (only active if --eval_mode flag is set)
 		metrics_logger.save_summary()
 
-		if not get_metrics:
-			if self.all_args.save_gifs:
-				imageio.mimsave(str(self.gif_dir) + '/'+str(self.all_args.model_name)+'_testingrandom_'+str(self.all_args.num_agents)+'.gif',
-								all_frames, duration=self.all_args.ifi, loop=0)
+		# if not get_metrics:
+		# 	if self.all_args.save_gifs:
+		# 		imageio.mimsave(str(self.gif_dir) + '/'+str(self.all_args.model_name)+'_testingrandom_'+str(self.all_args.num_agents)+'.gif',
+		# 						all_frames, duration=self.all_args.ifi, loop=0)

@@ -294,19 +294,39 @@ class Scenario(BaseScenario):
 		#################### set colours ####################
 		# set colours for agents
 		for i, agent in enumerate(world.agents):
-			agent.color = np.array([0.85, 0.35, 0.35])
-			if i%4 == 0:
-				agent.color = np.array([0.85, 0.35, 0.35])
-			elif i%4 == 1:
-				agent.color = np.array([0.35, 0.85, 0.35])
-			elif i%4 == 2:
-				agent.color = np.array([0.35, 0.35, 0.85])
-			else:
-				agent.color = np.array([0.85, 0.85, 0.25])
+			agent.color = np.array([0.15, 0.35, 0.65])
+			# if i%4 == 0:
+			# 	agent.color = np.array([0.85, 0.35, 0.35])
+			# elif i%4 == 1:
+			# 	agent.color = np.array([0.35, 0.85, 0.35])
+			# elif i%4 == 2:
+			# 	agent.color = np.array([0.35, 0.35, 0.85])
+			# else:
+			# 	agent.color = np.array([0.85, 0.85, 0.25])
 			# if i == 0:
 			# 	agent.color = np.array([0.15, 0.75, 0.65])
 			agent.state.p_dist = 0.0
 			agent.state.time = 0.0
+
+		# ################### heterogeneous speeds ####################
+		# # UNCOMMENT AND MODIFY FOR HETEROGENEOUS SPEED TESTING
+		# # Example: Set agents 0-2 to slow speed (140 knots), rest to fast speed (175 knots)
+		# slow_agent_ids = [0, 2, 4]  # First 3 agents are slow
+		# randomly select slow agents for heterogeneous speed testing
+		self.slow_agent_ids = np.random.choice(self.num_agents, size=self.num_agents//5, replace=False)
+		print(f"Slow agent IDs: {self.slow_agent_ids}")
+		# input("Press Enter to continue...")
+		slow_speed = 140 * 0.514444 * 0.001  # 140 knots in km/s
+		fast_speed = 175 * 0.514444 * 0.001  # 175 knots in km/s
+		for i, agent in enumerate(world.agents):
+			if i in self.slow_agent_ids:
+				# IMPORTANT: Set both agent.max_speed AND agent.state.max_speed
+				agent.max_speed = slow_speed
+				agent.state.max_speed = slow_speed
+				agent.color = np.array([0.85, 0.15, 0.15])  # Red for slow agents
+			else:
+				agent.max_speed = fast_speed
+				agent.state.max_speed = fast_speed
 		# set colours for scripted agents
 		for i, agent in enumerate(world.scripted_agents):
 			agent.color = np.array([0.15, 0.15, 0.15])
@@ -385,9 +405,9 @@ class Scenario(BaseScenario):
 		num_agents_added = 0
 		agents_added = []
 
-		min_sep = max(3.0 * self.separation_distance, 2.0 * self.separation_distance)
-		long_spacing = min_sep * 1.4
-		lateral_spread = 0.5
+		min_sep = max(2.0 * self.separation_distance, 1.0 * self.separation_distance)
+		long_spacing = min_sep * 4.0
+		lateral_spread = 0.2
 
 		# Count how many agents per entry for staggering
 		entry_count = {0: 0, 4: 0, 6: 0}  # start_tube → count so far
@@ -750,10 +770,10 @@ class Scenario(BaseScenario):
 		y = float(np.dot(r, n))  # y is the signed lateral offset from the tube centerline (y=0 on centerline, |y| increases outward).
 		return s, y, L, half_w
 
-	def _in_tube_rect(self, s: float, y: float, L: float, half_w: float, eps: float = 0.2) -> bool:
+	def _in_tube_rect(self, s: float, y: float, L: float, half_w: float, eps: float = 0.15) -> bool:
 		return (-eps <= s <= L + eps) and (abs(y) <= half_w + eps)
 	
-	def _in_entrance_gate(self, s: float, y: float, L: float, half_w: float, eps: float = 0.2) -> bool:
+	def _in_entrance_gate(self, s: float, y: float, L: float, half_w: float, eps: float = 0.25) -> bool:
 		"""Full-width gate spanning the entrance edge: s in [-gate_back, +gate_front], |y|<=half_w."""
 		gate_front = float(self.gate_front_ratio) * L
 		gate_back = float(self.gate_back_ratio) * L
@@ -768,7 +788,7 @@ class Scenario(BaseScenario):
 		return float(np.hypot(ds, dy))
 	
 	# Full-width exit gate: s in [L - exit_back, L + exit_front], |y| <= half_w
-	def _in_exit_gate(self, s: float, y: float, L: float, half_w: float, eps: float = 0.2) -> bool:
+	def _in_exit_gate(self, s: float, y: float, L: float, half_w: float, eps: float = 0.25) -> bool:
 		exit_back = float(self.exit_back_ratio) * L
 		exit_front = float(self.exit_front_ratio) * L
 		return (L - exit_back - eps <= s <= L + exit_front + eps) and (abs(y) <= half_w + eps)
@@ -930,6 +950,7 @@ class Scenario(BaseScenario):
 		# print("self.delta_spacing_sum",self.delta_spacing_sum)
 		# print("self.spacing_violation",np.sum(self.spacing_violation))
 		# print(self.delta_spacing[agent.id]/(self.spacing_violation[agent.id] if self.spacing_violation[agent.id] != 0 else 1))
+		# print("Agent", agent.id, "self.tube_route", self.tube_route[agent.id][-1], "self.current_tube", self.current_tube[agent.id], "self.phase_reached", self.phase_reached[agent.id])
 		agent_info = {
 			'Dist_to_goal': np.float32(world.dist_left_to_goal[agent.id]),  # make this into float using numpy float32
 			'Time_req_to_goal': world.times_required[agent.id],
@@ -949,6 +970,7 @@ class Scenario(BaseScenario):
 			'Delta_spacing': self.delta_spacing_sum /(np.sum(self.spacing_violation) if np.sum(self.spacing_violation) != 0 else 1),
 			'Spacing_violations': self.spacing_violation[agent.id]/(self.steps_in_corridor[agent.id] if self.steps_in_corridor[agent.id] != 0 else 1),
 			'Phase_reached': self.phase_reached[agent.id],
+			'On_last_corridor': self.current_tube[agent.id] ==  self.tube_route[agent.id][-1]  ,  # Tube 5 is the final merged corridor
 
 
 		}
@@ -1057,6 +1079,9 @@ class Scenario(BaseScenario):
 		if agent.status:
 			return 0.0
 		rew = 0.0
+
+		slow_speed = 140 * 0.514444 * 0.001  # 140 knots in km/s
+		fast_speed = 175 * 0.514444 * 0.001  # 175 knots in km/s
 		current_phase = self.get_agent_phase(agent, world)
 		# if current_phase == 2:
 		# print("Agent", agent.id, "phase", current_phase, "previous_phase", agent.previous_phase, "phase_reached", self.phase_reached[agent.id])
@@ -1072,6 +1097,9 @@ class Scenario(BaseScenario):
 				dist_aa = np.linalg.norm(agent.state.p_pos - a.state.p_pos)
 				# --- Hard collision penalty ---
 				if dist_aa < self.separation_distance:
+					agent.state.max_speed = slow_speed
+					# print(f"Agent {agent.id} COLLISION with Agent {a.id} at distance {dist_aa:.2f}! Applying hard penalty.")
+					# input("Press Enter to continue...")
 					rew -= self.collision_rew
 				# --- Soft proximity penalty (only when closing in) ---
 				warning_zone = 2.5 * self.separation_distance
@@ -1083,6 +1111,13 @@ class Scenario(BaseScenario):
 						proximity_ratio = (warning_zone - dist_aa) / (warning_zone - self.separation_distance + 1e-9)
 						proximity_ratio = np.clip(proximity_ratio, 0.0, 1.0)
 						rew -= self.collision_rew * 0.25 * proximity_ratio
+				else:
+					if agent.id not in self.slow_agent_ids:
+						agent.state.max_speed = fast_speed
+					else:
+						agent.state.max_speed = slow_speed
+				# 	print(f"Agent {agent.id} is safe from Agent {a.id} at distance {dist_aa:.2f}. Restoring max speed.")
+
 
 		# Calculate tube length
 		current_tube = world.tube_params[self.current_tube[agent.id]]
@@ -1168,7 +1203,7 @@ class Scenario(BaseScenario):
 				rew -= norm_dist_entrance * self.goal_rew * 0.3
 			else:
 				rew -= norm_dist_entrance * self.goal_rew * 0.6
-			print("Agent", agent.id, "distance to entrance edge", dist_to_entrance_edge, "normalized", norm_dist_entrance, "reward", rew)
+			# print("Agent", agent.id, "distance to entrance edge", dist_to_entrance_edge, "normalized", norm_dist_entrance, "reward", rew)
 			# Progress reward toward entrance
 			rew += self.progress_gain * max(delta_proj, -0.05)
 			# print("Agent", agent.id, "delta_proj", delta_proj, "reward after progress", rew)

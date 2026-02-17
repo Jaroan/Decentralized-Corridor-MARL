@@ -20,16 +20,20 @@ class EvalMetricsLogger:
     Does not interfere with normal training or debugging.
     """
 
-    def __init__(self, output_dir: str, enabled: bool = False):
+    def __init__(self, output_dir: str, enabled: bool = False, num_agents: int = 0, heterogeneous: bool = False):
         """
         Initialize metrics logger.
 
         Args:
             output_dir: Directory to save evaluation metrics
             enabled: If False, all methods are no-ops (no overhead)
+            num_agents: Number of agents in simulation
+            heterogeneous: Whether this is a heterogeneous speed run
         """
         self.enabled = enabled
         self.output_dir = output_dir
+        self.num_agents = num_agents
+        self.heterogeneous = heterogeneous
 
         if not self.enabled:
             return
@@ -119,8 +123,10 @@ class EvalMetricsLogger:
                 summary[f'{metric}_min'] = 0.0
                 summary[f'{metric}_max'] = 0.0
 
-        # Save to CSV
-        csv_path = os.path.join(self.output_dir, 'eval_summary.csv')
+        # Save to CSV with descriptive filename
+        run_type = 'heterogeneous' if self.heterogeneous else 'homogeneous'
+        csv_filename = f'eval_summary_{self.num_agents}agents_{run_type}.csv'
+        csv_path = os.path.join(self.output_dir, csv_filename)
 
         # Write header if file doesn't exist
         file_exists = os.path.exists(csv_path)
@@ -142,7 +148,9 @@ class EvalMetricsLogger:
         """Save raw per-episode data for detailed analysis."""
         import pickle
 
-        raw_path = os.path.join(self.output_dir, 'eval_raw_data.pkl')
+        run_type = 'heterogeneous' if self.heterogeneous else 'homogeneous'
+        raw_filename = f'eval_raw_data_{self.num_agents}agents_{run_type}.pkl'
+        raw_path = os.path.join(self.output_dir, raw_filename)
 
         with open(raw_path, 'wb') as f:
             pickle.dump(self.episodes_data, f)
@@ -177,12 +185,17 @@ def create_logger(all_args) -> EvalMetricsLogger:
     """
     # Only enable if explicitly in evaluation mode
     enabled = getattr(all_args, 'eval_mode', False)
+    num_agents = getattr(all_args, 'num_agents', 0)
+    heterogeneous = getattr(all_args, 'heterogeneous_speeds', False)
 
     if enabled:
         output_dir = getattr(all_args, 'eval_output_dir', 'eval_results')
+        run_type = 'heterogeneous' if heterogeneous else 'homogeneous'
         print(f"📊 Evaluation metrics logging ENABLED")
         print(f"   Output: {output_dir}")
+        print(f"   Agents: {num_agents} ({run_type})")
     else:
         output_dir = None
 
-    return EvalMetricsLogger(output_dir=output_dir, enabled=enabled)
+    return EvalMetricsLogger(output_dir=output_dir, enabled=enabled,
+                            num_agents=num_agents, heterogeneous=heterogeneous)

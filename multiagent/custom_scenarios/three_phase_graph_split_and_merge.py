@@ -376,8 +376,8 @@ class Scenario(BaseScenario):
 		# Multiple agents may share a longitudinal level if they are
 		# laterally separated beyond the warning zone.
 		min_sep = max(2.0 * self.separation_distance, 1*self.separation_distance)  # beyond warning zone
-		long_spacing = min_sep * 1.2  # 50% extra gap between rows * 1.5
-		lateral_spread = self.world_size * 0.3  # wider lateral spread
+		long_spacing = min_sep * 3.5   # 50% extra gap between rows * 1.5
+		lateral_spread = self.world_size * 0.1  # wider lateral spread
 
 		while num_agents_added < self.num_agents:
 			# All agents start on tube 0
@@ -646,10 +646,10 @@ class Scenario(BaseScenario):
 		y = float(np.dot(r, n))  # y is the signed lateral offset from the tube centerline (y=0 on centerline, |y| increases outward).
 		return s, y, L, half_w
 
-	def _in_tube_rect(self, s: float, y: float, L: float, half_w: float, eps: float = 0.15) -> bool:
+	def _in_tube_rect(self, s: float, y: float, L: float, half_w: float, eps: float = 0.05) -> bool:
 		return (-eps <= s <= L + eps) and (abs(y) <= half_w + eps)
 	
-	def _in_entrance_gate(self, s: float, y: float, L: float, half_w: float, eps: float = 0.15) -> bool:
+	def _in_entrance_gate(self, s: float, y: float, L: float, half_w: float, eps: float = 0.25) -> bool:
 		"""Full-width gate spanning the entrance edge: s in [-gate_back, +gate_front], |y|<=half_w."""
 		gate_front = float(self.gate_front_ratio) * L
 		gate_back = float(self.gate_back_ratio) * L
@@ -664,7 +664,7 @@ class Scenario(BaseScenario):
 		return float(np.hypot(ds, dy))
 	
 	# Full-width exit gate: s in [L - exit_back, L + exit_front], |y| <= half_w
-	def _in_exit_gate(self, s: float, y: float, L: float, half_w: float, eps: float = 0.15) -> bool:
+	def _in_exit_gate(self, s: float, y: float, L: float, half_w: float, eps: float = 0.25) -> bool:
 		exit_back = float(self.exit_back_ratio) * L
 		exit_front = float(self.exit_front_ratio) * L
 		return (L - exit_back - eps <= s <= L + exit_front + eps) and (abs(y) <= half_w + eps)
@@ -848,6 +848,7 @@ class Scenario(BaseScenario):
 			'Delta_spacing': self.delta_spacing_sum /(np.sum(self.spacing_violation) if np.sum(self.spacing_violation) != 0 else 1),
 			'Spacing_violations': self.spacing_violation[agent.id]/(self.steps_in_corridor[agent.id] if self.steps_in_corridor[agent.id] != 0 else 1),
 			'Phase_reached': self.phase_reached[agent.id],
+			'On_last_corridor': self.current_tube[agent.id] ==  5,  # Tube 5 is the final merged corridor
 
 
 		}

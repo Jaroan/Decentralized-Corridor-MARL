@@ -237,7 +237,7 @@ python onpolicy/scripts/eval_mpe.py \
 --num_obstacles=0 \
 --seed=0 \
 --num_landmarks=1 \
---episode_length=300 \
+--episode_length=450 \
 --use_dones=False \
 --collaborative=False --model_name='Mer' \
 --scenario_name='three_phase_graph_merge' \
@@ -246,24 +246,24 @@ python onpolicy/scripts/eval_mpe.py \
 --collision_rew=20 \
 --formation_rew 10 \
 --fair_rew=1 \
---save_gifs \
---use_render \
 --num_walls=0 \
 --zeroshift=5 \
 --min_obs_dist 0.5 \
 --total_actions 5 \
---formation_type 'point'
-
+--get_metrics True \
+--formation_type 'point' \
+--save_gifs False \
+--use_render False 
 
 python onpolicy/scripts/eval_mpe.py \
---model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/feb14_3ag' \
---render_episodes=1 \
+--model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width/' \
+--render_episodes=10 \
 --world_size=5 \
---num_agents=6 \
+--num_agents=40 \
 --num_obstacles=0 \
 --seed=1 \
 --num_landmarks=1 \
---episode_length=200 \
+--episode_length=400 \
 --use_dones=False \
 --collaborative=False --model_name='DoubleMer' \
 --scenario_name='three_phase_graph_double_merge' \
@@ -272,8 +272,6 @@ python onpolicy/scripts/eval_mpe.py \
 --collision_rew=20 \
 --formation_rew 10 \
 --fair_rew=1 \
---save_gifs \
---use_render \
 --num_walls=0 \
 --zeroshift=5 \
 --min_obs_dist 0.5 \
@@ -283,13 +281,13 @@ python onpolicy/scripts/eval_mpe.py \
 
 python onpolicy/scripts/eval_mpe.py \
 --model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width/test' \
---render_episodes=1 \
+--render_episodes=10 \
 --world_size=5 \
---num_agents=15 \
+--num_agents=40 \
 --num_obstacles=0 \
 --seed=0 \
 --num_landmarks=1 \
---episode_length=250 \
+--episode_length=550 \
 --use_dones=False \
 --collaborative=False --model_name='SplMer' \
 --scenario_name='three_phase_graph_split_and_merge' \
@@ -298,8 +296,6 @@ python onpolicy/scripts/eval_mpe.py \
 --collision_rew=20 \
 --formation_rew 10 \
 --fair_rew=1 \
---save_gifs \
---use_render \
 --num_walls=0 \
 --zeroshift=5 \
 --min_obs_dist 0.5 \
@@ -312,11 +308,11 @@ python onpolicy/scripts/eval_mpe.py \
 --model_dir='model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width/' \
 --render_episodes=1 \
 --world_size=8 \
---num_agents=6 \
+--num_agents=40 \
 --num_obstacles=0 \
 --seed=1 \
 --num_landmarks=1 \
---episode_length=220 \
+--episode_length=450 \
 --use_dones=False \
 --collaborative=False --model_name='Combined' \
 --scenario_name='simple_combined_graph' \
@@ -324,9 +320,7 @@ python onpolicy/scripts/eval_mpe.py \
 --goal_rew=20 \
 --collision_rew=20 \
 --fair_rew=1 \
---save_gifs \
 --formation_rew 10 \
---use_render \
 --num_walls=0 \
 --zeroshift=5 \
 --min_obs_dist 0.5 \

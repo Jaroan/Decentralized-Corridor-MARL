@@ -18,6 +18,10 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
+# Import separation distance from config (for air_taxi dynamics)
+# From multiagent/config.py: SEPARATION_DISTANCE = 500 * 0.0003048 km
+SEPARATION_MINIMUM = 500 * 0.0003048  # 500 ft = 0.1524 km = 152.4 m
+
 
 def load_episode_data(eval_dir):
     """

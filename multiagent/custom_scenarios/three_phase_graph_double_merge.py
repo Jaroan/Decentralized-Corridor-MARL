@@ -377,9 +377,9 @@ class Scenario(BaseScenario):
 		# corridor axis with guaranteed minimum longitudinal spacing.
 		# Multiple agents may share a longitudinal level if they are
 		# laterally separated beyond the warning zone.
-		min_sep = max(4.0 * self.separation_distance, 3*self.separation_distance)  # beyond warning zone
-		long_spacing = min_sep * 1.5  # 50% extra gap between rows * 1.5
-		lateral_spread = self.world_size * 0.3  # wider lateral spread
+		min_sep = max(2.0 * self.separation_distance, 1*self.separation_distance)  # beyond warning zone
+		long_spacing = min_sep * 3.0  # 50% extra gap between rows * 1.5
+		lateral_spread = self.world_size * 0.1  # wider lateral spread
 
 		while True:
 			if num_agents_added == self.num_agents:
@@ -840,6 +840,7 @@ class Scenario(BaseScenario):
 			'Delta_spacing': self.delta_spacing_sum /(np.sum(self.spacing_violation) if np.sum(self.spacing_violation) != 0 else 1),
 			'Spacing_violations': self.spacing_violation[agent.id]/(self.steps_in_corridor[agent.id] if self.steps_in_corridor[agent.id] != 0 else 1),
 			'Phase_reached': self.phase_reached[agent.id],
+			'On_last_corridor': self.current_tube[agent.id] == 4,  # Tube 2 is the final merged corridor
 
 
 		}

@@ -415,6 +415,12 @@ def get_config():
                         "Use this for formal evaluations, not debugging.")
     parser.add_argument("--eval_output_dir", type=str, default="eval_results",
                         help="Directory to save evaluation metrics when --eval_mode is enabled.")
+    parser.add_argument("--save_trajectories", action='store_true', default=False,
+                        help="Save agent positions and velocities at each timestep for trajectory analysis. "
+                        "Creates trajectory_data.npz in eval_output_dir.")
+    parser.add_argument("--heterogeneous_speeds", action='store_true', default=False,
+                        help="Flag to indicate heterogeneous speed configuration. "
+                        "Adds 'heterogeneous' to output filenames for easy identification.")
 
     # misc parameters
     parser.add_argument("--verbose", action='store_false', default=True,

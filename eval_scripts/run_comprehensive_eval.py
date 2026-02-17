@@ -19,40 +19,35 @@ from pathlib import Path
 # Scenario configurations
 SCENARIOS = {
     'merge': {
-        'name': 'simple_merge',
-        'world_size_base': 6,
-        'episode_length_base': 150,
-    },
-    'double_merge': {
-        'name': 'simple_double_merge',
-        'world_size_base': 8,
-        'episode_length_base': 180,
-    },
-    'split_merge': {
-        'name': 'simple_split_and_merge',
-        'world_size_base': 8,
-        'episode_length_base': 180,
-    },
-    'sequential': {
-        'name': 'easy_multiple_sequential',
-        'world_size_base': 10,
+        'name': 'three_phase_graph_merge',
+        'world_size_base': 5,
         'episode_length_base': 200,
     },
-    'combined': {
-        'name': 'simple_combined_graph',
-        'world_size_base': 10,
-        'episode_length_base': 250,
-    },
+    # 'double_merge': {
+    #     'name': 'three_phase_graph_double_merge',
+    #     'world_size_base': 5,
+    #     'episode_length_base': 200,
+    # },
+    # 'split_merge': {
+    #     'name': 'three_phase_graph_split_and_merge',
+    #     'world_size_base': 5,
+    #     'episode_length_base': 200,
+    # },
+    # 'combined': {
+    #     'name': 'simple_combined_graph',
+    #     'world_size_base': 8,
+    #     'episode_length_base': 350,
+    # },
 }
 
 # Agent counts to test
-AGENT_COUNTS = [10, 20, 30, 40]
+AGENT_COUNTS = [30, 40]
 
 # Model configurations
 MODELS = {
     'standard': {
-        'dir': 'model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width/test',
-        'max_speed': 2.0,
+        'dir': 'model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width/',
+        'max_speed': 175 * 0.0003048,  # 175 ft/s converted to km/s
         'description': 'Standard speed model'
     },
     # Add heterogeneous models later
@@ -71,21 +66,33 @@ MODELS = {
 def get_world_size(base_size, num_agents):
     """Scale world size based on number of agents."""
     # Scale by sqrt of agent ratio to maintain density
-    scale_factor = np.sqrt(num_agents / 10)
+    scale_factor = 1.0  # np.sqrt(num_agents / 10)
     return int(base_size * scale_factor)
 
-def get_episode_length(base_length, num_agents):
+def get_episode_length(base_length, num_agents, scenario_name):
     """Scale episode length based on number of agents."""
-    # Increase episode length for more agents to allow completion
-    scale_factor = 1.0 + 0.1 * (num_agents - 10) / 10
+    # # Increase episode length for more agents to allow completion
+    # scale_factor = 1.0 + 0.1 * (num_agents - 10) / 10
+    # for merges: 10 agents: 200 steps, 20 agents: 250 steps, 30 agents: 350 steps, 40 agents: 450 steps
+    if scenario_name in ['merge', 'double_merge']:
+        if num_agents == 10:
+            scale_factor = 1.0
+        elif num_agents == 20:
+            scale_factor = 1.25
+        elif num_agents == 30:
+            scale_factor = 1.75
+        elif num_agents == 40:
+            scale_factor = 2.25
+        else:
+            scale_factor = 1.0
     return int(base_length * scale_factor)
 
 def run_evaluation(scenario_name, scenario_config, num_agents, model_config,
-                   output_dir, seed=1, render=False):
+                   output_dir, seed=0, render=False):
     """Run a single evaluation configuration."""
 
     world_size = get_world_size(scenario_config['world_size_base'], num_agents)
-    episode_length = get_episode_length(scenario_config['episode_length_base'], num_agents)
+    episode_length = get_episode_length(scenario_config['episode_length_base'], num_agents, scenario_name)
 
     # Create output directory
     eval_name = f"{scenario_name}_agents{num_agents}_seed{seed}"
@@ -115,15 +122,15 @@ def run_evaluation(scenario_name, scenario_config, num_agents, model_config,
         '--num_walls=0',
         '--zeroshift=5',
         '--min_obs_dist=0.5',
-        '--total_actions=5',
+        '--total_actions=9',
         '--formation_type=point',
         f'--eval_output_dir={eval_output}',
         '--eval_mode',  # IMPORTANT: Enables metrics logging
     ]
 
-    if render:
-        cmd.append('--use_render')
-        cmd.append('--save_gifs')
+    # if render:
+    #     cmd.append('--use_render')
+    #     cmd.append('--save_gifs')
 
     print(f"\n{'='*80}")
     print(f"Running: {eval_name}")
@@ -169,9 +176,9 @@ def main():
     parser.add_argument('--model', type=str, default='standard',
                         choices=list(MODELS.keys()),
                         help='Model to use for evaluation')
-    parser.add_argument('--seed', type=int, default=1,
+    parser.add_argument('--seed', type=int, default=0,
                         help='Random seed')
-    parser.add_argument('--render', action='store_true',
+    parser.add_argument('--render', action='store_true', default=False,
                         help='Enable rendering and gif saving (WARNING: slow)')
     parser.add_argument('--dry_run', action='store_true',
                         help='Print configurations without running')
@@ -213,10 +220,10 @@ def main():
         return
 
     # Confirm to proceed
-    response = input("Proceed with evaluations? [y/N]: ")
-    if response.lower() != 'y':
-        print("Aborted.")
-        return
+    # response = input("Proceed with evaluations? [y/N]: ")
+    # if response.lower() != 'y':
+    #     print("Aborted.")
+    #     return
 
     # Run evaluations
     results = []
@@ -267,8 +274,39 @@ def main():
 
     print("\nNext steps:")
     print("1. Run the metrics computation script to analyze results:")
-    print(f"   python eval_scripts/compute_metrics.py --results_dir {output_dir}")
+    print(f"   python eval_scripts/compute_metrics_simple.py --results_dir {output_dir}")
     print("2. Generate plots and tables for the paper")
+
+    # Display summary of metrics
+    print(f"\n{'='*80}")
+    print("METRICS SUMMARY")
+    print(f"{'='*80}\n")
+
+    import pandas as pd
+
+    for r in results:
+        if r['success']:
+            scenario_name = r['scenario']
+            num_agents = r['num_agents']
+            eval_name = f"{scenario_name}_agents{num_agents}_seed{args.seed}"
+            csv_file = os.path.join(output_dir, eval_name, 'eval_summary.csv')
+
+            if os.path.exists(csv_file):
+                try:
+                    df = pd.read_csv(csv_file)
+                    print(f"--- {scenario_name} ({num_agents} agents) ---")
+                    print(f"  Episodes:        {df['num_episodes'].values[0]}")
+                    print(f"  Success Rate:    {df['success_rate_mean'].values[0]:.1f}%")
+                    print(f"  Conformance:     {df['conformance_pct_mean'].values[0]:.1f}%")
+                    print(f"  Completion Time: {df['completion_time_mean'].values[0]:.1f} ± {df['completion_time_std'].values[0]:.1f} s")
+                    print(f"  Throughput:      {df['throughput_mean'].values[0]:.2f} agents/min")
+                    print(f"  Δd (violations): {df['delta_d_mean'].values[0]:.2f} ± {df['delta_d_std'].values[0]:.2f} m")
+                    print(f"  Intervention:    {df['spacing_violations_mean'].values[0]:.1f}%")
+                    print()
+                except Exception as e:
+                    print(f"  ✗ Error reading {csv_file}: {e}\n")
+
+    print(f"{'='*80}")
 
 if __name__ == '__main__':
     main()

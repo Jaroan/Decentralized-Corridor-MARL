@@ -550,19 +550,33 @@ class Runner(object):
 			if 'time_to_goal' in k and 'min_time_to_goal' not in k:
 				# print("v is",v, self.all_args.episode_length * self.dt,v[0]/(self.all_args.episode_length * self.dt))
 				fracs.append(v[0] / (self.all_args.episode_length * self.dt))
+				# print("time_taken is", v[0])
 				time_taken.append(v[0])
 				# if didn't reach goal then time_to_goal >= episode_len * dt
 				# if v[0] < self.all_args.episode_length * self.dt:
 				# 	success.append(1)
 				# else:
 				# 	success.append(0)
-			## add success based on dist_to_goal
-			if 'dist_to_goal' in k:
-				if v[0] < self.all_args.min_dist_thresh:
-					# print("v is",v, self.all_args.min_dist_thresh)
-					success.append(1)
+			## add success based on Phase_reached (Phase 2 = successfully exited corridor)
+			# Check if we have On_last_corridor info (for multi-corridor scenarios)
+			if 'phase_reached' in k:
+				agent_idx = k.split('/')[0].replace('agent', '')
+				phase_reached = v[0]
+				# Check if agent is on last corridor (if this info is available)
+				on_last_corridor_key = f'agent{agent_idx}/On_last_corridor'
+				if on_last_corridor_key in env_infos:
+					on_last_corridor = env_infos[on_last_corridor_key][0]
+					# Success = reached Phase 2 of last corridor
+					if phase_reached >= 2 and on_last_corridor:
+						success.append(1)
+					else:
+						success.append(0)
 				else:
-					success.append(0)
+					# Fallback: For single-corridor scenarios, Phase 2 = success
+					if phase_reached >= 2:
+						success.append(1)
+					else:
+						success.append(0)
 		assert len(success) == self.all_args.num_agents
 		# if sum(success) == self.all_args.num_agents:
 		# 	success = True

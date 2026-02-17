@@ -739,9 +739,9 @@ class MultiAgentBaseEnv(gym.Env):
 
 			# Add tube rendering
 			if hasattr(self.world, 'tube_params'):
-				# for tube in self.world.tube_params:
+				for tube in self.world.tube_params:
 					# print("tube: ", tube)
-					tube = self.world.tube_params
+					# tube = self.world.tube_params
 					# Get tube parameters
 					entrance = tube['entrance']
 					exit = tube['exit']

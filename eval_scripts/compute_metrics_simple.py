@@ -199,7 +199,9 @@ def main():
 
     print("\nMetric descriptions:")
     print("  C%  - Conformance to corridor boundaries (higher is better)")
+    print("        Note: 100% = perfect (no violations), 0% = always violating")
     print("  S%  - Success rate (higher is better)")
+    print("        Note: Based on reaching Phase 2 of last corridor")
     print("  T   - Completion time in seconds (lower is better)")
     print("  Δd  - Separation violation magnitude in meters (lower better)")
     print("  I%  - Need for tactical intervention (lower is better)")

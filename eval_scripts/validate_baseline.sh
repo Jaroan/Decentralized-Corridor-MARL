@@ -57,6 +57,11 @@ for NUM_AGENTS in "${AGENT_COUNTS[@]}"; do
         --eval_mode \
         --eval_output_dir="$TEST_DIR" \
         --save_gifs \
+        --use_render \
+        --num_landmarks=1 \
+        --seed=0 \
+        --collaborative=False --model_name='single' \
+        --formation_type 'point' \
         2>&1 | tee "${TEST_DIR}/eval_log.txt"
 
     if [ $? -eq 0 ]; then

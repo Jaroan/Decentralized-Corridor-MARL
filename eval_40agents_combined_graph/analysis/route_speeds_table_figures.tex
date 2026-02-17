@@ -1,0 +1,15 @@
+% Box plot of route speeds
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{eval_40agents_combined_graph/analysis/route_speeds_boxplot.pdf}
+\caption{Distribution of agent speeds by route. Box plots show median, quartiles, and outliers. The red dashed line indicates the maximum theoretical speed of 175 knots. Route 5 (CL$\rightarrow$T17) exhibits high variability and a significant outlier at 87.3 knots, suggesting a bottleneck.}
+\label{fig:route_speeds_boxplot}
+\end{figure}
+
+% Scatter plot of speed vs distance
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.8\textwidth]{eval_40agents_combined_graph/analysis/speed_vs_distance.pdf}
+\caption{Agent speed versus total distance traveled, colored by route. Longer routes (Routes 0, 1 from entry A) require agents to traverse greater distances. The outlier at approximately 87 knots on Route 5 indicates severe performance degradation due to conflict resolution or spacing maintenance.}
+\label{fig:speed_vs_distance}
+\end{figure}

@@ -364,7 +364,7 @@ class Scenario(BaseScenario):
 		# Multiple agents may share a longitudinal level if they are
 		# laterally separated beyond the warning zone.
 		min_sep = max(2.0 * self.separation_distance, 1*self.separation_distance)  # beyond warning zone
-		long_spacing = min_sep * 1.5   # 50% extra gap between rows * 1.5
+		long_spacing = min_sep * 3.0   # 50% extra gap between rows * 1.5
 		lateral_spread = self.world_size * 0.3  # wider lateral spread
 
 		while True:
@@ -729,6 +729,7 @@ class Scenario(BaseScenario):
 		if dist_to_goal < self.min_dist_thresh and (world.times_required[agent.id] == -1):
 			# print("agent", agent.id, "reached goal",world.dist_left_to_goal[agent.id])
 			world.times_required[agent.id] = world.current_time_step * world.dt
+			# print("time required to reach goal",world.times_required[agent.id])
 			world.dists_to_goal[agent.id] = agent.state.p_dist
 			world.dist_left_to_goal[agent.id] = dist_to_goal
 			self.goal_reached[agent.id] = nearest_landmark
@@ -776,6 +777,7 @@ class Scenario(BaseScenario):
 		self.delta_spacing_sum = np.array(self.delta_spacing)
 		#sum all the values in the list
 		self.delta_spacing_sum = np.sum(self.delta_spacing, axis=0)
+		# print("time required to reach goal",world.times_required[agent.id])
 		# print("self.delta_spacing_sum",self.delta_spacing_sum)
 		# print("self.spacing_violation",np.sum(self.spacing_violation))
 		# print(self.delta_spacing[agent.id]/(self.spacing_violation[agent.id] if self.spacing_violation[agent.id] != 0 else 1))
@@ -798,6 +800,7 @@ class Scenario(BaseScenario):
 			'Delta_spacing': self.delta_spacing_sum /(np.sum(self.spacing_violation) if np.sum(self.spacing_violation) != 0 else 1),
 			'Spacing_violations': self.spacing_violation[agent.id]/(self.steps_in_corridor[agent.id] if self.steps_in_corridor[agent.id] != 0 else 1),
 			'Phase_reached': self.phase_reached[agent.id],
+			'On_last_corridor': self.current_tube[agent.id] == 2,  # Tube 2 is the final merged corridor
 
 
 		}
@@ -1070,6 +1073,7 @@ class Scenario(BaseScenario):
 				spacing_error += np.abs(diff) if diff < 0 else 0
 			if spacing_error > 0:
 				self.spacing_violation[agent.id] += 1
+				# print(f"Agent {agent.id} spacing violation! error: {spacing_error:.2f} rew", rew, "diff", diff, "desired_spacing", desired_spacing, "dist_front", dist_front if front_agent else "N/A", "dist_back", dist_back if back_agent else "N/A")
 			rew -= spacing_error * self.formation_rew
 			dist_to_exit_edge = self._exit_gate_distance(s, y, L, half_w)
 			# Normalize by tube length so penalty stays bounded

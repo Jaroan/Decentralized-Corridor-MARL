@@ -7,8 +7,8 @@ set -e  # Exit on error
 # Configuration
 OUTPUT_DIR="eval_results_$(date +%Y%m%d_%H%M%S)"
 SCENARIOS="all"
-AGENT_COUNTS="10 20 30 40"
-MODEL="standard"
+AGENT_COUNTS="30 40"
+MODEL="standard" ## standard or low speed
 
 echo "=========================================="
 echo "AAM Corridor Comprehensive Evaluation"
@@ -60,24 +60,24 @@ echo ""
 echo "✓ Metrics computed successfully"
 echo ""
 
-# Step 3: Generate plots
-echo "=========================================="
-echo "STEP 3: Generating Plots"
-echo "=========================================="
-echo ""
+# # Step 3: Generate plots
+# echo "=========================================="
+# echo "STEP 3: Generating Plots"
+# echo "=========================================="
+# echo ""
 
-python eval_scripts/plot_results.py \
-    --metrics_file "$OUTPUT_DIR/raw_metrics.csv" \
-    --output_dir "$OUTPUT_DIR/plots"
+# python eval_scripts/plot_results.py \
+#     --metrics_file "$OUTPUT_DIR/raw_metrics.csv" \
+#     --output_dir "$OUTPUT_DIR/plots"
 
-if [ $? -ne 0 ]; then
-    echo "ERROR: Plot generation failed!"
-    exit 1
-fi
+# if [ $? -ne 0 ]; then
+#     echo "ERROR: Plot generation failed!"
+#     exit 1
+# fi
 
-echo ""
-echo "✓ Plots generated successfully"
-echo ""
+# echo ""
+# echo "✓ Plots generated successfully"
+# echo ""
 
 # Summary
 echo "=========================================="

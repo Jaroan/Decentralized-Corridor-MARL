@@ -1,0 +1,473 @@
+__________________________________________________
+Keeping CLI-provided total_actions = 9
+Keeping CLI-provided formation_type = point
+Keeping CLI-provided formation_rew = 10
+Keeping CLI-provided goal_rew = 20.0
+Keeping CLI-provided fair_rew = 1
+Keeping CLI-provided min_obs_dist = 0.5
+Keeping CLI-provided model_name = Combined
+Keeping CLI-provided seed = 0
+Keeping CLI-provided world_size = 5.0
+Keeping CLI-provided max_edge_dist = 1
+Keeping CLI-provided num_walls = 0
+Keeping CLI-provided episode_length = 350
+Keeping CLI-provided save_gifs = True
+Keeping CLI-provided use_render = False
+Keeping CLI-provided render_episodes = 100
+Keeping CLI-provided model_dir = model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width/
+Keeping CLI-provided model_dir_slow = None
+Keeping CLI-provided slow_agent_ids = None
+Keeping CLI-provided scenario_name = three_phase_graph_merge
+Keeping CLI-provided num_landmarks = 1
+Keeping CLI-provided num_agents = 30
+Keeping CLI-provided num_obstacles = 0
+Keeping CLI-provided collaborative = False
+Keeping CLI-provided min_dist_thresh = 0.05
+Keeping CLI-provided use_dones = False
+__________________________________________________
+__________________________________________________
+||                  Arguments                   ||
+__________________________________________________
+|| total_actions: 9                             ||
+|| dynamics_type: air_taxi                      ||
+|| formation_type: point                        ||
+|| formation_rew: 10                            ||
+|| collision_rew: 20.0                          ||
+|| goal_rew: 20.0                               ||
+|| fair_wt: 1                                   ||
+|| fair_rew: 1                                  ||
+|| num_agents_per_team: 3                       ||
+|| num_teams: 1                                 ||
+|| zeroshift: 5                                 ||
+|| increase_fairness: False                     ||
+|| min_obs_dist: 0.5                            ||
+|| no_curriculum: False                         ||
+|| model_name: Combined                         ||
+|| algorithm_name: rmappo                       ||
+|| project_name: test                           ||
+|| experiment_name: check                       ||
+|| seed: 0                                      ||
+|| cuda: False                                  ||
+|| cuda_deterministic: True                     ||
+|| n_training_threads: 1                        ||
+|| n_rollout_threads: 1                         ||
+|| n_eval_rollout_threads: 1                    ||
+|| n_render_rollout_threads: 1                  ||
+|| num_env_steps: 10000.0                       ||
+|| user_name: marl                              ||
+|| use_wandb: False                             ||
+|| env_name: GraphMPE                           ||
+|| use_obs_instead_of_state: False              ||
+|| world_size: 5.0                              ||
+|| num_scripted_agents: 0                       ||
+|| obs_type: global                             ||
+|| max_edge_dist: 1                             ||
+|| num_nbd_entities: 3                          ||
+|| use_comm: False                              ||
+|| num_walls: 0                                 ||
+|| episode_length: 350                          ||
+|| share_policy: True                           ||
+|| use_centralized_V: True                      ||
+|| stacked_frames: 1                            ||
+|| use_stacked_frames: False                    ||
+|| hidden_size: 64                              ||
+|| layer_N: 1                                   ||
+|| use_ReLU: True                               ||
+|| use_popart: False                            ||
+|| use_valuenorm: True                          ||
+|| use_feature_normalization: True              ||
+|| use_orthogonal: True                         ||
+|| gain: 0.01                                   ||
+|| split_batch: False                           ||
+|| max_batch_size: 32                           ||
+|| use_naive_recurrent_policy: False            ||
+|| use_recurrent_policy: True                   ||
+|| recurrent_N: 1                               ||
+|| data_chunk_length: 10                        ||
+|| lr: 0.0005                                   ||
+|| critic_lr: 0.0005                            ||
+|| opti_eps: 1e-05                              ||
+|| weight_decay: 0                              ||
+|| ppo_epoch: 15                                ||
+|| use_clipped_value_loss: True                 ||
+|| clip_param: 0.2                              ||
+|| num_mini_batch: 1                            ||
+|| entropy_coef: 0.01                           ||
+|| value_loss_coef: 1                           ||
+|| use_max_grad_norm: True                      ||
+|| max_grad_norm: 10.0                          ||
+|| use_gae: True                                ||
+|| gamma: 0.99                                  ||
+|| gae_lambda: 0.95                             ||
+|| use_proper_time_limits: False                ||
+|| use_huber_loss: True                         ||
+|| use_value_active_masks: True                 ||
+|| use_policy_active_masks: True                ||
+|| huber_delta: 10.0                            ||
+|| use_linear_lr_decay: False                   ||
+|| save_interval: 1                             ||
+|| log_interval: 5                              ||
+|| img_interval: 2                              ||
+|| use_eval: False                              ||
+|| eval_interval: 25                            ||
+|| eval_episodes: 32                            ||
+|| save_gifs: True                              ||
+|| use_render: True                             ||
+|| render_episodes: 100                         ||
+|| ifi: 0.1                                     ||
+|| render_eval: False                           ||
+|| model_dir: model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width/||
+|| model_dir_slow: None                         ||
+|| slow_agent_ids: None                         ||
+|| eval_mode: True                              ||
+|| eval_output_dir: eval_results_20260216_004002/merge_agents30_seed0||
+|| verbose: True                                ||
+|| scenario_name: three_phase_graph_merge       ||
+|| num_landmarks: 1                             ||
+|| num_agents: 30                               ||
+|| num_obstacles: 0                             ||
+|| collaborative: False                         ||
+|| max_speed: 2                                 ||
+|| min_dist_thresh: 0.05                        ||
+|| use_dones: False                             ||
+|| _wandb: {'code_path': 'source-air_corridor_unicycle_5-onpolicy_scripts_train_mpe.py', 'python_version': '3.12.11', 'cli_version': '0.22.2', 'framework': 'torch', 'is_jupyter_run': False, 'is_kaggle_kernel': False, 'start_time': 1771024593, 't': {1: [1, 105], 2: [1, 49, 77, 105], 3: [2, 3, 4, 13, 16, 42, 61], 4: '3.12.11', 5: '0.22.2', 10: [20], 13: 'linux-x86_64'}, 'e': {'6lh12f1tmfbg8chrhztviq6092ehoyob': {'os': 'Linux-6.1.161-llgrid-x86_64-with-glibc2.39', 'python': 'CPython 3.12.11', 'started_at': '2026-02-13T23:16:33.239612Z', 'args': ['--use_valuenorm', '--use_popart', '--project_name', 'air_corridor_unicycle_5', '--model_dir', 'model_weights/tube/rot_inv/airtaxi/try/three/test2026/transferfromTest2026', '--env_name', 'GraphMPE', '--algorithm_name', 'rmappo', '--seed', '1', '--experiment_name', 'at_260213_181617_lowwidth_with_coll20_spacing10_rot_eplen120', '--scenario_name', 'working_three_phase_graph', '--dynamics_type', 'air_taxi', '--fair_wt', '1', '--fair_rew', '10', '--num_agents=5', '--num_landmarks=5', '--collision_rew', '20', '--formation_rew', '10', '--n_training_threads', '1', '--n_rollout_threads', '64', '--num_mini_batch', '1', '--episode_length', '120', '--total_actions', '9', '--num_env_steps', '5000000', '--ppo_epoch', '10', '--use_ReLU', '--gain', '0.01', '--lr', '5e-4', '--critic_lr', '5e-4', '--entropy_coef', '0.02', '--user_name', 'marl', '--use_cent_obs', 'False', '--use_dones', 'False', '--collaborative', 'False', '--goal_rew', '20', '--num_walls', '0', '--zeroshift', '10', '--world_size=5', '--graph_feat_type', 'relative', '--increase_fairness', 'False', '--auto_mini_batch_size', '--target_mini_batch_size', '16384', '--formation_type', 'point'], 'program': '/home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/scripts/train_mpe.py', 'code_path': 'onpolicy/scripts/train_mpe.py', 'code_path_local': 'onpolicy/scripts/train_mpe.py', 'git': {'remote_url': 'https://github.com/Jaroan/AAM-Corridor-MARL.git', 'commit': '8b74987c89bb7a77204301e1118d464a2b4da9c7'}, 'root': '/home/gridsan/jaloor/AAM-Corridor-MARL/onpolicy/results/GraphMPE/working_three_phase_graph/rmappo/at_260213_181617_lowwidth_with_coll20_spacing10_rot_eplen120', 'host': 'd-9-3-2', 'executable': '/state/partition1/llgrid/pkg/conda/python-ML-2025b-pytorch/bin/python', 'cpu_count': 40, 'cpu_count_logical': 80, 'gpu_type': 'Tesla V100-PCIE-32GB', 'gpu_count': 2, 'disk': {'/': {'total': '471413596160', 'used': '18505854976'}}, 'memory': {'total': '405413994496'}, 'gpu_nvidia': [{'name': 'Tesla V100-PCIE-32GB', 'memory_total': '34359738368', 'cuda_cores': 5120, 'architecture': 'Volta', 'uuid': 'GPU-374034c4-2c4f-3c8a-830c-085bf28b29a1'}, {'name': 'Tesla V100-PCIE-32GB', 'memory_total': '34359738368', 'cuda_cores': 5120, 'architecture': 'Volta', 'uuid': 'GPU-c3c6487c-2b9e-3420-e6f2-f938044f9f5b'}], 'cuda_version': '13.0', 'slurm': {'tasks_per_node': '1', 'job_name': '5widthrot_col20', 'job_qos': 'normal', 'topology_addr': 'd-9-3-2', 'conf': '/etc/slurm/slurm.conf', 'gtids': '0', 'mem_per_cpu': '8500', 'cpus_on_node': '20', 'script_context': 'prolog_task', 'task_pid': '2313760', 'job_user': 'jaloor', 'nnodes': '1', 'nodeid': '0', 'gpupower': '150', 'cluster_name': 'txe1', 'job_partition': 'xeon-g6-volta', 'job_cpus_per_node': '20', 'array_task_min': '0', 'spank_gpupower': 'WHAT', 'node_aliases': '(null)', 'nodelist': 'd-9-3-2', 'job_end_time': '1771384576', 'array_job_id': '4147713', 'array_task_step': '1', 'job_start_time': '1771024576', 'job_num_nodes': '1', 'gpus_on_node': '1', 'procid': '0', 'array_task_count': '2', 'jobid': '4147713', 'job_id': '4147713', 'job_account': 'default_group', 'job_uid': '62375', 'submit_host': 'login-4', 'topology_addr_pattern': 'node', 'submit_dir': '/home/gridsan/jaloor/AAM-Corridor-MARL', 'job_gid': '62375', 'working_cluster': 'txe1:scheduler-0:6817:9984:109', 'array_task_id': '1', 'job_nodelist': 'd-9-3-2', 'job_gpus': '1', 'localid': '0', 'cpus_per_task': '20', 'array_task_max': '1', 'prio_process': '0'}, 'writer_id': '6lh12f1tmfbg8chrhztviq6092ehoyob'}}}||
+|| num_embeddings: 4                            ||
+|| embedding_size: 2                            ||
+|| embed_hidden_size: 16                        ||
+|| embed_layer_N: 1                             ||
+|| embed_use_ReLU: True                         ||
+|| embed_add_self_loop: False                   ||
+|| gnn_hidden_size: 16                          ||
+|| gnn_num_heads: 3                             ||
+|| gnn_concat_heads: False                      ||
+|| gnn_layer_N: 2                               ||
+|| gnn_use_ReLU: True                           ||
+|| graph_feat_type: relative                    ||
+|| actor_graph_aggr: node                       ||
+|| critic_graph_aggr: global                    ||
+|| global_aggr_type: mean                       ||
+|| use_cent_obs: False                          ||
+|| auto_mini_batch_size: True                   ||
+|| target_mini_batch_size: 16384                ||
+__________________________________________________
+Overriding Observation dimension
+Overriding Observation dimension
+Restoring from checkpoint stored in model_weights/tube/rot_inv/airtaxi/try/three/test2026/5ag/low_width/
+num_episodes:  100
+📊 Evaluation metrics logging ENABLED
+   Output: eval_results_20260216_004002/merge_agents30_seed0
+ total_time_taken[-1]: 337.00 seconds
+Successful exits: 30/30 in 337.00 seconds
+Episode 1/100 - Throughput: 5.34 agents/minute
+ total_time_taken[-1]: 344.00 seconds
+Successful exits: 30/30 in 344.00 seconds
+Episode 2/100 - Throughput: 5.23 agents/minute
+ total_time_taken[-1]: 340.00 seconds
+Successful exits: 30/30 in 340.00 seconds
+Episode 3/100 - Throughput: 5.29 agents/minute
+ total_time_taken[-1]: 339.00 seconds
+Successful exits: 30/30 in 339.00 seconds
+Episode 4/100 - Throughput: 5.31 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 5/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 339.00 seconds
+Successful exits: 30/30 in 339.00 seconds
+Episode 6/100 - Throughput: 5.31 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 7/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 8/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 348.00 seconds
+Successful exits: 30/30 in 348.00 seconds
+Episode 9/100 - Throughput: 5.17 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 10/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 35.00 seconds
+Successful exits: 30/30 in 35.00 seconds
+Episode 11/100 - Throughput: 51.43 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 12/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 344.00 seconds
+Successful exits: 30/30 in 344.00 seconds
+Episode 13/100 - Throughput: 5.23 agents/minute
+ total_time_taken[-1]: 343.00 seconds
+Successful exits: 30/30 in 343.00 seconds
+Episode 14/100 - Throughput: 5.25 agents/minute
+ total_time_taken[-1]: 347.00 seconds
+Successful exits: 30/30 in 347.00 seconds
+Episode 15/100 - Throughput: 5.19 agents/minute
+ total_time_taken[-1]: 343.00 seconds
+Successful exits: 30/30 in 343.00 seconds
+Episode 16/100 - Throughput: 5.25 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 17/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 343.00 seconds
+Successful exits: 30/30 in 343.00 seconds
+Episode 18/100 - Throughput: 5.25 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 19/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 340.00 seconds
+Successful exits: 30/30 in 340.00 seconds
+Episode 20/100 - Throughput: 5.29 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 21/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 339.00 seconds
+Successful exits: 30/30 in 339.00 seconds
+Episode 22/100 - Throughput: 5.31 agents/minute
+ total_time_taken[-1]: 340.00 seconds
+Successful exits: 30/30 in 340.00 seconds
+Episode 23/100 - Throughput: 5.29 agents/minute
+ total_time_taken[-1]: 338.00 seconds
+Successful exits: 30/30 in 338.00 seconds
+Episode 24/100 - Throughput: 5.33 agents/minute
+ total_time_taken[-1]: 347.00 seconds
+Successful exits: 30/30 in 347.00 seconds
+Episode 25/100 - Throughput: 5.19 agents/minute
+ total_time_taken[-1]: 346.00 seconds
+Successful exits: 30/30 in 346.00 seconds
+Episode 26/100 - Throughput: 5.20 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 27/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 343.00 seconds
+Successful exits: 30/30 in 343.00 seconds
+Episode 28/100 - Throughput: 5.25 agents/minute
+ total_time_taken[-1]: 340.00 seconds
+Successful exits: 30/30 in 340.00 seconds
+Episode 29/100 - Throughput: 5.29 agents/minute
+ total_time_taken[-1]: 344.00 seconds
+Successful exits: 30/30 in 344.00 seconds
+Episode 30/100 - Throughput: 5.23 agents/minute
+ total_time_taken[-1]: 339.00 seconds
+Successful exits: 30/30 in 339.00 seconds
+Episode 31/100 - Throughput: 5.31 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 32/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 343.00 seconds
+Successful exits: 30/30 in 343.00 seconds
+Episode 33/100 - Throughput: 5.25 agents/minute
+ total_time_taken[-1]: 348.00 seconds
+Successful exits: 30/30 in 348.00 seconds
+Episode 34/100 - Throughput: 5.17 agents/minute
+ total_time_taken[-1]: 338.00 seconds
+Successful exits: 30/30 in 338.00 seconds
+Episode 35/100 - Throughput: 5.33 agents/minute
+ total_time_taken[-1]: 339.00 seconds
+Successful exits: 30/30 in 339.00 seconds
+Episode 36/100 - Throughput: 5.31 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 37/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 343.00 seconds
+Successful exits: 30/30 in 343.00 seconds
+Episode 38/100 - Throughput: 5.25 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 39/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 40/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 347.00 seconds
+Successful exits: 30/30 in 347.00 seconds
+Episode 41/100 - Throughput: 5.19 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 42/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 343.00 seconds
+Successful exits: 30/30 in 343.00 seconds
+Episode 43/100 - Throughput: 5.25 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 44/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 345.00 seconds
+Successful exits: 30/30 in 345.00 seconds
+Episode 45/100 - Throughput: 5.22 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 46/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 349.00 seconds
+Successful exits: 30/30 in 349.00 seconds
+Episode 47/100 - Throughput: 5.16 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 48/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 49/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 50/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 344.00 seconds
+Successful exits: 30/30 in 344.00 seconds
+Episode 51/100 - Throughput: 5.23 agents/minute
+ total_time_taken[-1]: 343.00 seconds
+Successful exits: 30/30 in 343.00 seconds
+Episode 52/100 - Throughput: 5.25 agents/minute
+ total_time_taken[-1]: 345.00 seconds
+Successful exits: 30/30 in 345.00 seconds
+Episode 53/100 - Throughput: 5.22 agents/minute
+ total_time_taken[-1]: 340.00 seconds
+Successful exits: 30/30 in 340.00 seconds
+Episode 54/100 - Throughput: 5.29 agents/minute
+ total_time_taken[-1]: 340.00 seconds
+Successful exits: 30/30 in 340.00 seconds
+Episode 55/100 - Throughput: 5.29 agents/minute
+ total_time_taken[-1]: 350.00 seconds
+Successful exits: 30/30 in 350.00 seconds
+Episode 56/100 - Throughput: 5.14 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 57/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 350.00 seconds
+Successful exits: 30/30 in 350.00 seconds
+Episode 58/100 - Throughput: 5.14 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 59/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 344.00 seconds
+Successful exits: 30/30 in 344.00 seconds
+Episode 60/100 - Throughput: 5.23 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 61/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 62/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 63/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 339.00 seconds
+Successful exits: 30/30 in 339.00 seconds
+Episode 64/100 - Throughput: 5.31 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 65/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 346.00 seconds
+Successful exits: 30/30 in 346.00 seconds
+Episode 66/100 - Throughput: 5.20 agents/minute
+ total_time_taken[-1]: 337.00 seconds
+Successful exits: 30/30 in 337.00 seconds
+Episode 67/100 - Throughput: 5.34 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 68/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 69/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 70/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 344.00 seconds
+Successful exits: 30/30 in 344.00 seconds
+Episode 71/100 - Throughput: 5.23 agents/minute
+ total_time_taken[-1]: 339.00 seconds
+Successful exits: 30/30 in 339.00 seconds
+Episode 72/100 - Throughput: 5.31 agents/minute
+ total_time_taken[-1]: 347.00 seconds
+Successful exits: 30/30 in 347.00 seconds
+Episode 73/100 - Throughput: 5.19 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 74/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 345.00 seconds
+Successful exits: 30/30 in 345.00 seconds
+Episode 75/100 - Throughput: 5.22 agents/minute
+ total_time_taken[-1]: 340.00 seconds
+Successful exits: 30/30 in 340.00 seconds
+Episode 76/100 - Throughput: 5.29 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 77/100 - Throughput: 5.26 agents/minute
+ total_time_taken[-1]: 346.00 seconds
+Successful exits: 30/30 in 346.00 seconds
+Episode 78/100 - Throughput: 5.20 agents/minute
+ total_time_taken[-1]: 345.00 seconds
+Successful exits: 30/30 in 345.00 seconds
+Episode 79/100 - Throughput: 5.22 agents/minute
+ total_time_taken[-1]: 340.00 seconds
+Successful exits: 30/30 in 340.00 seconds
+Episode 80/100 - Throughput: 5.29 agents/minute
+ total_time_taken[-1]: 347.00 seconds
+Successful exits: 30/30 in 347.00 seconds
+Episode 81/100 - Throughput: 5.19 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 82/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 340.00 seconds
+Successful exits: 30/30 in 340.00 seconds
+Episode 83/100 - Throughput: 5.29 agents/minute
+ total_time_taken[-1]: 343.00 seconds
+Successful exits: 30/30 in 343.00 seconds
+Episode 84/100 - Throughput: 5.25 agents/minute
+ total_time_taken[-1]: 348.00 seconds
+Successful exits: 30/30 in 348.00 seconds
+Episode 85/100 - Throughput: 5.17 agents/minute
+ total_time_taken[-1]: 343.00 seconds
+Successful exits: 30/30 in 343.00 seconds
+Episode 86/100 - Throughput: 5.25 agents/minute
+ total_time_taken[-1]: 343.00 seconds
+Successful exits: 30/30 in 343.00 seconds
+Episode 87/100 - Throughput: 5.25 agents/minute
+ total_time_taken[-1]: 350.00 seconds
+Successful exits: 30/30 in 350.00 seconds
+Episode 88/100 - Throughput: 5.14 agents/minute
+ total_time_taken[-1]: 35.00 seconds
+Successful exits: 30/30 in 35.00 seconds
+Episode 89/100 - Throughput: 51.43 agents/minute
+ total_time_taken[-1]: 347.00 seconds
+Successful exits: 30/30 in 347.00 seconds
+Episode 90/100 - Throughput: 5.19 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 91/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 92/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 93/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 94/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 338.00 seconds
+Successful exits: 30/30 in 338.00 seconds
+Episode 95/100 - Throughput: 5.33 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 96/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 341.00 seconds
+Successful exits: 30/30 in 341.00 seconds
+Episode 97/100 - Throughput: 5.28 agents/minute
+ total_time_taken[-1]: 338.00 seconds
+Successful exits: 30/30 in 338.00 seconds
+Episode 98/100 - Throughput: 5.33 agents/minute
+ total_time_taken[-1]: 344.00 seconds
+Successful exits: 30/30 in 344.00 seconds
+Episode 99/100 - Throughput: 5.23 agents/minute
+ total_time_taken[-1]: 342.00 seconds
+Successful exits: 30/30 in 342.00 seconds
+Episode 100/100 - Throughput: 5.26 agents/minute
+Rewards -3707.716925145518
+Frac of episode 9.796
+Success rates mean 0.9946666666666667
+Success rates median 1.0
+Num collisions 4.16
+Total Dists Traveled Median: 512.0
+Total Time Taken Median: 342.0
+Conformance_percentage Mean: 0.001920952380952381
+Conformance_percentage median: 0.0
+Delta_space Mean: 0.013554685850447189
+Delta_space median: 0.0
+Spacing violations Mean: 0.00641932316932317
+Spacing violations median: 0.0
+✓ Evaluation metrics saved to: eval_results_20260216_004002/merge_agents30_seed0/eval_summary.csv
+✓ Raw episode data saved to: eval_results_20260216_004002/merge_agents30_seed0/eval_raw_data.pkl
