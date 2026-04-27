@@ -739,11 +739,21 @@ class MultiAgentBaseEnv(gym.Env):
 
 			# Add tube rendering
 			if hasattr(self.world, 'tube_params'):
-				for tube in self.world.tube_params:
-					# print("tube: ", tube)
-					# tube = self.world.tube_params
-					# Get tube parameters
-					entrance = tube['entrance']
+				tube_params = self.world.tube_params
+
+				if isinstance(tube_params, dict):
+					if all(k in tube_params for k in ['entrance', 'exit', 'width', 'angle']):
+						tubes = [tube_params]
+					else:
+						tubes = tube_params.values()
+				else:
+					tubes = tube_params
+
+				for tube in tubes:
+					entrance = np.array(tube['entrance'])
+					exit = np.array(tube['exit'])
+					width = tube['width']
+					angle = tube['angle']
 					exit = tube['exit']
 					width = tube['width']
 					angle = tube['angle']  # Rotation angle (in radians)

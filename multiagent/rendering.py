@@ -101,7 +101,7 @@ class Viewer(object):
             # refer: https://pyglet.readthedocs.io/en/latest/modules/image/index.html
             # Works with pyglet==1.5.26, PyOpenGL==3.1.5, PyQt5==5.9.2, gym==0.17.2
             pix = image_data.get_data('RGBA', image_data.width * 4)
-            arr = np.fromstring(pix, dtype=np.uint8, sep='')
+            arr = np.frombuffer(pix, dtype=np.uint8)
             arr = arr.reshape(buffer.height, buffer.width, 4)
             # arr = np.fromstring(image_data.data, dtype=np.uint8, sep='')
             # In https://github.com/openai/gym-http-api/issues/2, we
