@@ -1097,7 +1097,7 @@ class Scenario(BaseScenario):
 				dist_aa = np.linalg.norm(agent.state.p_pos - a.state.p_pos)
 				# --- Hard collision penalty ---
 				if dist_aa < self.separation_distance:
-					agent.state.max_speed = slow_speed
+					# agent.state.max_speed = slow_speed
 					# print(f"Agent {agent.id} COLLISION with Agent {a.id} at distance {dist_aa:.2f}! Applying hard penalty.")
 					# input("Press Enter to continue...")
 					rew -= self.collision_rew
@@ -1111,11 +1111,11 @@ class Scenario(BaseScenario):
 						proximity_ratio = (warning_zone - dist_aa) / (warning_zone - self.separation_distance + 1e-9)
 						proximity_ratio = np.clip(proximity_ratio, 0.0, 1.0)
 						rew -= self.collision_rew * 0.25 * proximity_ratio
-				else:
-					if agent.id not in self.slow_agent_ids:
-						agent.state.max_speed = fast_speed
-					else:
-						agent.state.max_speed = slow_speed
+				# else:
+				# 	if agent.id not in self.slow_agent_ids:
+				# 		agent.state.max_speed = fast_speed
+				# 	else:
+				# 		agent.state.max_speed = slow_speed
 				# 	print(f"Agent {agent.id} is safe from Agent {a.id} at distance {dist_aa:.2f}. Restoring max speed.")
 
 

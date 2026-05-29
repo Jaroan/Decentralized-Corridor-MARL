@@ -1,4 +1,0 @@
-/Users/jasmine/opt/miniconda3/envs/fairness/lib/python3.11/site-packages/torch/amp/autocast_mode.py:204: UserWarning: User provided device_type of 'cuda', but CUDA is not available. Disabling
-  warnings.warn('User provided device_type of \'cuda\', but CUDA is not available. Disabling')
-/Users/jasmine/opt/miniconda3/envs/fairness/lib/python3.11/site-packages/torch/cuda/amp/grad_scaler.py:120: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
-  warnings.warn("torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.")
