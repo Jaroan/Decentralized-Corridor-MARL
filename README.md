@@ -49,7 +49,6 @@ pip install -r requirements.txt
 - PyTorch 2.0.1+
 - OpenAI Gym
 - Multi-agent environment libraries
-- Gurobi (for optimization-based baseline comparisons)
 
 ## Usage
 
@@ -129,7 +128,7 @@ If you use this code or build upon this work, please cite the relevant papers:
 
 ## Acknowledgements
 
-This work is supported by research at MIT's Department of Aeronautics and Astronautics. Special thanks to collaborators at the University of Maryland for contributions to the corridor network modeling.
+This work was supported in part by NASA grants and the Department of the Air Force Artificial Intelligence Accelerator.
 
 ## Questions & Contact
 
