@@ -290,7 +290,7 @@ def plot_outflow_rate(trajectory_file: str, output_dir: str, window_size: int = 
 
     # Plot optimal throughput (theoretical maximum)
     ax.plot(time_seconds, optimal_rate, 'b--', linewidth=2, alpha=0.7,
-            label='Optimal Throughput (max speed)')
+            label='Upper bound on outflow rate (max speed)')
 
     # Plot actual outflow rate
     ax.plot(time_seconds, total_rate, 'k-', linewidth=3, label='Actual Outflow Rate')

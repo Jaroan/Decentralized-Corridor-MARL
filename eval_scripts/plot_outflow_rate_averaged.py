@@ -113,10 +113,12 @@ def infer_agent_max_speeds(data: dict, dt: float) -> np.ndarray:
     return agent_max_speeds
 
 
-def compute_optimal_throughput(data: dict, window_size: int, dt: float,
+def compute_upper_bound_throughput(data: dict, window_size: int, dt: float,
                                agent_max_speeds_kms: np.ndarray = None) -> np.ndarray:
     """
-    Compute theoretical optimal throughput.
+    Compute an upper bound on throughput, assuming each agent travels its
+    full route at its max speed without interactions, congestion, or
+    spacing constraints. This is a loose upper bound — not a true optimum.
 
     Args:
         data: trajectory data dict
@@ -156,7 +158,7 @@ def compute_optimal_throughput(data: dict, window_size: int, dt: float,
     if agent_max_speeds_kms is None:
         agent_max_speeds_kms = np.full(num_agents, 175.0 * 0.514444 * 0.001)
 
-    optimal_exit_times = []
+    ub_exit_times = []
     for agent_id in range(num_agents):
         route_idx = agent_id % len(all_routes)
         route = all_routes[route_idx]
@@ -167,15 +169,15 @@ def compute_optimal_throughput(data: dict, window_size: int, dt: float,
         approach_distance = float(np.linalg.norm(start_pos - first_corridor_entrance))
 
         total_distance = approach_distance + route_length
-        optimal_time_seconds = total_distance / agent_max_speeds_kms[agent_id]
-        optimal_time_timesteps = optimal_time_seconds / dt
+        ub_time_seconds = total_distance / agent_max_speeds_kms[agent_id]
+        ub_time_timesteps = ub_time_seconds / dt
 
-        optimal_exit_times.append(optimal_time_timesteps)
+        ub_exit_times.append(ub_time_timesteps)
 
     num_timesteps = positions.shape[0]
-    _, optimal_rate = compute_outflow_rate(optimal_exit_times, num_timesteps, window_size, dt)
+    _, upper_bound_rate = compute_outflow_rate(ub_exit_times, num_timesteps, window_size, dt)
 
-    return optimal_rate
+    return upper_bound_rate
 
 
 def plot_averaged_outflow_rate(trajectory_dir: str, num_episodes: int,
@@ -206,7 +208,7 @@ def plot_averaged_outflow_rate(trajectory_dir: str, num_episodes: int,
 
     # Collect outflow rates from all episodes
     all_actual_rates = []
-    all_optimal_rates = []
+    all_upper_bound_rates = []
 
     for i, traj_file in enumerate(trajectory_files):
         print(f"\nProcessing episode {i}...")
@@ -220,10 +222,10 @@ def plot_averaged_outflow_rate(trajectory_dir: str, num_episodes: int,
         _, actual_rate = compute_outflow_rate(exit_times, num_timesteps, window_size, dt)
         all_actual_rates.append(actual_rate)
 
-        # Compute optimal rate (only once, should be similar across episodes)
+        # Compute upper bound rate (only once, should be similar across episodes)
         if i == 0:
-            optimal_rate = compute_optimal_throughput(data, window_size, dt)
-            all_optimal_rates.append(optimal_rate)
+            upper_bound_rate = compute_upper_bound_throughput(data, window_size, dt)
+            all_upper_bound_rates.append(upper_bound_rate)
 
         print(f"  Episode {i}: {len(exit_times)}/{num_agents} agents exited")
 
@@ -234,11 +236,11 @@ def plot_averaged_outflow_rate(trajectory_dir: str, num_episodes: int,
         padded_rates[i, :len(rate)] = rate
     all_actual_rates = padded_rates
 
-    # Pad optimal rate to same length if needed
-    if len(optimal_rate) < max_timesteps:
-        optimal_rate = np.pad(optimal_rate, (0, max_timesteps - len(optimal_rate)))
+    # Pad upper bound rate to same length if needed
+    if len(upper_bound_rate) < max_timesteps:
+        upper_bound_rate = np.pad(upper_bound_rate, (0, max_timesteps - len(upper_bound_rate)))
     else:
-        optimal_rate = optimal_rate[:max_timesteps]
+        upper_bound_rate = upper_bound_rate[:max_timesteps]
 
     # Compute mean and std (only over timesteps that have data)
     mean_actual_rate = np.mean(all_actual_rates, axis=0)
@@ -252,9 +254,9 @@ def plot_averaged_outflow_rate(trajectory_dir: str, num_episodes: int,
     # Create figure
     fig, ax = plt.subplots(figsize=(10, 6))
 
-    # Plot optimal throughput
-    ax.plot(time_seconds, optimal_rate, 'b--', linewidth=2, alpha=0.7,
-            label='Optimal Throughput (max speed)')
+    # Plot upper bound throughput
+    ax.plot(time_seconds, upper_bound_rate, 'b--', linewidth=2, alpha=0.7,
+            label='Upper Bound (max speed)')
 
     # Plot mean actual rate with std as shaded region
     ax.plot(time_seconds, mean_actual_rate, 'k-', linewidth=3,
@@ -267,7 +269,7 @@ def plot_averaged_outflow_rate(trajectory_dir: str, num_episodes: int,
     # Formatting
     ax.set_xlabel('Episode Time (seconds)', fontsize=20)
     ax.set_ylabel('Outflow Rate (agents/minute)', fontsize=20)
-    ax.set_title(f'Exit Throughput Over Time,  Homogeneous (N={num_agents} agents)',
+    ax.set_title(f'Exit Throughput Over Time,  Heterogeneous (N={num_agents} agents)',
                  fontsize=22)
     ax.grid(True, alpha=0.3)
     ax.legend(fontsize=16, loc='upper right')
@@ -275,12 +277,12 @@ def plot_averaged_outflow_rate(trajectory_dir: str, num_episodes: int,
 
     # Add statistics box
     actual_peak = np.max(mean_actual_rate)
-    optimal_peak = np.max(optimal_rate)
+    upper_bound_peak = np.max(upper_bound_rate)
 
     stats_text = (
         f'Episodes: {num_episodes}\n'
         f'Actual peak: {actual_peak:.1f} ag/min\n'
-        f'Optimal peak: {optimal_peak:.1f} ag/min\n'
+        f'Upper bound peak: {upper_bound_peak:.1f} ag/min\n'
     )
     ax.text(0.02, 0.98, stats_text, transform=ax.transAxes,
             verticalalignment='top', fontsize=14,
@@ -292,8 +294,8 @@ def plot_averaged_outflow_rate(trajectory_dir: str, num_episodes: int,
     # Save plot
     os.makedirs(output_dir, exist_ok=True)
 
-    png_file = os.path.join(output_dir, f'outflow_rate_averaged_{num_episodes}eps.png')
-    pdf_file = os.path.join(output_dir, f'outflow_rate_averaged_{num_episodes}eps.pdf')
+    png_file = os.path.join(output_dir, f'het_outflow_rate_averaged_{num_episodes}eps.png')
+    pdf_file = os.path.join(output_dir, f'het_outflow_rate_averaged_{num_episodes}eps.pdf')
 
     fig.savefig(png_file, dpi=300, bbox_inches='tight', pad_inches=0.05)
     fig.savefig(pdf_file, bbox_inches='tight', pad_inches=0.05)
@@ -307,8 +309,8 @@ def plot_averaged_outflow_rate(trajectory_dir: str, num_episodes: int,
     # Print summary statistics
     print(f"\nSummary Statistics:")
     print(f"  Mean peak rate: {actual_peak:.2f} ± {np.std([np.max(r) for r in all_actual_rates]):.2f} ag/min")
-    print(f"  Optimal peak rate: {optimal_peak:.2f} ag/min")
-    print(f"  Efficiency: {(actual_peak / optimal_peak * 100):.1f}%")
+    print(f"  Upper bound peak rate: {upper_bound_peak:.2f} ag/min")
+    print(f"  Efficiency: {(actual_peak / upper_bound_peak * 100):.1f}%")
 
 
 def main():
